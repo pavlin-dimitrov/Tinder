@@ -4,6 +4,8 @@ import com.volasoftware.tinder.auditor.Auditable;
 import lombok.*;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
+import java.io.Serializable;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
@@ -13,18 +15,20 @@ import java.util.UUID;
 @Getter
 @Setter
 @NoArgsConstructor
-public class VerificationToken extends Auditable<String> {
+public class VerificationToken extends Auditable<String> implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToOne
-    @JoinColumn(name = "user_id", referencedColumnName = "id")
+    @Column(unique = true)
+    @NotNull
+    private String token = UUID.randomUUID().toString();
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "account_id", referencedColumnName = "id")
+    @NotNull
     private Account account;
 
-    @Column(name = "token")
-    private UUID token;
-
-    @Column(name = "expiration_date")
+    @NotNull
     private OffsetDateTime expirationDate;
 }

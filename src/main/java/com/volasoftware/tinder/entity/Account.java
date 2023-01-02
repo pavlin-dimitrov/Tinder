@@ -5,14 +5,9 @@ import com.volasoftware.tinder.enums.Gender;
 import com.volasoftware.tinder.validator.password.ValidPassword;
 
 import java.io.Serializable;
+import java.util.List;
 import java.util.Objects;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -25,8 +20,9 @@ import org.hibernate.Hibernate;
 @Entity
 @Table(name = "account")
 @RequiredArgsConstructor
-@Getter @Setter
-@ToString
+@AllArgsConstructor
+@Getter
+@Setter
 public class Account extends Auditable<String> implements Serializable {
 
     @Id
@@ -41,15 +37,11 @@ public class Account extends Auditable<String> implements Serializable {
     @NotNull
     private Gender gender;
 
-    public Account(
-            Long id, String firstName, String lastName, String email, String password, Gender gender) {
-        this.id = id;
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.email = email;
-        this.password = password;
-        this.gender = gender;
-    }
+    //TODO add this changes to Flyway sql files
+    @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @NotNull
+    @Column(name = "verification_tokens")
+    private List<VerificationToken> verificationTokens;
 
     @Override
     public boolean equals(Object o) {
