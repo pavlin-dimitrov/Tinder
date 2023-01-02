@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@PreAuthorize("")
 @RestController
 @AllArgsConstructor
 @RequestMapping("api/v1/accounts")
@@ -43,6 +42,7 @@ public class AccountController {
           @ApiResponse(code = 403, message = "Accessing the resource you were trying to reach is forbidden"),
           @ApiResponse(code = 404, message = "The resource you were trying to reach is not found")
   })
+  @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN')")
   @PostMapping("/register")
   public ResponseEntity<AccountRegisterDTO> createAccount(@RequestBody AccountRegisterDTO dto) {
     AccountRegisterDTO newAccount = accountService.addNewAccount(dto);

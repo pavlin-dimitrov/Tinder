@@ -19,19 +19,13 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
-import lombok.Data;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 import org.hibernate.Hibernate;
 
-@Data
 @Entity
 @Table(name = "account")
-@NoArgsConstructor
-@Getter
-@Setter
+@RequiredArgsConstructor
+@Getter @Setter
 @ToString
 public class Account extends Auditable<String> implements Serializable {
 

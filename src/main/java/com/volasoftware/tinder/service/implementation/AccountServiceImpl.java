@@ -11,20 +11,27 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 @Service
 @AllArgsConstructor
+@Slf4j
 public class AccountServiceImpl implements AccountService {
-
     @Autowired
     private final AccountRepository accountRepository;
     @Autowired
     private final ModelMapper modelMapper;
 
     public List<AccountDTO> getAccounts() {
+        log.info("Get all accounts");
         return accountRepository
                 .findAll()
                 .stream()
@@ -33,6 +40,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
     public AccountRegisterDTO addNewAccount(AccountRegisterDTO accountRegisterDTO) {
+        log.info("Register new account with email {}", accountRegisterDTO.getEmail());
         Optional<Account> accountByEmail = accountRepository.findAccountByEmail(accountRegisterDTO.getEmail());
         if (accountByEmail.isPresent()) {
             throw new IllegalStateException("Email is taken! Use another e-mail address!");
