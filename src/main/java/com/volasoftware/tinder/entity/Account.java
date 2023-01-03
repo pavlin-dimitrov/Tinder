@@ -37,7 +37,6 @@ public class Account extends Auditable<String> implements Serializable {
     @NotNull
     private Gender gender;
 
-    //TODO add this changes to Flyway sql files
     @OneToMany(mappedBy = "account", cascade = CascadeType.ALL)
     @Column(name = "verification_tokens")
     private List<VerificationToken> verificationTokens;

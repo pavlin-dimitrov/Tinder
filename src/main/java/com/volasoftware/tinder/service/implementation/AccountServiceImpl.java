@@ -12,11 +12,13 @@ import java.util.stream.Collectors;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import lombok.AllArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -52,16 +54,19 @@ public class AccountServiceImpl implements AccountService {
     try {
       sendVerificationEmail(account.getEmail(), token.getToken());
     } catch (MessagingException e) {
+      log.error("Failed to send email for: " + account.getEmail() + "\n" + e);
       e.printStackTrace();
     }
 
     return modelMapper.map(account, AccountRegisterDTO.class);
   }
 
+  @Async
   public void sendVerificationEmail(String accountEmail, String token) throws MessagingException {
     MimeMessage message = mailSender.createMimeMessage();
     MimeMessageHelper helper = new MimeMessageHelper(message, true);
     helper.setTo(accountEmail);
+    helper.setFrom("petar_petov86@abv.bg");
     helper.setSubject("Verify Your Email");
     helper.setText(
         String.format(
