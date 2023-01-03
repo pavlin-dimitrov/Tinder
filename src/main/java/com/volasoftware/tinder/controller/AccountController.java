@@ -10,7 +10,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
+//import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -42,7 +42,7 @@ public class AccountController {
           @ApiResponse(code = 403, message = "Accessing the resource you were trying to reach is forbidden"),
           @ApiResponse(code = 404, message = "The resource you were trying to reach is not found")
   })
-  @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN')")
+//  @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN')")
   @PostMapping("/register")
   public ResponseEntity<AccountRegisterDTO> createAccount(@RequestBody AccountRegisterDTO dto) {
     AccountRegisterDTO newAccount = accountService.addNewAccount(dto);

@@ -38,8 +38,7 @@ public class Account extends Auditable<String> implements Serializable {
     private Gender gender;
 
     //TODO add this changes to Flyway sql files
-    @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @NotNull
+    @OneToMany(mappedBy = "account", cascade = CascadeType.ALL)
     @Column(name = "verification_tokens")
     private List<VerificationToken> verificationTokens;
 

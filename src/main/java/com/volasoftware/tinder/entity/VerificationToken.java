@@ -24,7 +24,7 @@ public class VerificationToken extends Auditable<String> implements Serializable
     @NotNull
     private String token = UUID.randomUUID().toString();
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(targetEntity = Account.class)
     @JoinColumn(name = "account_id", referencedColumnName = "id")
     @NotNull
     private Account account;
