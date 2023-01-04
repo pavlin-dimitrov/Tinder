@@ -2,6 +2,7 @@ package com.volasoftware.tinder.service.implementation;
 
 import com.volasoftware.tinder.entity.EmailDetails;
 import com.volasoftware.tinder.service.contract.EmailService;
+import java.nio.charset.StandardCharsets;
 import javax.mail.MessagingException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
@@ -18,16 +19,19 @@ public class EmailServiceImpl implements EmailService {
   @Autowired private JavaMailSender javaMailSender;
 
   @Override
-  public void sendVerificationEmail(String recipientEmail, String token)
-      throws MessagingException {
-    log.info("Verification e-mail sent to address: {}", recipientEmail);
+  public void sendVerificationEmail(String recipientEmail, String token) throws MessagingException {
     try {
       MimeMessage message = javaMailSender.createMimeMessage();
-      MimeMessageHelper helper = new MimeMessageHelper(message, true);
+      MimeMessageHelper helper =
+          new MimeMessageHelper(
+              message,
+              MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED,
+              StandardCharsets.UTF_8.name()); // true
       helper.setFrom(new InternetAddress("tinderapplicationsender@gmail.com"));
       helper.setTo(recipientEmail);
       helper.setSubject(mail(recipientEmail, token).getSubject());
       helper.setText(mail(recipientEmail, token).getMsgBody(), true);
+      log.info("New email details generated");
       javaMailSender.send(message);
     } catch (Exception e) {
       throw new MessagingException("Failed on email sending!");
@@ -35,7 +39,6 @@ public class EmailServiceImpl implements EmailService {
   }
 
   private EmailDetails mail(String recipientEmail, String token) {
-    log.info("New email details generated");
     EmailDetails mail = new EmailDetails();
     mail.setRecipient(recipientEmail);
     mail.setSubject("Verify Your Email");

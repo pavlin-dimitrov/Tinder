@@ -53,9 +53,11 @@ public class AccountServiceImpl implements AccountService {
     account = accountRepository.save(account);
 
     VerificationToken token = verificationTokenService.createVerificationToken(account);
+    log.info("Verification token generated for email: {}", accountRegisterDTO.getEmail());
 
     try {
       emailService.sendVerificationEmail(accountRegisterDTO.getEmail(), token.getToken());
+      log.info("Email with verification token sent to email: {}", accountRegisterDTO.getEmail());
     } catch (MessagingException e) {
       log.error("Failed to send email for: " + account.getEmail() + "\n" + e);
       e.printStackTrace();
