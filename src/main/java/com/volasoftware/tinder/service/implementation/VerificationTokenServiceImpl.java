@@ -3,17 +3,20 @@ package com.volasoftware.tinder.service.implementation;
 import com.volasoftware.tinder.entity.Account;
 import com.volasoftware.tinder.entity.VerificationToken;
 import com.volasoftware.tinder.repository.VerificationTokenRepository;
+import com.volasoftware.tinder.service.contract.VerificationTokenService;
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class VerificationTokenService {
+public class VerificationTokenServiceImpl implements VerificationTokenService {
 
   @Autowired private VerificationTokenRepository verificationTokenRepository;
 
+  @Override
   public VerificationToken createVerificationToken(Account account) {
     VerificationToken token = new VerificationToken();
     token.setAccount(account);
@@ -23,10 +26,12 @@ public class VerificationTokenService {
     return verificationTokenRepository.save(token);
   }
 
+  @Override
   public VerificationToken findByToken(UUID tokenString) {
     return verificationTokenRepository.findByToken(tokenString);
   }
 
+  @Override
   public void deleteExpiredTokens() {
     OffsetDateTime now = OffsetDateTime.now();
     List<VerificationToken> expiredTokens =
