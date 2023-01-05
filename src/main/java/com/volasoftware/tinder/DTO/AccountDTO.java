@@ -2,12 +2,13 @@ package com.volasoftware.tinder.DTO;
 
 import com.volasoftware.tinder.enums.Gender;
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @AllArgsConstructor
 @NoArgsConstructor
-@Data
+@Setter @Getter
 public class AccountDTO {
     private Long id;
     private String firstName;

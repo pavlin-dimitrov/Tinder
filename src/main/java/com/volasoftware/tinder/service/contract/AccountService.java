@@ -2,6 +2,7 @@ package com.volasoftware.tinder.service.contract;
 
 import com.volasoftware.tinder.DTO.AccountDTO;
 import com.volasoftware.tinder.DTO.AccountRegisterDTO;
+import com.volasoftware.tinder.DTO.AccountVerificationDTO;
 import com.volasoftware.tinder.entity.Account;
 import java.util.List;
 import java.util.Optional;
@@ -17,4 +18,7 @@ public interface AccountService {
 
   AccountRegisterDTO addNewAccount(AccountRegisterDTO accountRegisterDTO);
 
+  Optional<AccountVerificationDTO> findById(Long id);
+
+  void updateVerificationStatus(Long accountId, AccountVerificationDTO verificationDTO);
 }

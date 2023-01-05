@@ -17,6 +17,8 @@ import org.springframework.stereotype.Service;
 public class EmailServiceImpl implements EmailService {
 
   @Autowired private JavaMailSender javaMailSender;
+  private final static String verificationToken = "http://localhost:8080/verify?token=%s";
+  private final static String subject = "Verify Your Email";
 
   @Override
   public void sendVerificationEmail(String recipientEmail, String token) throws MessagingException {
@@ -41,16 +43,16 @@ public class EmailServiceImpl implements EmailService {
   private EmailDetails mail(String recipientEmail, String token) {
     EmailDetails mail = new EmailDetails();
     mail.setRecipient(recipientEmail);
-    mail.setSubject("Verify Your Email");
+    mail.setSubject(subject);
     mail.setMsgBody(
         String.format(
             "<html>"
                 + "<body>"
                 + "<p>Please verify your email by clicking the following button:</p>"
-                + "<form action='http://localhost:8080/verify-email?token=%s' method='POST'>"
-                + "<button type='submit'>Verify Email</button>"
-                + "</form><"
-                + "/body>"
+                + "<form action='"+ verificationToken +"' method='POST'>"
+                + "<button type='submit' name='token' value='" + token +"'>Verify Email</button>"
+                + "</form>"
+                + "</body>"
                 + "</html>",
             token));
     return mail;

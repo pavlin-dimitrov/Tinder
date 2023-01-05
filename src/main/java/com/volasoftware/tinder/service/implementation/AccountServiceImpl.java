@@ -2,6 +2,7 @@ package com.volasoftware.tinder.service.implementation;
 
 import com.volasoftware.tinder.DTO.AccountDTO;
 import com.volasoftware.tinder.DTO.AccountRegisterDTO;
+import com.volasoftware.tinder.DTO.AccountVerificationDTO;
 import com.volasoftware.tinder.entity.Account;
 import com.volasoftware.tinder.entity.VerificationToken;
 import com.volasoftware.tinder.repository.AccountRepository;
@@ -17,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @AllArgsConstructor
@@ -31,7 +33,6 @@ public class AccountServiceImpl implements AccountService {
   public Optional<Account> getAccountByEmail(AccountRegisterDTO accountRegisterDTO){
    return accountRepository.findAccountByEmail(accountRegisterDTO.getEmail());
   }
-
   @Override
   public List<AccountDTO> getAccounts() {
     log.info("Get all accounts");
@@ -64,5 +65,21 @@ public class AccountServiceImpl implements AccountService {
     }
 
     return modelMapper.map(account, AccountRegisterDTO.class);
+  }
+  @Override
+  public Optional<AccountVerificationDTO> findById(Long id) {
+    return accountRepository.findById(id)
+        .map(account -> modelMapper
+            .map(account, AccountVerificationDTO.class));
+  }
+  @Override
+  @Transactional
+  public void updateVerificationStatus(Long accountId, AccountVerificationDTO verificationDTO) {
+    Account account = accountRepository.findById(accountId).orElse(null);
+    if (account == null) {
+      throw new RuntimeException("Account not found with id: " + accountId);
+    }
+    modelMapper.map(verificationDTO, account);
+    accountRepository.save(account);
   }
 }

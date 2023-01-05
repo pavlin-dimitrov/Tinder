@@ -6,7 +6,6 @@ import com.volasoftware.tinder.repository.VerificationTokenRepository;
 import com.volasoftware.tinder.service.contract.VerificationTokenService;
 import java.time.OffsetDateTime;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -26,7 +25,7 @@ public class VerificationTokenServiceImpl implements VerificationTokenService {
     return verificationTokenRepository.save(token);
   }
 
-  @Override
+  @Override //TODO change UUID to String token
   public VerificationToken findByToken(UUID tokenString) {
     return verificationTokenRepository.findByToken(tokenString);
   }

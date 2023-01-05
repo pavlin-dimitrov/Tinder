@@ -7,7 +7,6 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import java.util.List;
-import javax.mail.MessagingException;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -37,8 +36,7 @@ public class AccountController {
       })
   @GetMapping
   public ResponseEntity<List<AccountDTO>> getAllAccounts() {
-    List<AccountDTO> accounts = accountService.getAccounts();
-    return ResponseEntity.ok(accounts);
+    return ResponseEntity.ok(accountService.getAccounts());
   }
 
   @ApiOperation(value = "Create new account / registration")
@@ -53,7 +51,6 @@ public class AccountController {
       })
   @PostMapping("/register")
   public ResponseEntity<AccountRegisterDTO> createAccount(@RequestBody AccountRegisterDTO dto) {
-    AccountRegisterDTO newAccount = accountService.addNewAccount(dto);
-    return ResponseEntity.status(HttpStatus.CREATED).body(newAccount);
+    return ResponseEntity.status(HttpStatus.CREATED).body(accountService.addNewAccount(dto));
   }
 }
