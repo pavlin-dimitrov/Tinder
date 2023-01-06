@@ -26,7 +26,7 @@ public class VerificationTokenServiceImpl implements VerificationTokenService {
   }
 
   @Override //TODO change UUID to String token
-  public VerificationToken findByToken(UUID tokenString) {
+  public VerificationToken findByToken(String tokenString) {
     return verificationTokenRepository.findByToken(tokenString);
   }
 

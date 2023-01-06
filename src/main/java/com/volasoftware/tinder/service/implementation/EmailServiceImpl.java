@@ -17,7 +17,7 @@ import org.springframework.stereotype.Service;
 public class EmailServiceImpl implements EmailService {
 
   @Autowired private JavaMailSender javaMailSender;
-  private final static String verificationToken = "http://localhost:8080/verify?token=%s";
+  private final static String verificationToken = "http://localhost:8080/api/v1/accounts/verify?token=%s";
   private final static String subject = "Verify Your Email";
 
   @Override
@@ -49,7 +49,7 @@ public class EmailServiceImpl implements EmailService {
             "<html>"
                 + "<body>"
                 + "<p>Please verify your email by clicking the following button:</p>"
-                + "<form action='"+ verificationToken +"' method='POST'>"
+                + "<form action='"+ verificationToken +"' method='GET'>"
                 + "<button type='submit' name='token' value='" + token +"'>Verify Email</button>"
                 + "</form>"
                 + "</body>"
