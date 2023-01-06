@@ -10,9 +10,11 @@ import springfox.documentation.builders.RequestHandlerSelectors;
 import springfox.documentation.service.ApiInfo;
 import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
+import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 @Configuration
 @EnableWebMvc
+@EnableSwagger2
 @RequiredArgsConstructor
 public class SwaggerConfig {
     @Bean
@@ -27,8 +29,8 @@ public class SwaggerConfig {
     private ApiInfo apiInfo() {
         return new ApiInfoBuilder()
                 .title("Tinder - Vola Software offline internship final project")
-                .description("Social Network")
-                .version("Version: 1")
+                .description("This API provides a set of endpoints for the system.")
+                .version("1.0.0")
                 .build();
     }
 }

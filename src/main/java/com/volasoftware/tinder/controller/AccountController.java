@@ -3,6 +3,7 @@ package com.volasoftware.tinder.controller;
 import com.volasoftware.tinder.DTO.AccountDTO;
 import com.volasoftware.tinder.DTO.AccountRegisterDTO;
 import com.volasoftware.tinder.service.contract.AccountService;
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
@@ -20,11 +21,12 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @AllArgsConstructor
 @RequestMapping("api/v1/accounts")
+@Api(value = "Account controller")
 public class AccountController {
 
   @Autowired private final AccountService accountService;
 
-  @ApiOperation(value = "Retrieves a list of accounts")
+  @ApiOperation(value = "Retrieves a list of accounts", response = AccountDTO.class)
   @ApiResponses(
       value = {
         @ApiResponse(code = 200, message = "Successfully retrieved list of accounts"),
