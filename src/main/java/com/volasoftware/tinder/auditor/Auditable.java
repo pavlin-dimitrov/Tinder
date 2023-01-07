@@ -3,7 +3,6 @@ package com.volasoftware.tinder.auditor;
 import static javax.persistence.TemporalType.TIMESTAMP;
 
 import java.util.Date;
-import javax.persistence.Column;
 import javax.persistence.EntityListeners;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.Temporal;
@@ -17,7 +16,6 @@ import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-//@Data
 @ToString
 @NoArgsConstructor
 @Getter
