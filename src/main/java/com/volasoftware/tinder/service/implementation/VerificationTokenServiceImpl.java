@@ -25,7 +25,7 @@ public class VerificationTokenServiceImpl implements VerificationTokenService {
     return verificationTokenRepository.save(token);
   }
 
-  @Override //TODO change UUID to String token
+  @Override
   public VerificationToken findByToken(String tokenString) {
     return verificationTokenRepository.findByToken(tokenString);
   }
@@ -36,5 +36,10 @@ public class VerificationTokenServiceImpl implements VerificationTokenService {
     List<VerificationToken> expiredTokens =
         verificationTokenRepository.findByExpirationDateBefore(now);
     verificationTokenRepository.deleteAll(expiredTokens);
+  }
+
+  @Override
+  public void delete(VerificationToken token){
+    verificationTokenRepository.delete(token);
   }
 }

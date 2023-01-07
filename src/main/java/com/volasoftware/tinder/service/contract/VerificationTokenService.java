@@ -10,4 +10,6 @@ public interface VerificationTokenService {
   VerificationToken findByToken(String tokenString);
 
   void deleteExpiredTokens();
+
+  void delete(VerificationToken token);
 }
