@@ -21,7 +21,7 @@
 //
 //  @BeforeEach
 //  public void setUp() {
-//    greenMail = new GreenMail(new ServerSetup(25, null, "smtp¿"));
+//    greenMail = new GreenMail(new ServerSetup(25, null, "smtp"));
 //    greenMail.start();
 //  }
 //

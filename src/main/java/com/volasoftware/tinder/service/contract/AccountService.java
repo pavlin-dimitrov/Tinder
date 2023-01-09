@@ -7,18 +7,20 @@ import com.volasoftware.tinder.entity.Account;
 import java.util.List;
 import java.util.Optional;
 
+import javax.security.auth.login.AccountNotFoundException;
 import org.springframework.stereotype.Service;
 
 @Service
 public interface AccountService {
 
-  Optional<Account> getAccountByEmail(AccountRegisterDTO accountRegisterDTO);
+  Optional<Account> getAccountByEmail(AccountDTO accountDTO);
 
   List<AccountDTO> getAccounts();
 
   AccountRegisterDTO addNewAccount(AccountRegisterDTO accountRegisterDTO);
 
-  Optional<AccountVerificationDTO> findById(Long id);
+  Optional<AccountVerificationDTO> findAccountById(Long id);
 
-  void updateVerificationStatus(Long accountId, AccountVerificationDTO verificationDTO);
+  void updateVerificationStatus(Long accountId, AccountVerificationDTO verificationDTO)
+      throws AccountNotFoundException;
 }
