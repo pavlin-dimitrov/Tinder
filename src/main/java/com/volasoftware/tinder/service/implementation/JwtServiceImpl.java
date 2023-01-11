@@ -1,5 +1,6 @@
-package com.volasoftware.tinder.config;
+package com.volasoftware.tinder.service.implementation;
 
+import com.volasoftware.tinder.service.contract.JwtService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -14,23 +15,27 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 @Service
-public class JwtService {
+public class JwtServiceImpl implements JwtService {
 
   private static final String SECRET_KEY = "404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970";
 
+  @Override
   public String extractUsername(String token) {
     return extractClaim(token, Claims::getSubject);
   }
 
+  @Override
   public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
     final Claims claims = extractAllClaims(token);
     return claimsResolver.apply(claims);
   }
 
+  @Override
   public String generateToken(UserDetails userDetails) {
     return generateToken(new HashMap<>(), userDetails);
   }
 
+  @Override
   public String generateToken(
       Map<String, Object> extraClaims,
       UserDetails userDetails
@@ -45,6 +50,7 @@ public class JwtService {
         .compact();
   }
 
+  @Override
   public boolean isTokenValid(String token, UserDetails userDetails) {
     final String username = extractUsername(token);
     return (username.equals(userDetails.getUsername())) && !isTokenExpired(token);

@@ -2,6 +2,7 @@ package com.volasoftware.tinder.entity;
 
 import com.volasoftware.tinder.auditor.Auditable;
 import com.volasoftware.tinder.enums.Gender;
+import com.volasoftware.tinder.enums.Role;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
@@ -18,17 +19,21 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.hibernate.Hibernate;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 @Entity
 @Table(name = "account")
 @RequiredArgsConstructor
 @AllArgsConstructor
+@Builder
 @Getter
 @Setter
 public class Account extends Auditable<String> implements Serializable, UserDetails {
@@ -41,9 +46,9 @@ public class Account extends Auditable<String> implements Serializable, UserDeta
     private String email;
     private String password;
     private boolean isVerified;
-
     @Enumerated(EnumType.STRING)
-    @NotNull
+    private Role role;
+    @Enumerated(EnumType.STRING)
     private Gender gender;
 
     @OneToMany(mappedBy = "account", cascade = CascadeType.ALL)
@@ -69,31 +74,36 @@ public class Account extends Auditable<String> implements Serializable, UserDeta
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return null;
+        return List.of(new SimpleGrantedAuthority(role.name()));
+    }
+
+    @Override
+    public String getPassword() {
+        return password;
     }
 
     @Override
     public String getUsername() {
-        return null;
+        return email;
     }
 
     @Override
     public boolean isAccountNonExpired() {
-        return false;
+        return true;
     }
 
     @Override
     public boolean isAccountNonLocked() {
-        return false;
+        return true;
     }
 
     @Override
     public boolean isCredentialsNonExpired() {
-        return false;
+        return true;
     }
 
     @Override
     public boolean isEnabled() {
-        return false;
+        return true;
     }
 }

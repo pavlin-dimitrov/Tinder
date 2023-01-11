@@ -1,5 +1,6 @@
-package com.volasoftware.tinder.config;
+package com.volasoftware.tinder.security;
 
+import com.volasoftware.tinder.service.contract.JwtService;
 import java.io.IOException;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
