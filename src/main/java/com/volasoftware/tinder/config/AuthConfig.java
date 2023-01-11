@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class ApplicationConfig {
+public class AuthConfig {
 
   private final AccountRepository repository;
 
