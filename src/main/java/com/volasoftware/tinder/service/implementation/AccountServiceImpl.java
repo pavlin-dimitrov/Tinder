@@ -15,10 +15,12 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.mail.MessagingException;
+import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,10 +29,11 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class AccountServiceImpl implements AccountService {
 
-  private final VerificationTokenService verificationTokenService;
+//  private final VerificationTokenService verificationTokenService;
   private final AccountRepository accountRepository;
+//  private final PasswordEncoder passwordEncoder;
   private final ModelMapper modelMapper;
-  private EmailService emailService;
+  //private final EmailService emailService;
 
   @Override
   // TODO Changed from AccountRegisterDTO to AccountDTO (check if any error)
@@ -47,32 +50,33 @@ public class AccountServiceImpl implements AccountService {
         .collect(Collectors.toList());
   }
 
-  @Override
-  public AccountRegisterDTO addNewAccount(AccountRegisterDTO accountRegisterDTO) {
-    log.info("Register new account with email {}", accountRegisterDTO.getEmail());
-
-    Optional<Account> accountByEmail =
-        accountRepository.findAccountByEmail(accountRegisterDTO.getEmail());
-    if (accountByEmail.isPresent()) {
-      throw new EmailIsTakenException("Email is taken! Use another e-mail address!");
-    }
-
-    Account account = modelMapper.map(accountRegisterDTO, Account.class);
-    account = accountRepository.save(account);
-
-    VerificationToken token = verificationTokenService.createVerificationToken(account);
-    log.info("Verification token generated for email: {}", accountRegisterDTO.getEmail());
-
-    try {
-      emailService.sendVerificationEmail(accountRegisterDTO.getEmail(), token.getToken());
-      log.info("Email with verification token sent to email: {}", accountRegisterDTO.getEmail());
-    } catch (MessagingException e) {
-      log.error("Failed to send email for: " + account.getEmail() + "\n" + e);
-      e.printStackTrace();
-    }
-
-    return modelMapper.map(account, AccountRegisterDTO.class);
-  }
+//  @Override
+//  public AccountRegisterDTO addNewAccount(AccountRegisterDTO accountRegisterDTO) {
+//    log.info("Register new account with email {}", accountRegisterDTO.getEmail());
+//
+//    Optional<Account> accountByEmail =
+//        accountRepository.findAccountByEmail(accountRegisterDTO.getEmail());
+//    if (accountByEmail.isPresent()) {
+//      throw new EmailIsTakenException("Email is taken! Use another e-mail address!");
+//    }
+//
+//    Account account = modelMapper.map(accountRegisterDTO, Account.class);
+//    account.setPassword(passwordEncoder.encode(accountRegisterDTO.getPassword()));
+//    account = accountRepository.save(account);
+//
+//    VerificationToken token = verificationTokenService.createVerificationToken(account);
+//    log.info("Verification token generated for email: {}", accountRegisterDTO.getEmail());
+//
+//    try {
+//      emailService.sendVerificationEmail(accountRegisterDTO.getEmail(), token.getToken());
+//      log.info("Email with verification token sent to email: {}", accountRegisterDTO.getEmail());
+//    } catch (MessagingException e) {
+//      log.error("Failed to send email for: " + account.getEmail() + "\n" + e);
+//      e.printStackTrace();
+//    }
+//
+//    return modelMapper.map(account, AccountRegisterDTO.class);
+//  }
 
   @Override
   public Optional<AccountVerificationDTO> findAccountById(Long id) {

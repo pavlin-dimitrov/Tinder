@@ -6,7 +6,7 @@ import com.volasoftware.tinder.auth.AuthenticationResponse;
 
 public interface AuthenticationService {
 
-  AuthenticationResponse register(AccountRegisterDTO request);
+  AccountRegisterDTO register(AccountRegisterDTO request);
 
   AuthenticationResponse authenticate(AuthenticationRequest request);
 }

@@ -3,6 +3,7 @@ package com.volasoftware.tinder.controller;
 import com.volasoftware.tinder.DTO.AccountDTO;
 import com.volasoftware.tinder.DTO.AccountRegisterDTO;
 import com.volasoftware.tinder.service.contract.AccountService;
+import com.volasoftware.tinder.service.contract.AuthenticationService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -28,6 +29,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class AccountController {
 
   private final AccountService accountService;
+  private final AuthenticationService authenticationService;
 
   @ApiOperation(value = "Retrieves a list of accounts", response = AccountDTO.class)
   @ApiResponses(
@@ -58,6 +60,7 @@ public class AccountController {
   @PostMapping("/register")
   public ResponseEntity<AccountRegisterDTO> createAccount(@RequestBody AccountRegisterDTO dto) {
     log.info("Received request to register new account with e-mail: " + dto.getEmail());
-    return ResponseEntity.status(HttpStatus.CREATED).body(accountService.addNewAccount(dto));
+    //accountService.addNewAccount(dto)
+    return ResponseEntity.status(HttpStatus.CREATED).body(authenticationService.register(dto));
   }
 }

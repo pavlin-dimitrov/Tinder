@@ -18,12 +18,13 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @AllArgsConstructor
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
+//@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 @RequestMapping("api/v1/accounts")
 
 @Slf4j
 public class VerificationController {
 
+  @Autowired
   private EmailVerificationService emailVerificationService;
 
   @ApiOperation(value = "Verification of new account e-mail address.")

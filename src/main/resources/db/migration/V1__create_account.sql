@@ -8,7 +8,7 @@ create TABLE `account` (
   `first_name` varchar(50) NOT NULL,
   `gender` varchar(255) NOT NULL,
   `last_name` varchar(50) NOT NULL,
-  `password` varchar(30) NOT NULL,
+  `password` varchar(255) NOT NULL,
   CONSTRAINT account_pkey PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 

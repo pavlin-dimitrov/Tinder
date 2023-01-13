@@ -17,7 +17,7 @@ public interface AccountService {
 
   List<AccountDTO> getAccounts();
 
-  AccountRegisterDTO addNewAccount(AccountRegisterDTO accountRegisterDTO);
+//  AccountRegisterDTO addNewAccount(AccountRegisterDTO accountRegisterDTO);
 
   Optional<AccountVerificationDTO> findAccountById(Long id);
 
