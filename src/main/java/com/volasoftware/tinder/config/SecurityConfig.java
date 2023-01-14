@@ -16,18 +16,17 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-  // TODO JwtAuthenticationFilter class.
-  // before sec.2920 - https://www.youtube.com/watch?v=KxqlJblhzfI&t=2920s
   private final JwtAuthenticationFilter jwtAuthFilter;
   private final AuthenticationProvider authenticationProvider;
 
   @Bean
+  //TODO may be I have to change for ACCESS_TOKEN and REFRESH_TOKEN
   public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
     http.csrf()
         .disable()
         .authorizeHttpRequests()
-        .antMatchers("/api/v1/accounts/**")
-        .permitAll()
+            .antMatchers("/api/v1/auth/**", "/api/v1/verify-email/**", "/login")
+            .permitAll()
         .anyRequest()
         .authenticated()
         .and()

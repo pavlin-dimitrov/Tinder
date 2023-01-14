@@ -25,6 +25,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
   private final UserDetailsService userDetailsService;
 
   @Override
+  //TODO may be I have to change for ACCESS_TOKEN and REFRESH_TOKEN
   protected void doFilterInternal(
       @NotNull HttpServletRequest request,
       @NotNull HttpServletResponse response,

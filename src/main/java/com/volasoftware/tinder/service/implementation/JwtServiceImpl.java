@@ -31,23 +31,45 @@ public class JwtServiceImpl implements JwtService {
   }
 
   @Override
-  public String generateToken(UserDetails userDetails) {
-    return generateToken(new HashMap<>(), userDetails);
+  public String generateAccessToken(UserDetails userDetails) {
+    return generateAccessToken(new HashMap<>(), userDetails);
   }
 
   @Override
-  public String generateToken(
+  public  String generateRefreshToken(UserDetails userDetails){
+    return generateRefreshToken(new HashMap<>(), userDetails);
+  }
+
+  @Override
+  public String generateAccessToken(
       Map<String, Object> extraClaims,
       UserDetails userDetails
   ) {
+    long twentyFourMinutes = 1000 * 60 * 24;
     return Jwts
         .builder()
         .setClaims(extraClaims)
         .setSubject(userDetails.getUsername())
         .setIssuedAt(new Date(System.currentTimeMillis()))
-        .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 24))
+        .setExpiration(new Date(System.currentTimeMillis() + twentyFourMinutes))
         .signWith(getSignInKey(), SignatureAlgorithm.HS256)
         .compact();
+  }
+
+  @Override
+  public String generateRefreshToken(
+          Map<String, Object> extraClaims,
+          UserDetails userDetails
+  ) {
+    long oneWeek = 1000 * 60 * 60 * 24 * 7;
+    return Jwts
+            .builder()
+            .setClaims(extraClaims)
+            .setSubject(userDetails.getUsername())
+            .setIssuedAt(new Date(System.currentTimeMillis()))
+            .setExpiration(new Date(System.currentTimeMillis() + oneWeek))
+            .signWith(getSignInKey(), SignatureAlgorithm.HS256)
+            .compact();
   }
 
   @Override

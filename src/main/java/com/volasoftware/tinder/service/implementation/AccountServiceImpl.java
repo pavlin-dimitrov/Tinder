@@ -1,26 +1,20 @@
 package com.volasoftware.tinder.service.implementation;
 
 import com.volasoftware.tinder.DTO.AccountDTO;
-import com.volasoftware.tinder.DTO.AccountRegisterDTO;
 import com.volasoftware.tinder.DTO.AccountVerificationDTO;
 import com.volasoftware.tinder.entity.Account;
-import com.volasoftware.tinder.entity.VerificationToken;
-import com.volasoftware.tinder.exeption.AccountNotFoundException;
-import com.volasoftware.tinder.exeption.EmailIsTakenException;
+import com.volasoftware.tinder.exception.AccountNotFoundException;
 import com.volasoftware.tinder.repository.AccountRepository;
 import com.volasoftware.tinder.service.contract.AccountService;
-import com.volasoftware.tinder.service.contract.EmailService;
-import com.volasoftware.tinder.service.contract.VerificationTokenService;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import javax.mail.MessagingException;
-import lombok.Builder;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

@@ -17,7 +17,7 @@ import org.springframework.stereotype.Service;
 public class EmailServiceImpl implements EmailService {
 
   @Autowired private JavaMailSender javaMailSender;
-  private final static String verificationToken = "http://localhost:8080/api/v1/accounts/verify?token=%s";
+  private final static String verificationToken = "http://localhost:8080/api/v1/verify-email/verify?token=%s";
   private final static String subject = "Verify Your Email";
 
   @Override

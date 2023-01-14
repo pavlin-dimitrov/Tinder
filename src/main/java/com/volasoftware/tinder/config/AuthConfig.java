@@ -1,6 +1,6 @@
 package com.volasoftware.tinder.config;
 
-import com.volasoftware.tinder.exeption.AccountNotFoundException;
+import com.volasoftware.tinder.exception.AccountNotFoundException;
 import com.volasoftware.tinder.repository.AccountRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
