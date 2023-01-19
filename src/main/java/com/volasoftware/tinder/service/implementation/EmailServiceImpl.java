@@ -1,6 +1,6 @@
 package com.volasoftware.tinder.service.implementation;
 
-import com.volasoftware.tinder.entity.EmailDetails;
+import com.volasoftware.tinder.email.EmailDetails;
 import com.volasoftware.tinder.service.contract.EmailService;
 import java.nio.charset.StandardCharsets;
 import javax.mail.MessagingException;
@@ -17,7 +17,7 @@ import org.springframework.stereotype.Service;
 public class EmailServiceImpl implements EmailService {
 
   @Autowired private JavaMailSender javaMailSender;
-  private final static String verificationToken = "http://localhost:8080/api/v1/accounts/verify?token=%s";
+  private final static String verificationToken = "http://localhost:8080/api/v1/verify-email/verify?token=%s";
   private final static String subject = "Verify Your Email";
 
   @Override
