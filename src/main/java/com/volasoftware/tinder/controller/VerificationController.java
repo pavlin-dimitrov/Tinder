@@ -43,6 +43,6 @@ public class VerificationController {
             throws AccountNotFoundException {
         log.info("Received request to verify email with token: {}", token);
         emailVerificationService.verifyEmail(token);
-        return new RedirectView("/login");
+        return new RedirectView("/api/v1/auth/login");
     }
 }

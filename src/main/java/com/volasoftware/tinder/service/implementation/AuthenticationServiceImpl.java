@@ -73,16 +73,20 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     @Override
     public AuthenticationResponse login(AccountLoginDTO accountLoginDTO) {
         verifyLogin(accountLoginDTO);
+        log.info("Login verified.");
 
         Authentication authentication = authenticationManager
                 .authenticate(new UsernamePasswordAuthenticationToken(
                         accountLoginDTO.getEmail(),
                         accountLoginDTO.getPassword()));
         SecurityContextHolder.getContext().setAuthentication(authentication);
+        log.info("Authentication successfully added to Security Context Holder");
 
         var user = accountService.findAccountByEmail(accountLoginDTO.getEmail()).orElseThrow();
         var accessToken = jwtService.generateAccessToken(user);
+        log.info("Access token created after the Login.");
         var refreshToken = jwtService.generateRefreshToken(user);
+        log.info("Refresh token created after Login.");
 
         return AuthenticationResponse
                 .builder()
@@ -102,6 +106,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 userEmail = jwtService.extractUsername(refresh_jwt);
                 Optional<Account> optionalAccount = accountService.findAccountByEmail(userEmail);
                 if (optionalAccount.isEmpty()) {
+                    log.error("Account was not found in /refresh endpoint");
                     throw new AccountNotFoundException("Account not found for the refresh token!");
                 }
                 Account account = optionalAccount.get();
@@ -112,7 +117,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 response.setContentType(MimeTypeUtils.APPLICATION_JSON_VALUE);
                 new ObjectMapper().writeValue(response.getOutputStream(), tokens);
             } catch (Exception e) {
-                log.error("");
+                log.error("Error refreshing the access token: {}", e.getMessage());
                 response.setHeader("error", e.getMessage());
                 response.setStatus(FORBIDDEN.value());
                 Map<String, String> error = new HashMap<>();
@@ -120,6 +125,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 new ObjectMapper().writeValue(response.getOutputStream(), error);
             }
         } else {
+            log.warn("Refresh token is missing, can not refresh the access token.");
             throw new MissingRefreshTokenException("Refresh token is missing!");
 
         }
