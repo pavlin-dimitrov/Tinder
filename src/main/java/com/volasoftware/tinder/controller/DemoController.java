@@ -26,7 +26,7 @@ public class DemoController {
                     @ApiResponse(code = 404, message = "The resource is not found")})
     @GetMapping
     public ResponseEntity<String> demoMessage() {
-        log.info("Received request to get all accounts");
+        log.info("Received request to get message after the LOGIN");
         return ResponseEntity.ok("Hello after the login!");
     }
 }

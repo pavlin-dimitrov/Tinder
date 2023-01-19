@@ -18,6 +18,9 @@ import org.springframework.stereotype.Service;
 public class JwtServiceImpl implements JwtService {
 
   private static final String SECRET_KEY = "404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970";
+  private static final long  accessTokenTwentyFourMinutes = 1000 * 60 * 2;
+  //1000 * 60 * 24
+  private static final long refreshTokenOneWeek = 1000 * 60 * 60 * 24 * 7;
 
   @Override
   public String extractUsername(String token) {
@@ -45,13 +48,12 @@ public class JwtServiceImpl implements JwtService {
       Map<String, Object> extraClaims,
       UserDetails userDetails
   ) {
-    long twentyFourMinutes = 1000 * 60 * 24;
     return Jwts
         .builder()
         .setClaims(extraClaims)
         .setSubject(userDetails.getUsername())
         .setIssuedAt(new Date(System.currentTimeMillis()))
-        .setExpiration(new Date(System.currentTimeMillis() + twentyFourMinutes))
+        .setExpiration(new Date(System.currentTimeMillis() + accessTokenTwentyFourMinutes))
         .signWith(getSignInKey(), SignatureAlgorithm.HS256)
         .compact();
   }
@@ -61,13 +63,12 @@ public class JwtServiceImpl implements JwtService {
           Map<String, Object> extraClaims,
           UserDetails userDetails
   ) {
-    long oneWeek = 1000 * 60 * 60 * 24 * 7;
     return Jwts
             .builder()
             .setClaims(extraClaims)
             .setSubject(userDetails.getUsername())
             .setIssuedAt(new Date(System.currentTimeMillis()))
-            .setExpiration(new Date(System.currentTimeMillis() + oneWeek))
+            .setExpiration(new Date(System.currentTimeMillis() + refreshTokenOneWeek))
             .signWith(getSignInKey(), SignatureAlgorithm.HS256)
             .compact();
   }

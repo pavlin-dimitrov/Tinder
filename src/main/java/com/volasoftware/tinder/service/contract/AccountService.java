@@ -13,7 +13,9 @@ import org.springframework.stereotype.Service;
 @Service
 public interface AccountService {
 
-  Optional<Account> getAccountByEmail(AccountDTO accountDTO);
+  Account save(Account account);
+
+  Optional<Account> findAccountByEmail(String email);
 
   List<AccountDTO> getAccounts();
 
