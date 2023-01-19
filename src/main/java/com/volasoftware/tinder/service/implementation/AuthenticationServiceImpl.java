@@ -96,7 +96,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     @Override
-    public void refresh(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    public void getNewPairAuthTokens(HttpServletRequest request, HttpServletResponse response) throws IOException {
         final String authHeader = request.getHeader("Authorization");
         final String refresh_jwt;
         final String userEmail;

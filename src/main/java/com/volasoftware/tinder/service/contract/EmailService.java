@@ -4,4 +4,5 @@ import javax.mail.MessagingException;
 
 public interface EmailService {
   void sendVerificationEmail(String accountEmail, String token) throws MessagingException;
+
 }

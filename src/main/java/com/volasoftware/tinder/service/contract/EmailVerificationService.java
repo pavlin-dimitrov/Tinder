@@ -7,4 +7,6 @@ public interface EmailVerificationService {
 
   ResponseEntity<?> verifyEmail(String token) throws AccountNotFoundException;
 
+  public void resendVerificationEmail(String email) throws AccountNotFoundException;
+
 }

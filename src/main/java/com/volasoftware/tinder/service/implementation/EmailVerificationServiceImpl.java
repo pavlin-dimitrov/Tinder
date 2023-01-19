@@ -1,11 +1,16 @@
 package com.volasoftware.tinder.service.implementation;
 
+import com.volasoftware.tinder.DTO.AccountDTO;
 import com.volasoftware.tinder.DTO.AccountVerificationDTO;
+import com.volasoftware.tinder.entity.Account;
 import com.volasoftware.tinder.entity.VerificationToken;
 import com.volasoftware.tinder.service.contract.AccountService;
+import com.volasoftware.tinder.service.contract.EmailService;
 import com.volasoftware.tinder.service.contract.EmailVerificationService;
 import com.volasoftware.tinder.service.contract.VerificationTokenService;
 import java.time.OffsetDateTime;
+import java.util.Optional;
+import javax.mail.MessagingException;
 import javax.security.auth.login.AccountNotFoundException;
 
 import lombok.AllArgsConstructor;
@@ -24,6 +29,8 @@ public class EmailVerificationServiceImpl implements EmailVerificationService {
 
   @Autowired
   private VerificationTokenService verificationTokenService;
+  @Autowired
+  private EmailService emailService;
   @Autowired
   private AccountService accountService;
 
@@ -50,6 +57,27 @@ public class EmailVerificationServiceImpl implements EmailVerificationService {
 
       log.info("Successfully verified email for user with id: {}", accountId);
       return ResponseEntity.ok().build();
+    }
+  }
+
+  @Override
+  public void resendVerificationEmail(String email) throws AccountNotFoundException {
+    Optional<Account> accountByEmail = accountService.findAccountByEmail(email);
+    if (accountByEmail.isPresent() && !accountByEmail.get().isVerified()) {
+      Account account = accountByEmail.get();
+      VerificationToken verificationToken = verificationTokenService.createVerificationToken(account);
+      log.info("Re-Verification token generated for email: {}", account.getEmail());
+      verificationTokenService.updateToken(verificationToken);
+      log.info("Re-Verification token saved in to dthe DB");
+      try {
+        emailService.sendVerificationEmail(account.getEmail(), verificationToken.getToken());
+        log.info("Email with re-verification token sent to email: {}", account.getEmail());
+      } catch (MessagingException e) {
+        log.error("Failed to send email for: " + account.getEmail() + "\n" + e);
+        e.printStackTrace();
+      }
+    } else {
+      throw new AccountNotFoundException("Account with e-mail: " + email + " is not found!");
     }
   }
 }
