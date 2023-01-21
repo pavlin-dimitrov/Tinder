@@ -58,10 +58,10 @@ public class VerificationController {
                     @ApiResponse(code = 404, message = "The resource you were trying to reach is not found")
             })
     @PostMapping("/resend-verification-email")
-    public ResponseEntity<String> resendVerificationEmail(@RequestParam("email") String email) throws AccountNotFoundException {
+    public ResponseEntity<String> resendVerificationEmail(@RequestParam("email") String email)
+            throws AccountNotFoundException {
         log.info("Received request to RESEND verification email");
         emailVerificationService.resendVerificationEmail(email);
-//        ResponseDTO resendVerificationResponse = new ResponseDTO("Check your e-mail to confirm the registration");
         return ResponseEntity.status(HttpStatus.OK).body("Check your e-mail to confirm the registration");
     }
 }

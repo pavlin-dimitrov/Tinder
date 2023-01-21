@@ -67,7 +67,7 @@ public class EmailVerificationServiceImpl implements EmailVerificationService {
         VerificationToken verificationToken = verificationTokenService.createVerificationToken(account);
         log.info("Re-Verification token generated for email: {}", account.getEmail());
         verificationTokenService.updateToken(verificationToken);
-        log.info("Re-Verification token saved in to dthe DB");
+        log.info("Re-Verification token saved in to the DB");
         try {
             emailService.sendVerificationEmail(account.getEmail(), verificationToken.getToken());
             log.info("Email with re-verification token sent to email: {}", account.getEmail());
@@ -80,6 +80,7 @@ public class EmailVerificationServiceImpl implements EmailVerificationService {
     private Account isAccountPresent(String email) throws AccountNotFoundException {
         Optional<Account> optionalAccount = accountService.findAccountByEmail(email);
         if (optionalAccount.isEmpty()) {
+            log.warn("Account was not found!");
             throw new AccountNotFoundException("Account with e-mail: " + email + " is not found!");
         } else {
             return optionalAccount.get();
@@ -88,6 +89,7 @@ public class EmailVerificationServiceImpl implements EmailVerificationService {
 
     private void isEmailVerified(String email) throws AccountNotFoundException {
         if (isAccountPresent(email).isVerified()) {
+            log.warn("Email address for email: " + email + " is already verified");
             throw new EmailIsVerifiedException("This e-mail: " + email + " is already verified!");
         }
     }

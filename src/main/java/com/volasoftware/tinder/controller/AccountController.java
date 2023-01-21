@@ -52,16 +52,22 @@ public class AccountController {
                     @ApiResponse(code = 404, message = "The resource is not found")
             })
     @PutMapping("/profile")
-    public ResponseEntity<ResponseDTO<AccountDTO>> editAccountInfo(@RequestBody AccountDTO accountDTO, Principal principal) {
+    public ResponseEntity<ResponseDTO<AccountDTO>> editAccountInfo(
+            @RequestBody AccountDTO accountDTO, Principal principal) {
         if (!principal.getName().equals(accountDTO.getEmail())) {
+            log.warn("Account: " + principal.getName() +" is not authorized to edit account of: "
+                    + accountDTO.getEmail());
             return new ResponseEntity<>(new ResponseDTO<>(
                     "You are not authorized to edit this account", null), HttpStatus.BAD_REQUEST);
         }
         Account account = accountService.updateAccountInfo(accountDTO);
         if (account == null) {
+            log.warn("The account you are looking for via the DTO provided email: "
+                    + accountDTO.getEmail() + " is not found in the DB!");
             return new ResponseEntity<>(new ResponseDTO<>(
                     "Account is not found", null), HttpStatus.BAD_REQUEST);
         }
+        log.info("Account information was successfully updated!");
         return new ResponseEntity<>(new ResponseDTO<>(
                 "Account updated successfully", accountDTO), HttpStatus.BAD_REQUEST);
     }
