@@ -4,10 +4,7 @@ import com.volasoftware.tinder.DTO.AccountLoginDTO;
 import com.volasoftware.tinder.DTO.AccountRegisterDTO;
 import com.volasoftware.tinder.auth.AuthenticationResponse;
 import com.volasoftware.tinder.service.contract.AuthenticationService;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.swagger.annotations.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,7 +37,10 @@ public class AuthenticationController {
                     @ApiResponse(code = 404, message = "The resource you were trying to reach is not found")
             })
     @PostMapping("/register")
-    public ResponseEntity<String> register(@RequestBody AccountRegisterDTO dto) {
+    public ResponseEntity<String> register(
+            @ApiParam(value = "Account registration details", required = true)
+            @RequestBody AccountRegisterDTO dto
+    ) {
         log.info("Received request to register new account with e-mail: " + dto.getEmail());
         authenticationService.register(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body("Check your e-mail to confirm the registration");
@@ -54,7 +54,9 @@ public class AuthenticationController {
                     @ApiResponse(code = 404, message = "The resource is not found")
             })
     @PostMapping("/login")
-    public ResponseEntity<AuthenticationResponse> login(@RequestBody AccountLoginDTO request) {
+    public ResponseEntity<AuthenticationResponse> login(
+            @ApiParam(value = "Login details", required = true)
+            @RequestBody AccountLoginDTO request) {
         log.info("Received request to login");
         return ResponseEntity.ok(authenticationService.login(request));
     }
@@ -68,7 +70,12 @@ public class AuthenticationController {
                     @ApiResponse(code = 404, message = "The resource is not found")
             })
     @GetMapping("/refresh")
-    public void getNewPairAuthTokens(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    public void getNewPairAuthTokens(
+            @ApiParam(value = "HttpServletRequest used to get information about the request", required = true)
+            HttpServletRequest request,
+            @ApiParam(value = "HttpServletResponse used to set the new tokens", required = true)
+            HttpServletResponse response) throws IOException
+    {
         log.info("Received request for new access token");
         authenticationService.getNewPairAuthTokens(request, response);
     }

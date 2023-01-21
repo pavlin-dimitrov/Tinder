@@ -4,10 +4,7 @@ import com.volasoftware.tinder.DTO.AccountDTO;
 import com.volasoftware.tinder.DTO.ResponseDTO;
 import com.volasoftware.tinder.entity.Account;
 import com.volasoftware.tinder.service.contract.AccountService;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.swagger.annotations.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,7 +50,11 @@ public class AccountController {
             })
     @PutMapping("/profile")
     public ResponseEntity<ResponseDTO<AccountDTO>> editAccountInfo(
-            @RequestBody AccountDTO accountDTO, Principal principal) {
+            @ApiParam(value = "Account information to update", required = true)
+            @RequestBody AccountDTO accountDTO,
+            @ApiParam(value = "The authenticated user", required = true)
+            Principal principal)
+    {
         if (!principal.getName().equals(accountDTO.getEmail())) {
             log.warn("Account: " + principal.getName() +" is not authorized to edit account of: "
                     + accountDTO.getEmail());

@@ -1,8 +1,8 @@
 package com.volasoftware.tinder.controller;
 
-import com.volasoftware.tinder.DTO.ResponseDTO;
 import com.volasoftware.tinder.service.contract.EmailVerificationService;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.AllArgsConstructor;
@@ -41,8 +41,11 @@ public class VerificationController {
                     @ApiResponse(code = 404, message = "The resource you were trying to reach is not found")
             })
     @PostMapping("/verify")
-    public RedirectView verifyAccountEmail(@RequestParam("token") String token)
-            throws AccountNotFoundException {
+    public RedirectView verifyAccountEmail(
+            @ApiParam(name = "token", value = "The token provided to verify the email address", required = true)
+            @RequestParam("token") String token)
+            throws AccountNotFoundException
+    {
         log.info("Received request to verify email with token: {}", token);
         emailVerificationService.verifyEmail(token);
         return new RedirectView("/api/v1/auth/login");
@@ -58,7 +61,10 @@ public class VerificationController {
                     @ApiResponse(code = 404, message = "The resource you were trying to reach is not found")
             })
     @PostMapping("/resend-verification-email")
-    public ResponseEntity<String> resendVerificationEmail(@RequestParam("email") String email)
+    public ResponseEntity<String> resendVerificationEmail(
+            @ApiParam(name = "email", value = "Email address for which the verification email should be sent",
+                    required = true)
+            @RequestParam("email") String email)
             throws AccountNotFoundException {
         log.info("Received request to RESEND verification email");
         emailVerificationService.resendVerificationEmail(email);
