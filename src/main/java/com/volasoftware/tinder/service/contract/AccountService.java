@@ -19,10 +19,10 @@ public interface AccountService {
 
   List<AccountDTO> getAccounts();
 
-//  AccountRegisterDTO addNewAccount(AccountRegisterDTO accountRegisterDTO);
-
   Optional<AccountVerificationDTO> findAccountById(Long id);
 
   void updateVerificationStatus(Long accountId, AccountVerificationDTO verificationDTO)
       throws AccountNotFoundException;
+
+  Account updateAccountInfo(AccountDTO accountDTO);
 }

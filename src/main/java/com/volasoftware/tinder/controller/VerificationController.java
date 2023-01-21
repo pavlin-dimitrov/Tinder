@@ -28,8 +28,6 @@ public class VerificationController {
 
     @Autowired
     private EmailVerificationService emailVerificationService;
-    @Autowired
-    ResponseDTO response;
 
     @ApiOperation(value = "Verification of new account e-mail address.")
     @ApiResponses(
@@ -63,7 +61,7 @@ public class VerificationController {
     public ResponseEntity<String> resendVerificationEmail(@RequestParam("email") String email) throws AccountNotFoundException {
         log.info("Received request to RESEND verification email");
         emailVerificationService.resendVerificationEmail(email);
-        ResponseDTO resendVerificationResponse = new ResponseDTO("Check your e-mail to confirm the registration");
+//        ResponseDTO resendVerificationResponse = new ResponseDTO("Check your e-mail to confirm the registration");
         return ResponseEntity.status(HttpStatus.OK).body("Check your e-mail to confirm the registration");
     }
 }
