@@ -14,5 +14,6 @@ public interface AuthenticationService {
 
   AuthenticationResponse login(AccountLoginDTO accountLoginDTO);
 
-  void refresh(HttpServletRequest request, HttpServletResponse response) throws IOException;
+  void getNewPairAuthTokens(HttpServletRequest request, HttpServletResponse response) throws IOException;
+
 }

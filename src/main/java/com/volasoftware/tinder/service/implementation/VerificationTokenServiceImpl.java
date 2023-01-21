@@ -14,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Slf4j
@@ -55,5 +56,11 @@ public class VerificationTokenServiceImpl implements VerificationTokenService {
   public void delete(VerificationToken token){
     log.info("Deleting expired verification token");
     verificationTokenRepository.delete(token);
+  }
+
+  @Override
+  @Transactional
+  public void updateToken(VerificationToken token){
+    verificationTokenRepository.save(token);
   }
 }

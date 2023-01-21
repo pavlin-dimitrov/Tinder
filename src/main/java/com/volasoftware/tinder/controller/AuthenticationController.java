@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.view.RedirectView;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -69,6 +70,6 @@ public class AuthenticationController {
     @GetMapping("/refresh")
     public void getNewPairAuthTokens(HttpServletRequest request, HttpServletResponse response) throws IOException {
         log.info("Received request for new access token");
-        authenticationService.refresh(request, response);
+        authenticationService.getNewPairAuthTokens(request, response);
     }
 }
