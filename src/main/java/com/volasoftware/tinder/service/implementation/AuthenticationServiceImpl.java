@@ -3,6 +3,7 @@ package com.volasoftware.tinder.service.implementation;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.volasoftware.tinder.DTO.AccountLoginDTO;
 import com.volasoftware.tinder.DTO.AccountRegisterDTO;
+import com.volasoftware.tinder.DTO.ResponseDTO;
 import com.volasoftware.tinder.auth.AuthenticationResponse;
 import com.volasoftware.tinder.entity.Account;
 import com.volasoftware.tinder.entity.VerificationToken;
@@ -47,10 +48,11 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final EmailService emailService;
 
     @Override
-    public void register(AccountRegisterDTO accountRegisterDTO) {
+    public ResponseDTO register(AccountRegisterDTO accountRegisterDTO) {
         log.info("Register new account with email {}", accountRegisterDTO.getEmail());
         Optional<Account> accountByEmail =
                 accountService.findAccountByEmail(accountRegisterDTO.getEmail());
+        ResponseDTO response = new ResponseDTO();
         if (accountByEmail.isPresent()) {
             throw new EmailIsTakenException("Email is taken! Use another e-mail address!");
         }
@@ -63,11 +65,13 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         try {
             emailService.sendVerificationEmail(accountRegisterDTO.getEmail(), token.getToken());
             log.info("Email with verification token sent to email: {}", accountRegisterDTO.getEmail());
+            response.setResponse("Check your e-mail to confirm the registration");
         } catch (MessagingException e) {
             log.error("Failed to send email for: " + account.getEmail() + "\n" + e);
+            response.setResponse("Failed to re-send verification e-mail!");
             e.printStackTrace();
         }
-        modelMapper.map(account, AccountRegisterDTO.class);
+        return response;
     }
 
     @Override

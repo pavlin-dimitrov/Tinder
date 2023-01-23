@@ -1,6 +1,6 @@
 package com.volasoftware.tinder.config;
 
-import io.swagger.v3.oas.annotations.security.SecurityScheme;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,9 +17,6 @@ import springfox.documentation.spi.service.contexts.SecurityContext;
 import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
-import java.util.Arrays;
-import java.util.List;
-
 @Configuration
 @EnableWebMvc
 @EnableSwagger2
@@ -32,8 +29,8 @@ public class SwaggerConfig {
                 .apis(RequestHandlerSelectors.any())
                 .paths(PathSelectors.any())
                 .build()
-                .securitySchemes(Arrays.asList(apiKey()))
-                .securityContexts(Arrays.asList(securityContext()));
+                .securitySchemes(List.of(apiKey()))
+                .securityContexts(List.of(securityContext()));
     }
 
     private ApiInfo apiInfo() {
@@ -60,8 +57,8 @@ public class SwaggerConfig {
                 = new AuthorizationScope("global", "accessEverything");
         AuthorizationScope[] authorizationScopes = new AuthorizationScope[1];
         authorizationScopes[0] = authorizationScope;
-        return Arrays.asList(
-                new SecurityReference("Authorization", authorizationScopes));
+        return List.of(
+            new SecurityReference("Authorization", authorizationScopes));
     }
 }
 

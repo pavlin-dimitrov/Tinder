@@ -8,7 +8,6 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter @Setter
-public class ResponseDTO<T> {
+public class ResponseDTO {
     private String response;
-    private T data;
 }

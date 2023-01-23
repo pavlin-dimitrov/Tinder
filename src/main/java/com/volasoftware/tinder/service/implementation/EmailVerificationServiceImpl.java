@@ -1,6 +1,7 @@
 package com.volasoftware.tinder.service.implementation;
 
 import com.volasoftware.tinder.DTO.AccountVerificationDTO;
+import com.volasoftware.tinder.DTO.ResponseDTO;
 import com.volasoftware.tinder.entity.Account;
 import com.volasoftware.tinder.entity.VerificationToken;
 import com.volasoftware.tinder.exception.EmailIsVerifiedException;
@@ -61,20 +62,24 @@ public class EmailVerificationServiceImpl implements EmailVerificationService {
     }
 
     @Override
-    public void resendVerificationEmail(String email) throws AccountNotFoundException {
+    public ResponseDTO resendVerificationEmail(String email) throws AccountNotFoundException {
         Account account = isAccountPresent(email);
         isEmailVerified(email);
         VerificationToken verificationToken = verificationTokenService.createVerificationToken(account);
         log.info("Re-Verification token generated for email: {}", account.getEmail());
         verificationTokenService.updateToken(verificationToken);
         log.info("Re-Verification token saved in to the DB");
+        ResponseDTO response = new ResponseDTO();
         try {
             emailService.sendVerificationEmail(account.getEmail(), verificationToken.getToken());
+            response.setResponse("Check your e-mail to confirm the registration");
             log.info("Email with re-verification token sent to email: {}", account.getEmail());
         } catch (MessagingException e) {
             log.error("Failed to send email for: " + account.getEmail() + "\n" + e);
+            response.setResponse("Failed to re-send verification e-mail!");
             e.printStackTrace();
         }
+        return response;
     }
 
     private Account isAccountPresent(String email) throws AccountNotFoundException {
