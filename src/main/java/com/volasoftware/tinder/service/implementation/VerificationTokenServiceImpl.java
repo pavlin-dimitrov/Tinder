@@ -4,21 +4,19 @@ import com.volasoftware.tinder.entity.Account;
 import com.volasoftware.tinder.entity.VerificationToken;
 import com.volasoftware.tinder.repository.VerificationTokenRepository;
 import com.volasoftware.tinder.service.contract.VerificationTokenService;
-import java.time.OffsetDateTime;
-import java.util.List;
-import java.util.UUID;
-
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.OffsetDateTime;
+import java.util.List;
+import java.util.UUID;
+
 @Service
 @Slf4j
-//@RequiredArgsConstructor
 @NoArgsConstructor
 @AllArgsConstructor
 public class VerificationTokenServiceImpl implements VerificationTokenService {
@@ -61,6 +59,7 @@ public class VerificationTokenServiceImpl implements VerificationTokenService {
   @Override
   @Transactional
   public void updateToken(VerificationToken token){
+    log.info("Updated verification token");
     verificationTokenRepository.save(token);
   }
 }

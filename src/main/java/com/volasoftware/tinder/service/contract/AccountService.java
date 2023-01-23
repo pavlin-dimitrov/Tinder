@@ -4,6 +4,8 @@ import com.volasoftware.tinder.DTO.AccountDTO;
 import com.volasoftware.tinder.DTO.AccountRegisterDTO;
 import com.volasoftware.tinder.DTO.AccountVerificationDTO;
 import com.volasoftware.tinder.entity.Account;
+import com.volasoftware.tinder.exception.NotAuthorizedException;
+import java.security.Principal;
 import java.util.List;
 import java.util.Optional;
 
@@ -19,10 +21,11 @@ public interface AccountService {
 
   List<AccountDTO> getAccounts();
 
-//  AccountRegisterDTO addNewAccount(AccountRegisterDTO accountRegisterDTO);
-
   Optional<AccountVerificationDTO> findAccountById(Long id);
 
   void updateVerificationStatus(Long accountId, AccountVerificationDTO verificationDTO)
       throws AccountNotFoundException;
+
+  AccountDTO updateAccountInfo(AccountDTO accountDTO, Principal principal)
+      throws NotAuthorizedException;
 }
