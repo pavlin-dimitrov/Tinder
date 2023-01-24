@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service;
 @Service
 public interface AccountService {
 
-  Account save(Account account);
+  Account saveAccount(Account account);
 
   Optional<Account> findAccountByEmail(String email);
 

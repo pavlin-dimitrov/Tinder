@@ -28,7 +28,7 @@ public class AccountServiceImpl implements AccountService {
   private final ModelMapper modelMapper;
 
   @Override
-  public Account save(Account account) {
+  public Account saveAccount(Account account) {
     return accountRepository.save(account);
   }
 
