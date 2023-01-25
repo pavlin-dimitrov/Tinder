@@ -21,7 +21,7 @@ public interface AccountService {
 
   List<AccountDTO> getAccounts();
 
-  Optional<AccountVerificationDTO> findAccountById(Long id);
+  Optional<AccountVerificationDTO> findAccountVerificationById(Long id);
 
   void updateVerificationStatus(Long accountId, AccountVerificationDTO verificationDTO)
       throws AccountNotFoundException;

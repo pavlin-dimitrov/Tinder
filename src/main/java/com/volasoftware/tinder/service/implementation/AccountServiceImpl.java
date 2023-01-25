@@ -47,7 +47,7 @@ public class AccountServiceImpl implements AccountService {
   }
 
   @Override
-  public Optional<AccountVerificationDTO> findAccountById(Long id) {
+  public Optional<AccountVerificationDTO> findAccountVerificationById(Long id) {
     log.info("Get isVerified field for Account with ID: " + id);
     return accountRepository
         .findById(id)
