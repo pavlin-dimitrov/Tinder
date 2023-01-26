@@ -1,12 +1,11 @@
 package com.volasoftware.tinder.service.implementation;
 
-import static org.aspectj.bridge.MessageUtil.fail;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -15,24 +14,20 @@ import com.volasoftware.tinder.DTO.AccountVerificationDTO;
 import com.volasoftware.tinder.entity.Account;
 import com.volasoftware.tinder.enums.Gender;
 import com.volasoftware.tinder.enums.Role;
-import com.volasoftware.tinder.exception.EmailIsTakenException;
+import com.volasoftware.tinder.exception.NotAuthorizedException;
 import com.volasoftware.tinder.repository.AccountRepository;
+import java.security.Principal;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import org.junit.Before;
-import org.junit.Rule;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
@@ -46,7 +41,7 @@ public class AccountServiceTests {
 
   @Test
   @DisplayName("Test get all accounts")
-  public void testGetAllAccounts() {
+  public void testWhenRetrieveAllAccountsThenExpectedListOfThreeAccountsToBeReturned() {
     List<Account> accounts = getAccounts();
     when(repository.findAll()).thenReturn(accounts);
     List<AccountDTO> result = service.getAccounts();
@@ -57,7 +52,7 @@ public class AccountServiceTests {
 
   @Test
   @DisplayName("Test creating account")
-  public void testCreateAccount() {
+  public void testCreateAccountThenExpectSuccessfulAccountCreation() {
     Account account = getAccount("John", "Doe", "john.doe@example.com", Gender.MALE);
     ArgumentCaptor<Account> captor = ArgumentCaptor.forClass(Account.class);
     when(repository.save(captor.capture())).thenReturn(account);
@@ -65,22 +60,9 @@ public class AccountServiceTests {
     assertThat(createdAccount).isEqualTo(account);
   }
 
-//  @Test
-//  @DisplayName("Test creating account with taken email")
-//  public void testCreateAccountWithTakenEmail() {
-//    Account account = getAccounts().get(0);
-//    Account newAccount = new Account();
-//    newAccount.setEmail(account.getEmail());
-//    when(repository.findAccountByEmail(account.getEmail())).thenReturn(Optional.of(newAccount));
-//
-//    assertThrows(EmailIsTakenException.class, () -> service.saveAccount(account));
-//
-//    verify(repository).findAccountByEmail(account.getEmail());
-//  }
-
   @Test
   @DisplayName("Find account by valid e-mail address")
-  public void testFindAccountByEmail_validEmail() {
+  public void testFindAccountByEmailWhenTheGivenAddressIsValidThenFindAccount() {
     Account account = getAccount("John", "Doe", "john.doe@example.com", Gender.MALE);
     when(repository.findAccountByEmail("john.doe@example.com")).thenReturn(Optional.of(account));
     Optional<Account> returnedAccount = service.findAccountByEmail("john.doe@example.com");
@@ -89,7 +71,7 @@ public class AccountServiceTests {
 
   @Test
   @DisplayName("Find account by e-mail address, using invalid address")
-  public void testFindAccountByEmail_invalidEmail() {
+  public void testFindAccountByEmailWhenTheGivenAddressIsNotValidThenFindThatAccountIsEmpty() {
     Account account = getAccount("John", "Doe", "john.doe@example.com", Gender.MALE);
     when(repository.findAccountByEmail("invalid@example.com")).thenReturn(Optional.empty());
     Optional<Account> returnedAccount = service.findAccountByEmail("invalid@example.com");
@@ -97,18 +79,108 @@ public class AccountServiceTests {
   }
 
   @Test
-  @DisplayName("Find account by valid Id")
-  public void testFindAccountVerificationById_validId() {
+  @DisplayName("Find account verification by valid Id")
+  public void testFindAccountVerificationWhenValidIdIsProvidedAccountVerificationDTO() {
     Account account = getAccount("John", "Doe", "john.doe@example.com", Gender.MALE);
     account.setId(1L);
     account.setVerified(true);
+    AccountVerificationDTO accountVerificationDTO =
+        new AccountVerificationDTO(account.isVerified());
 
-    when(repository.findById(account.getId())).thenReturn(Optional.of(account));
+    Mockito.when(repository.findById(account.getId())).thenReturn(Optional.of(account));
+    Mockito.when(modelMapper.map(account, AccountVerificationDTO.class))
+        .thenReturn(accountVerificationDTO);
 
-    Optional<AccountVerificationDTO> returnedAccount = service.findAccountVerificationById(account.getId());
+    Optional<AccountVerificationDTO> returnedAccount =
+        service.findAccountVerificationById(account.getId());
     verify(repository).findById(account.getId());
     assertTrue(returnedAccount.isPresent());
     assertTrue(returnedAccount.get().isVerified());
+  }
+
+  @Test
+  @DisplayName("Update verification status for valid account")
+  public void testWhenUpdatingVerificationStatusForAccountThenExpectedTrue() {
+    Account account = getAccount("John", "Doe", "john.doe@example.com", Gender.MALE);
+    account.setId(1L);
+    account.setVerified(false);
+    AccountVerificationDTO verificationDTO = new AccountVerificationDTO(true);
+
+    Mockito.when(repository.findById(account.getId())).thenReturn(Optional.of(account));
+
+    Mockito.doAnswer(
+            invocation -> {
+              Object[] args = invocation.getArguments();
+              AccountVerificationDTO dto = (AccountVerificationDTO) args[0];
+              Account a = (Account) args[1];
+              a.setVerified(dto.isVerified());
+              return null;
+            })
+        .when(modelMapper)
+        .map(Mockito.any(AccountVerificationDTO.class), Mockito.any(Account.class));
+
+    service.updateVerificationStatus(account.getId(), verificationDTO);
+
+    verify(repository).findById(account.getId());
+    verify(repository).save(account);
+    assertTrue(account.isVerified());
+  }
+
+  @Test
+  @DisplayName("Update account info for authorized user")
+  public void testUpdateAccountInfoWhenUserIsAuthorizedThenExpectedAccountCorrectlyUpdated()
+      throws NotAuthorizedException {
+    Account account = getAccount("John", "Doe", "john.doe@example.com", Gender.MALE);
+    account.setId(1L);
+
+    AccountDTO accountDTO = new AccountDTO();
+    Mockito.when(modelMapper.map(account, AccountDTO.class)).thenReturn(accountDTO);
+    accountDTO = modelMapper.map(account, AccountDTO.class);
+    accountDTO.setFirstName("Jane");
+    accountDTO.setLastName("Doe");
+    accountDTO.setEmail("jane.doe@example.com");
+    accountDTO.setGender(Gender.FEMALE);
+
+    AccountDTO finalAccountDTO = accountDTO;
+    Principal principal = finalAccountDTO::getEmail;
+    Mockito.when(repository.findById(accountDTO.getId())).thenReturn(Optional.of(account));
+    AccountDTO updatedAccount = service.updateAccountInfo(accountDTO, principal);
+
+    verify(repository).findById(accountDTO.getId());
+    verify(repository).save(account);
+
+    assertEquals("Jane", updatedAccount.getFirstName());
+    assertEquals("Doe", updatedAccount.getLastName());
+    assertEquals("jane.doe@example.com", updatedAccount.getEmail());
+    assertEquals(Gender.FEMALE, updatedAccount.getGender());
+  }
+
+  @Test
+  @DisplayName(
+      "Throw NotAuthorizedException when unauthorized user attempts to update account info")
+  public void testUpdateAccountInfoWhenUserIsNotAuthorizedThenThrowAnNotAuthorizedException() {
+    AccountDTO accountDTO = new AccountDTO(
+        1L,
+        "John",
+        "Doe",
+        "john.doe@example.com",
+        Gender.MALE
+    );
+
+    Account account = getAccount(
+        "Johny",
+        "Doe",
+        "john.doe@example.com",
+        Gender.MALE
+    );
+
+    account.setId(1L);
+    Principal principal = () -> "jane.doe@example.com";
+    Mockito.when(repository.findById(accountDTO.getId())).thenReturn(Optional.of(account));
+
+    assertThrows(
+        NotAuthorizedException.class, () -> service.updateAccountInfo(accountDTO, principal));
+    verify(repository, never()).save(account);
   }
 
   private Account getAccount(String firstName, String lastName, String email, Gender gender) {
