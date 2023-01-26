@@ -1,9 +1,10 @@
 package com.volasoftware.tinder.controller;
 
 import com.volasoftware.tinder.DTO.AccountDTO;
-import com.volasoftware.tinder.DTO.ResponseDTO;
 import com.volasoftware.tinder.entity.Account;
+import com.volasoftware.tinder.exception.AccountNotFoundException;
 import com.volasoftware.tinder.exception.NotAuthorizedException;
+import com.volasoftware.tinder.repository.AccountRepository;
 import com.volasoftware.tinder.service.contract.AccountService;
 import io.swagger.annotations.*;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +25,7 @@ import java.util.List;
 public class AccountController {
 
   private final AccountService accountService;
+  private final AccountRepository repository;
 
   @ApiOperation(value = "Retrieves a list of accounts", response = AccountDTO.class)
   @ApiResponses(
@@ -57,5 +59,19 @@ public class AccountController {
       throws NotAuthorizedException {
     AccountDTO updatedAccountDto = accountService.updateAccountInfo(accountDTO, principal);
     return new ResponseEntity<>(updatedAccountDto, HttpStatus.OK);
+  }
+
+  @ApiOperation(value = "Retrieves an account profile", response = AccountDTO.class)
+  @ApiResponses(
+      value = {
+          @ApiResponse(code = 200, message = "Successfully retrieved account"),
+          @ApiResponse(code = 401, message = "You are not authorized to view the resource"),
+          @ApiResponse(code = 403, message = "Accessing the resource is forbidden"),
+          @ApiResponse(code = 404, message = "The resource you were trying to reach is not found")
+      })
+  @GetMapping("profile")
+  public ResponseEntity<AccountDTO> showUserProfile(
+      @ApiParam(value = "Id of account to be shown", required = true) @RequestParam Long id) {
+    return new ResponseEntity<>(accountService.findAccountById(id), HttpStatus.OK);
   }
 }

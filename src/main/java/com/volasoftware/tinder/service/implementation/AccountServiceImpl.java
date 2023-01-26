@@ -39,6 +39,13 @@ public class AccountServiceImpl implements AccountService {
   }
 
   @Override
+  public AccountDTO findAccountById(Long id){
+    Account account = accountRepository.findById(id).orElseThrow( () ->
+        new AccountNotFoundException("Account with id: " + id + " is not found") );
+    return modelMapper.map(account, AccountDTO.class);
+  }
+
+  @Override
   public List<AccountDTO> getAccounts() {
     log.info("Get all accounts");
     return accountRepository.findAll().stream()

@@ -79,6 +79,33 @@ public class AccountServiceTests {
   }
 
   @Test
+  @DisplayName("Find account by given id")
+  public void testFindAccountByIdWhenTheCorrectIdIsGivenThenExpectCorrectAccountDTO(){
+    Account account = getAccount("John", "Doe", "john.doe@example.com", Gender.MALE);
+    account.setId(1L);
+
+    AccountDTO accountDTO = new AccountDTO();
+    Mockito.when(modelMapper.map(account, AccountDTO.class)).thenReturn(accountDTO);
+    Mockito.when(repository.findById(account.getId())).thenReturn(Optional.of(account));
+
+    accountDTO.setId(1L);
+    accountDTO.setFirstName("John");
+    accountDTO.setLastName("Doe");
+    accountDTO.setEmail("john.doe@example.com");
+    accountDTO.setGender(Gender.MALE);
+
+    accountDTO = service.findAccountById(account.getId());
+
+    assertNotNull(accountDTO);
+    assertEquals(account.getId(), accountDTO.getId());
+    assertEquals(account.getEmail(), accountDTO.getEmail());
+    assertEquals(account.getFirstName(), accountDTO.getFirstName());
+    assertEquals(account.getLastName(), accountDTO.getLastName());
+    assertEquals(account.getGender(), accountDTO.getGender());
+    verify(repository).findById(account.getId());
+  }
+
+  @Test
   @DisplayName("Find account verification by valid Id")
   public void testFindAccountVerificationWhenValidIdIsProvidedAccountVerificationDTO() {
     Account account = getAccount("John", "Doe", "john.doe@example.com", Gender.MALE);
