@@ -1,6 +1,7 @@
 package com.volasoftware.tinder.service.implementation;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.volasoftware.tinder.DTO.AccountDTO;
 import com.volasoftware.tinder.DTO.AccountLoginDTO;
 import com.volasoftware.tinder.DTO.AccountRegisterDTO;
 import com.volasoftware.tinder.DTO.ResponseDTO;
@@ -12,11 +13,15 @@ import com.volasoftware.tinder.exception.AccountNotFoundException;
 import com.volasoftware.tinder.exception.AccountNotVerifiedException;
 import com.volasoftware.tinder.exception.EmailIsTakenException;
 import com.volasoftware.tinder.exception.MissingRefreshTokenException;
+import com.volasoftware.tinder.exception.NotAuthorizedException;
 import com.volasoftware.tinder.service.contract.*;
+import java.security.Principal;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -132,6 +137,23 @@ public class AuthenticationServiceImpl implements AuthenticationService {
       log.warn("Refresh token is missing, can not refresh the access token.");
       throw new MissingRefreshTokenException("Refresh token is missing!");
     }
+  }
+
+  @Override
+  public ResponseDTO recoverPassword(AccountDTO accountDTO, Principal principal)
+      throws NotAuthorizedException, MessagingException {
+    if (!principal.getName().equals(accountDTO.getEmail())) {
+      log.warn("Not authorized request for password recovery");
+      throw new NotAuthorizedException("Not authorized to edit this password");
+    }
+    String newPassword = UUID.randomUUID().toString();
+    emailService.sendPasswordRecoveryEmail(accountDTO.getEmail(), newPassword);
+
+
+
+  }
+  public ResponseEntity<?> saveNewPasswordInToDatabase(String newPassword){
+
   }
 
   private void verifyLogin(AccountLoginDTO accountLoginDTO) {

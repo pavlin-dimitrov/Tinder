@@ -1,11 +1,15 @@
 package com.volasoftware.tinder.controller;
 
+import com.volasoftware.tinder.DTO.AccountDTO;
 import com.volasoftware.tinder.DTO.AccountLoginDTO;
 import com.volasoftware.tinder.DTO.AccountRegisterDTO;
 import com.volasoftware.tinder.DTO.ResponseDTO;
 import com.volasoftware.tinder.auth.AuthenticationResponse;
+import com.volasoftware.tinder.exception.NotAuthorizedException;
 import com.volasoftware.tinder.service.contract.AuthenticationService;
 import io.swagger.annotations.*;
+import java.security.Principal;
+import javax.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,7 +46,6 @@ public class AuthenticationController {
       @ApiParam(value = "Account registration details", required = true) @RequestBody
           AccountRegisterDTO dto) {
     log.info("Received request to register new account with e-mail: " + dto.getEmail());
-    //authenticationService.register(dto);
     return new ResponseEntity<>(authenticationService.register(dto), HttpStatus.OK);
   }
 
@@ -80,5 +83,22 @@ public class AuthenticationController {
       throws IOException {
     log.info("Received request for new access token");
     authenticationService.getNewPairAuthTokens(request, response);
+  }
+
+  @PostMapping("/password-recovery")
+  public ResponseEntity<ResponseDTO> recoverPassword(
+      @ApiParam(value = "Account that we try to recover password", required = true) @RequestParam
+          AccountDTO accountDTO,
+      @ApiParam(value = "The authenticated user", required = true) Principal principal)
+      throws MessagingException, NotAuthorizedException {
+    return new ResponseEntity<>(
+        authenticationService.recoverPassword(accountDTO, principal), HttpStatus.OK);
+  }
+
+  @PostMapping("/recovered")
+  public RedirectView passwordRecoveredInDatabase(@ApiParam(name = "token",
+      value = "The new password provided for the user", required = true) @RequestParam("newPassword")
+  String newPassword){
+    return new RedirectView("/api/v1/auth/login");
   }
 }
