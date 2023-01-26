@@ -19,6 +19,8 @@ public interface AccountService {
 
   Optional<Account> findAccountByEmail(String email);
 
+  AccountDTO findAccountById(Long id);
+
   List<AccountDTO> getAccounts();
 
   Optional<AccountVerificationDTO> findAccountVerificationById(Long id);
