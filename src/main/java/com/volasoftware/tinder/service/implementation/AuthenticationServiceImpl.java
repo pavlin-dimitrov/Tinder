@@ -152,11 +152,11 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     try {
       emailService.sendPasswordRecoveryEmail(account.getEmail(), newPassword);
-      response.setResponse("Check your e-mail for the new password!");
+      response.setResponse("Your password was successfully changed!");
       log.info("Email with recovered password was sent to email: {}", account.getEmail());
       String encodedNewPass = passwordEncoder.encode(newPassword);
       log.info("Encode the password");
-      accountService.saveNewPasswordInToDatabase(encodedNewPass, principal);
+      accountService.saveNewPasswordInToDatabase(encodedNewPass, account);
       log.info("Save the new password in to the database");
     } catch (MessagingException e) {
       log.error("Failed to send email for: " + account.getEmail() + "\n" + e);

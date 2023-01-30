@@ -31,5 +31,5 @@ public interface AccountService {
   AccountDTO updateAccountInfo(AccountDTO accountDTO, Principal principal)
       throws NotAuthorizedException;
 
-  void saveNewPasswordInToDatabase(String newPassword, Principal principal);
+  void saveNewPasswordInToDatabase(String newPassword, Account account);
 }

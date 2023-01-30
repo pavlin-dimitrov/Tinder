@@ -2,23 +2,19 @@ package com.volasoftware.tinder.service.implementation;
 
 import com.volasoftware.tinder.DTO.AccountDTO;
 import com.volasoftware.tinder.DTO.AccountVerificationDTO;
-import com.volasoftware.tinder.DTO.ResponseDTO;
 import com.volasoftware.tinder.entity.Account;
 import com.volasoftware.tinder.exception.AccountNotFoundException;
 import com.volasoftware.tinder.exception.NotAuthorizedException;
 import com.volasoftware.tinder.repository.AccountRepository;
 import com.volasoftware.tinder.service.contract.AccountService;
-
 import java.security.Principal;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -114,14 +110,7 @@ public class AccountServiceImpl implements AccountService {
   }
 
   @Override
-  public void saveNewPasswordInToDatabase(String newPassword, Principal principal) {
-    Account account =
-        accountRepository
-            .findAccountByEmail(principal.getName())
-            .orElseThrow(
-                () ->
-                    new AccountNotFoundException(
-                        "Account with e-mail: " + principal.getName() + " was not found!"));
+  public void saveNewPasswordInToDatabase(String newPassword, Account account) {
     log.info(String.format("Update password for account with e-mail: %s", account.getEmail()));
     account.setPassword(newPassword);
     accountRepository.save(account);
