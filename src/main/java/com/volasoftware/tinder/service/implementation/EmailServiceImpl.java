@@ -6,6 +6,7 @@ import java.nio.charset.StandardCharsets;
 import javax.mail.MessagingException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -14,11 +15,14 @@ import org.springframework.stereotype.Service;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class EmailServiceImpl implements EmailService {
 
-  @Autowired private JavaMailSender javaMailSender;
-  private final static String verificationToken = "http://localhost:8080/api/v1/verify-email/verify";
-  private final static String subject = "Verify Your Email";
+  private final JavaMailSender javaMailSender;
+  private static final String verificationToken =
+      "http://localhost:8080/api/v1/verify-email/verify";
+  private static final String subject = "Verify Your Email";
+  private static final String pass_subject = "NEW PASSWORD HERE";
 
   @Override
   public void sendVerificationEmail(String recipientEmail, String token) throws MessagingException {
@@ -28,11 +32,32 @@ public class EmailServiceImpl implements EmailService {
           new MimeMessageHelper(
               message,
               MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED,
-              StandardCharsets.UTF_8.name()); // true
+              StandardCharsets.UTF_8.name());
       helper.setFrom(new InternetAddress("tinderapplicationsender@gmail.com"));
       helper.setTo(recipientEmail);
       helper.setSubject(mail(recipientEmail, token).getSubject());
       helper.setText(mail(recipientEmail, token).getMsgBody(), true);
+      log.info("New email details generated");
+      javaMailSender.send(message);
+    } catch (Exception e) {
+      throw new MessagingException("Failed on email sending!");
+    }
+  }
+
+  @Override
+  public void sendPasswordRecoveryEmail(String email, String newPassword)
+      throws MessagingException {
+    try {
+      MimeMessage message = javaMailSender.createMimeMessage();
+      MimeMessageHelper helper =
+          new MimeMessageHelper(
+              message,
+              MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED,
+              StandardCharsets.UTF_8.name());
+      helper.setFrom(new InternetAddress("tinderapplicationsender@gmail.com"));
+      helper.setTo(email);
+      helper.setSubject(passwordMail(email, newPassword).getSubject());
+      helper.setText(passwordMail(email, newPassword).getMsgBody(), true);
       log.info("New email details generated");
       javaMailSender.send(message);
     } catch (Exception e) {
@@ -49,12 +74,34 @@ public class EmailServiceImpl implements EmailService {
             "<html>"
                 + "<body>"
                 + "<p>Please verify your email by clicking the following button:</p>"
-                + "<form action='"+ verificationToken +"' method='POST'>"
-                + "<button type='submit' name='token' value='" + token +"'>Verify Email</button>"
+                + "<form action='"
+                + verificationToken
+                + "' method='POST'>"
+                + "<button type='submit' name='token' value='"
+                + token
+                + "'>Verify Email</button>"
                 + "</form>"
                 + "</body>"
                 + "</html>",
             token));
+    return mail;
+  }
+
+  private EmailDetails passwordMail(String recipient, String newPassword) {
+    EmailDetails mail = new EmailDetails();
+    mail.setRecipient(recipient);
+    mail.setSubject(pass_subject);
+    mail.setMsgBody(
+        String.format(
+            "<html>"
+                + "<body>"
+                + "<p>Please verify your new password by clicking the button:</p>"
+                + "<p>This is your new password: "
+                + newPassword
+                + "</p>"
+                + "</body>"
+                + "</html>",
+            newPassword));
     return mail;
   }
 }

@@ -6,8 +6,8 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
+import javax.security.auth.login.AccountNotFoundException;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -18,16 +18,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.view.RedirectView;
 
-import javax.security.auth.login.AccountNotFoundException;
-
 @RestController
-@AllArgsConstructor
-@NoArgsConstructor
 @RequestMapping("api/v1/verify-email")
 @Slf4j
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class VerificationController {
 
-  @Autowired private EmailVerificationService emailVerificationService;
+  private final EmailVerificationService emailVerificationService;
 
   @ApiOperation(value = "Verification of new account e-mail address.")
   @ApiResponses(

@@ -4,10 +4,10 @@ import com.volasoftware.tinder.DTO.AccountLoginDTO;
 import com.volasoftware.tinder.DTO.AccountRegisterDTO;
 import com.volasoftware.tinder.DTO.ResponseDTO;
 import com.volasoftware.tinder.auth.AuthenticationResponse;
-
+import java.io.IOException;
+import java.security.Principal;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 
 public interface AuthenticationService {
 
@@ -17,4 +17,5 @@ public interface AuthenticationService {
 
   void getNewPairAuthTokens(HttpServletRequest request, HttpServletResponse response) throws IOException;
 
+  ResponseDTO recoverPassword(Principal principal);
 }
