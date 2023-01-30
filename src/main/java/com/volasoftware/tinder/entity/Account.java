@@ -5,8 +5,10 @@ import com.volasoftware.tinder.enums.Gender;
 import com.volasoftware.tinder.enums.Role;
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -15,6 +17,9 @@ import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
@@ -54,6 +59,11 @@ public class Account extends Auditable<String> implements Serializable, UserDeta
     @OneToMany(mappedBy = "account", cascade = CascadeType.ALL)
     @Column(name = "verification_tokens")
     private List<VerificationToken> verificationTokens;
+
+    @ManyToMany
+    @JoinTable(name = "friends", joinColumns = @JoinColumn(name = "account_id"),
+    inverseJoinColumns = @JoinColumn(name = "friend_id"))
+    private Set<Account> friends;
 
     @Override
     public boolean equals(Object o) {
