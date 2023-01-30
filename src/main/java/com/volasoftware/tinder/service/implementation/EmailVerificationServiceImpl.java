@@ -9,31 +9,24 @@ import com.volasoftware.tinder.service.contract.AccountService;
 import com.volasoftware.tinder.service.contract.EmailService;
 import com.volasoftware.tinder.service.contract.EmailVerificationService;
 import com.volasoftware.tinder.service.contract.VerificationTokenService;
-
 import java.time.OffsetDateTime;
 import java.util.Optional;
 import javax.mail.MessagingException;
 import javax.security.auth.login.AccountNotFoundException;
-
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 @Service
-@AllArgsConstructor
-@NoArgsConstructor
 @Slf4j
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class EmailVerificationServiceImpl implements EmailVerificationService {
 
-    @Autowired
-    private VerificationTokenService verificationTokenService;
-    @Autowired
-    private EmailService emailService;
-    @Autowired
-    private AccountService accountService;
+    private final VerificationTokenService verificationTokenService;
+    private final EmailService emailService;
+    private final AccountService accountService;
 
     @Override
     public ResponseEntity<?> verifyEmail(String token) throws AccountNotFoundException {

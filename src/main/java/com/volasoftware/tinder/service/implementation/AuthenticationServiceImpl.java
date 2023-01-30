@@ -1,7 +1,8 @@
 package com.volasoftware.tinder.service.implementation;
 
+import static org.springframework.http.HttpStatus.FORBIDDEN;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.volasoftware.tinder.DTO.AccountDTO;
 import com.volasoftware.tinder.DTO.AccountLoginDTO;
 import com.volasoftware.tinder.DTO.AccountRegisterDTO;
 import com.volasoftware.tinder.DTO.ResponseDTO;
@@ -13,15 +14,25 @@ import com.volasoftware.tinder.exception.AccountNotFoundException;
 import com.volasoftware.tinder.exception.AccountNotVerifiedException;
 import com.volasoftware.tinder.exception.EmailIsTakenException;
 import com.volasoftware.tinder.exception.MissingRefreshTokenException;
-import com.volasoftware.tinder.exception.NotAuthorizedException;
-import com.volasoftware.tinder.service.contract.*;
+import com.volasoftware.tinder.service.contract.AccountService;
+import com.volasoftware.tinder.service.contract.AuthenticationService;
+import com.volasoftware.tinder.service.contract.EmailService;
+import com.volasoftware.tinder.service.contract.JwtService;
+import com.volasoftware.tinder.service.contract.VerificationTokenService;
+import java.io.IOException;
 import java.security.Principal;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
+import javax.mail.MessagingException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -29,16 +40,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.MimeTypeUtils;
-
-import javax.mail.MessagingException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-
-import static org.springframework.http.HttpStatus.FORBIDDEN;
 
 @Slf4j
 @Service
@@ -140,20 +141,29 @@ public class AuthenticationServiceImpl implements AuthenticationService {
   }
 
   @Override
-  public ResponseDTO recoverPassword(AccountDTO accountDTO, Principal principal)
-      throws NotAuthorizedException, MessagingException {
-    if (!principal.getName().equals(accountDTO.getEmail())) {
-      log.warn("Not authorized request for password recovery");
-      throw new NotAuthorizedException("Not authorized to edit this password");
-    }
+  public ResponseDTO recoverPassword(Principal principal) {
+    Account account =
+        accountService
+            .findAccountByEmail(principal.getName())
+            .orElseThrow(() -> new AccountNotFoundException("Account was not found"));
+
     String newPassword = UUID.randomUUID().toString();
-    emailService.sendPasswordRecoveryEmail(accountDTO.getEmail(), newPassword);
+    ResponseDTO response = new ResponseDTO();
 
-
-
-  }
-  public ResponseEntity<?> saveNewPasswordInToDatabase(String newPassword){
-
+    try {
+      emailService.sendPasswordRecoveryEmail(account.getEmail(), newPassword);
+      response.setResponse("Check your e-mail for the new password!");
+      log.info("Email with recovered password was sent to email: {}", account.getEmail());
+      String encodedNewPass = passwordEncoder.encode(newPassword);
+      log.info("Encode the password");
+      accountService.saveNewPasswordInToDatabase(encodedNewPass, principal);
+      log.info("Save the new password in to the database");
+    } catch (MessagingException e) {
+      log.error("Failed to send email for: " + account.getEmail() + "\n" + e);
+      response.setResponse("Failed to send new password!");
+      e.printStackTrace();
+    }
+    return response;
   }
 
   private void verifyLogin(AccountLoginDTO accountLoginDTO) {

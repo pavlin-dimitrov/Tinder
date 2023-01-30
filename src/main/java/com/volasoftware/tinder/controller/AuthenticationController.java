@@ -87,18 +87,7 @@ public class AuthenticationController {
 
   @PostMapping("/password-recovery")
   public ResponseEntity<ResponseDTO> recoverPassword(
-      @ApiParam(value = "Account that we try to recover password", required = true) @RequestParam
-          AccountDTO accountDTO,
-      @ApiParam(value = "The authenticated user", required = true) Principal principal)
-      throws MessagingException, NotAuthorizedException {
-    return new ResponseEntity<>(
-        authenticationService.recoverPassword(accountDTO, principal), HttpStatus.OK);
-  }
-
-  @PostMapping("/recovered")
-  public RedirectView passwordRecoveredInDatabase(@ApiParam(name = "token",
-      value = "The new password provided for the user", required = true) @RequestParam("newPassword")
-  String newPassword){
-    return new RedirectView("/api/v1/auth/login");
+      @ApiParam(value = "The authenticated user", required = true) Principal principal) {
+    return new ResponseEntity<>(authenticationService.recoverPassword(principal), HttpStatus.OK);
   }
 }

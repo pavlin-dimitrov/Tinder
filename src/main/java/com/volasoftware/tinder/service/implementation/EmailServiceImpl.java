@@ -6,6 +6,7 @@ import java.nio.charset.StandardCharsets;
 import javax.mail.MessagingException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -14,13 +15,14 @@ import org.springframework.stereotype.Service;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class EmailServiceImpl implements EmailService {
 
-  @Autowired private JavaMailSender javaMailSender;
+  private final JavaMailSender javaMailSender;
   private static final String verificationToken =
       "http://localhost:8080/api/v1/verify-email/verify";
-  private static final String recoverPassword = "http://localhost:8080/api/v1/auth/recovered";
   private static final String subject = "Verify Your Email";
+  private static final String pass_subject = "NEW PASSWORD HERE";
 
   @Override
   public void sendVerificationEmail(String recipientEmail, String token) throws MessagingException {
@@ -88,7 +90,7 @@ public class EmailServiceImpl implements EmailService {
   private EmailDetails passwordMail(String recipient, String newPassword) {
     EmailDetails mail = new EmailDetails();
     mail.setRecipient(recipient);
-    mail.setSubject(subject);
+    mail.setSubject(pass_subject);
     mail.setMsgBody(
         String.format(
             "<html>"
@@ -97,13 +99,6 @@ public class EmailServiceImpl implements EmailService {
                 + "<p>This is your new password: "
                 + newPassword
                 + "</p>"
-                + "<form action='"
-                + recoverPassword
-                + "' method='POST'>"
-                + "<button type='submit' name='token' value='"
-                + newPassword
-                + "'>Verify Password Recovery</button>"
-                + "</form>"
                 + "</body>"
                 + "</html>",
             newPassword));

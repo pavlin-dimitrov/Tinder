@@ -6,6 +6,7 @@ import com.volasoftware.tinder.repository.VerificationTokenRepository;
 import com.volasoftware.tinder.service.contract.VerificationTokenService;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -17,12 +18,10 @@ import java.util.UUID;
 
 @Service
 @Slf4j
-@NoArgsConstructor
-@AllArgsConstructor
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class VerificationTokenServiceImpl implements VerificationTokenService {
 
-  @Autowired
-  private VerificationTokenRepository verificationTokenRepository;
+  private final VerificationTokenRepository verificationTokenRepository;
 
   @Override
   public VerificationToken createVerificationToken(Account account) {
