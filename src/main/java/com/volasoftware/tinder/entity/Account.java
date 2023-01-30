@@ -55,6 +55,7 @@ public class Account extends Auditable<String> implements Serializable, UserDeta
     private Role role;
     @Enumerated(EnumType.STRING)
     private Gender gender;
+    private String image;
 
     @OneToMany(mappedBy = "account", cascade = CascadeType.ALL)
     @Column(name = "verification_tokens")
