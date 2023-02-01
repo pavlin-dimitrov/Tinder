@@ -59,6 +59,7 @@ public class Account extends Auditable<String> implements Serializable, UserDeta
     private String image;
     @Enumerated(EnumType.STRING)
     private AccountType type;
+    private int age;
 
     @OneToMany(mappedBy = "account", cascade = CascadeType.ALL)
     @Column(name = "verification_tokens")
