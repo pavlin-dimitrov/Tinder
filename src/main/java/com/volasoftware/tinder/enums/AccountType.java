@@ -1,5 +1,5 @@
 package com.volasoftware.tinder.enums;
 
-public enum Role {
-  ADMIN, USER
+public enum AccountType {
+  REAL, BOT
 }
