@@ -1,1 +1,1 @@
-ALTER TABLE account ADD image VARCHAR(1024) NOT NULL DEFAULT 'https://drive.google.com/file/d/1W1viYGAN02JMMPbBnbewuaCdR9OHQS1r/view?usp=share_link';
+ALTER TABLE account ADD image VARCHAR(1024) DEFAULT 'https://drive.google.com/file/d/1W1viYGAN02JMMPbBnbewuaCdR9OHQS1r/view?usp=share_link';

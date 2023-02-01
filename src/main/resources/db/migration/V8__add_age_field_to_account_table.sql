@@ -1,1 +1,1 @@
-ALTER TABLE account ADD age int NOT NULL DEFAULT 1;
+ALTER TABLE account ADD age int DEFAULT 1;
