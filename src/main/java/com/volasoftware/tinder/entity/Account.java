@@ -1,6 +1,7 @@
 package com.volasoftware.tinder.entity;
 
 import com.volasoftware.tinder.auditor.Auditable;
+import com.volasoftware.tinder.enums.AccountType;
 import com.volasoftware.tinder.enums.Gender;
 import com.volasoftware.tinder.enums.Role;
 import java.io.Serializable;
@@ -56,6 +57,8 @@ public class Account extends Auditable<String> implements Serializable, UserDeta
     @Enumerated(EnumType.STRING)
     private Gender gender;
     private String image;
+    @Enumerated(EnumType.STRING)
+    private AccountType type;
 
     @OneToMany(mappedBy = "account", cascade = CascadeType.ALL)
     @Column(name = "verification_tokens")
