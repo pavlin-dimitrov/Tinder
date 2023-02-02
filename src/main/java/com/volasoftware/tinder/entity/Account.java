@@ -1,6 +1,7 @@
 package com.volasoftware.tinder.entity;
 
 import com.volasoftware.tinder.auditor.Auditable;
+import com.volasoftware.tinder.enums.AccountType;
 import com.volasoftware.tinder.enums.Gender;
 import com.volasoftware.tinder.enums.Role;
 import java.io.Serializable;
@@ -21,6 +22,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -56,6 +58,13 @@ public class Account extends Auditable<String> implements Serializable, UserDeta
     @Enumerated(EnumType.STRING)
     private Gender gender;
     private String image;
+    @Enumerated(EnumType.STRING)
+    private AccountType type;
+    private int age;
+
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "location_id")
+    private Location location;
 
     @OneToMany(mappedBy = "account", cascade = CascadeType.ALL)
     @Column(name = "verification_tokens")

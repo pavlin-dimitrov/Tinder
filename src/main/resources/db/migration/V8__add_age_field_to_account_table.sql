@@ -1,0 +1,1 @@
+ALTER TABLE account ADD age int DEFAULT 1;
