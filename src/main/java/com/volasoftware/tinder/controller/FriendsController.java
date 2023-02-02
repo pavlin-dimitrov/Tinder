@@ -3,6 +3,9 @@ package com.volasoftware.tinder.controller;
 import com.volasoftware.tinder.DTO.ResponseDTO;
 import com.volasoftware.tinder.service.contract.FriendsService;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +25,12 @@ public class FriendsController {
 
   private final FriendsService friendsService;
 
+  @ApiOperation(value = "Seed friends")
+  @ApiResponses(
+      value = {
+          @ApiResponse(code = 200, message = "Successfully seeded friends"),
+          @ApiResponse(code = 404, message = "The resource is not found")
+      })
   @GetMapping("/seed-friends")
   public ResponseEntity<ResponseDTO> seedFriends(@RequestParam(required = false) Long accountId) {
     if (accountId == null) {
