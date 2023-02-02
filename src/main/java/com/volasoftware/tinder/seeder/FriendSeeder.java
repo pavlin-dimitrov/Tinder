@@ -1,76 +1,79 @@
 package com.volasoftware.tinder.seeder;
 
-import com.volasoftware.tinder.DTO.FriendDTO;
 import com.volasoftware.tinder.entity.Account;
 import com.volasoftware.tinder.entity.Location;
+import com.volasoftware.tinder.enums.AccountType;
 import com.volasoftware.tinder.enums.Gender;
+import com.volasoftware.tinder.enums.Role;
 import com.volasoftware.tinder.repository.AccountRepository;
 import com.volasoftware.tinder.repository.LocationRepository;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Component;
 
+@Component
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class FriendSeeder implements CommandLineRunner {
 
+  @Value("${run.commandlinerunner}")
+  private boolean runCommandLineRunner;
   private final AccountRepository accountRepository;
-
-  private final ModelMapper modelMapper;
-
+  private final PasswordEncoder passwordEncoder;
   private final LocationRepository locationRepository;
-
-  private final static String LINK_PREFIX = "https://drive.google.com/file/d/";
-  private final static String LINK_SUFFIX = "/view?usp=share_link";
-
-  private List<FriendDTO> friends = new ArrayList<>();
-
-  private Random random = new Random();
+  private static final String LINK_PREFIX = "https://drive.google.com/file/d/";
+  private static final String LINK_SUFFIX = "/view?usp=share_link";
 
   @Override
-  public void run(String... args) throws Exception {
-    createFriends();
-    accountRepository.saveAll(getAccounts());
-  }
+  public void run(String... args) {
+    if (accountRepository.findAllByType(AccountType.BOT).isEmpty()) {
+      runCommandLineRunner = true;
+      List<String> firstNames =
+          Arrays.asList(
+              "John", "Jane", "Jack", "Jill", "James", "Jessica", "Michael", "Sarah", "David",
+              "Emily");
+      List<String> lastNames =
+          Arrays.asList("Doe", "Smith", "Johnson", "Brown", "Miller", "Williams", "Jones", "Davis",
+              "Wilson", "Taylor");
+      Random random = new Random();
 
-  private void createFriends() {
-    for (int i = 0; i < 20; i++) {
-      FriendDTO friend = new FriendDTO();
-      friend.setFirstName("Friend" + i);
-      friend.setLastName("Last" + i);
-      friend.setImage(LINK_PREFIX + image().get(i) + LINK_SUFFIX);
-      friend.setGender(Gender.values()[random.nextInt(Gender.values().length)]);
-      friend.setAge(random.nextInt(50) + 18);
+      for (int i = 0; i < 20; i++) {
+        String firstName = firstNames.get(random.nextInt(firstNames.size()));
+        String lastName = lastNames.get(random.nextInt(lastNames.size()));
+        String image = LINK_PREFIX + image().get(i) + LINK_SUFFIX;
+        Gender gender = Gender.values()[random.nextInt(Gender.values().length)];
+        int age = random.nextInt(40) + 20;
 
-      Location location = new Location();
-      location.setLatitude(random.nextDouble() + 43.21);
-      location.setLongitude(random.nextDouble() + 23.34);
-      locationRepository.save(location);
-      friend.setLocation(location);
+        Account account = new Account();
+        account.setFirstName(firstName);
+        account.setLastName(lastName);
+        account.setEmail(firstName + "." + lastName + i + "@example.com");
+        account.setPassword(passwordEncoder.encode(UUID.randomUUID().toString()));
+        account.setVerified(true);
+        account.setRole(Role.USER);
+        account.setImage(image);
+        account.setGender(gender);
+        account.setAge(age);
+        account.setType(AccountType.BOT);
+        account = accountRepository.save(account);
 
-      friends.add(friend);
+        Location location = new Location();
+        location.setAccount(account);
+        location.setLatitude(43.40 + random.nextDouble());
+        location.setLongitude(23.21 + random.nextDouble());
+        locationRepository.save(location);
+      }
     }
   }
 
-  private List<Account> getAccounts() {
-    List<Account> accounts = new ArrayList<>();
-    for (FriendDTO friend : friends) {
-      Account account = modelMapper.map(friend, Account.class);
-      account.setFirstName(friend.getFirstName());
-      account.setLastName(friend.getLastName());
-      account.setImage(friend.getImage());
-      account.setGender(friend.getGender());
-      account.setAge(friend.getAge());
-      account.setLocation(friend.getLocation());
-      accounts.add(account);
-    }
-    return accounts;
-  }
-
-  private List<String> image(){
+  private List<String> image() {
     List<String> images = new ArrayList<>();
     images.add("1-zh9GCLyY6lVGzdqUYQXCEq157wlGv-l");
     images.add("1Q2m6ddQsBCLh57T1T5kbQskjC4VonsPa");
