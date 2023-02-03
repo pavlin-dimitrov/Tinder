@@ -2,6 +2,7 @@ package com.volasoftware.tinder.service.contract;
 
 import com.volasoftware.tinder.DTO.AccountLoginDTO;
 import com.volasoftware.tinder.DTO.AccountRegisterDTO;
+import com.volasoftware.tinder.DTO.LocationDTO;
 import com.volasoftware.tinder.DTO.ResponseDTO;
 import com.volasoftware.tinder.auth.AuthenticationResponse;
 import java.io.IOException;
@@ -11,7 +12,7 @@ import javax.servlet.http.HttpServletResponse;
 
 public interface AuthenticationService {
 
-  ResponseDTO register(AccountRegisterDTO request);
+  ResponseDTO register(AccountRegisterDTO request, LocationDTO locationDTO);
 
   AuthenticationResponse login(AccountLoginDTO accountLoginDTO);
 

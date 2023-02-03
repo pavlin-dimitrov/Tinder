@@ -2,6 +2,7 @@ package com.volasoftware.tinder.controller;
 
 import com.volasoftware.tinder.DTO.AccountLoginDTO;
 import com.volasoftware.tinder.DTO.AccountRegisterDTO;
+import com.volasoftware.tinder.DTO.LocationDTO;
 import com.volasoftware.tinder.DTO.ResponseDTO;
 import com.volasoftware.tinder.auth.AuthenticationResponse;
 import com.volasoftware.tinder.service.contract.AuthenticationService;
@@ -46,10 +47,10 @@ public class AuthenticationController {
       })
   @PostMapping("/register")
   public ResponseEntity<ResponseDTO> register(
-      @ApiParam(value = "Account registration details", required = true) @RequestBody
-          AccountRegisterDTO dto) {
+      @ApiParam(value = "Account registration details", required = true) @RequestBody AccountRegisterDTO dto,
+      @ApiParam(value = "Account location", required = true)@RequestBody LocationDTO locationDTO) {
     log.info("Received request to register new account with e-mail: " + dto.getEmail());
-    return new ResponseEntity<>(authenticationService.register(dto), HttpStatus.OK);
+    return new ResponseEntity<>(authenticationService.register(dto, locationDTO), HttpStatus.OK);
   }
 
   @ApiOperation(value = "Login")

@@ -4,15 +4,14 @@ import com.volasoftware.tinder.DTO.FriendDTO;
 import com.volasoftware.tinder.DTO.LocationDTO;
 import com.volasoftware.tinder.DTO.ResponseDTO;
 import com.volasoftware.tinder.entity.Account;
-import com.volasoftware.tinder.entity.Location;
 import com.volasoftware.tinder.enums.AccountType;
 import com.volasoftware.tinder.exception.AccountNotFoundException;
 import com.volasoftware.tinder.repository.AccountRepository;
 import com.volasoftware.tinder.service.contract.FriendsService;
 import java.security.Principal;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
@@ -62,7 +61,12 @@ public class FriendsServiceImpl implements FriendsService {
             .orElseThrow(() -> new AccountNotFoundException("This account is not present!"));
     LocationDTO myLocation = modelMapper.map(account.getLocation(), LocationDTO.class);
 
-    return null;
+    return account.getFriends().stream()
+        .map(friend -> new FriendDTO(friend.getFirstName(), friend.getLastName(),
+            friend.getImage(), friend.getGender(),
+            friend.getAge(), friend.getLocation()))
+        .sorted(Comparator.comparingDouble(f -> distance(myLocation, modelMapper.map(f.getLocation(), LocationDTO.class))))
+        .collect(Collectors.toList());
   }
 
   private static double distance(LocationDTO myLocation, LocationDTO friendLocation) {
