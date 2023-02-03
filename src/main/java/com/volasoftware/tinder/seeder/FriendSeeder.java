@@ -69,6 +69,9 @@ public class FriendSeeder implements CommandLineRunner {
         location.setLatitude(43.40 + random.nextDouble());
         location.setLongitude(23.21 + random.nextDouble());
         locationRepository.save(location);
+
+        account.setLocation(location);
+        accountRepository.save(account);
       }
     }
   }

@@ -50,7 +50,6 @@ public class FriendsController {
   public ResponseEntity<List<FriendDTO>> showListOfFriends(
       @ApiParam(value = "The authenticated user", required = true) @RequestParam
           Principal principal) {
-    return ResponseEntity<>(friendsService.showAllMyFriendsOrderedByClosestLocation(principal.getName()))
-
+    return new ResponseEntity<>(friendsService.showAllMyFriendsOrderedByClosestLocation(principal), HttpStatus.OK);
   }
 }
