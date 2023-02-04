@@ -11,6 +11,7 @@ import com.volasoftware.tinder.auth.AuthenticationResponse;
 import com.volasoftware.tinder.entity.Account;
 import com.volasoftware.tinder.entity.Location;
 import com.volasoftware.tinder.entity.VerificationToken;
+import com.volasoftware.tinder.enums.AccountType;
 import com.volasoftware.tinder.enums.Role;
 import com.volasoftware.tinder.exception.AccountNotFoundException;
 import com.volasoftware.tinder.exception.AccountNotVerifiedException;
@@ -58,7 +59,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
   private final EmailService emailService;
 
   @Override
-  public ResponseDTO register(AccountRegisterDTO accountRegisterDTO, LocationDTO locationDTO) {
+  public ResponseDTO register(AccountRegisterDTO accountRegisterDTO) {
     log.info("Register new account with email {}", accountRegisterDTO.getEmail());
     Optional<Account> accountByEmail =
         accountService.findAccountByEmail(accountRegisterDTO.getEmail());
@@ -69,18 +70,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     Account account = modelMapper.map(accountRegisterDTO, Account.class);
     account.setPassword(passwordEncoder.encode(accountRegisterDTO.getPassword()));
     account.setRole(Role.USER);
+    account.setType(AccountType.REAL);
     account = accountService.saveAccount(account);
-    accountService.saveAccount(account);
-
-    Location location = new Location();
-    location.setAccount(account);
-    location.setLongitude(locationDTO.getLongitude());
-    location.setLatitude(locationDTO.getLatitude());
-    locationRepository.save(location);
-
-    account.setLocation(location);
-    accountService.saveAccount(account);
-
 
     VerificationToken token = verificationTokenService.createVerificationToken(account);
     log.info("Verification token generated for email: {}", accountRegisterDTO.getEmail());

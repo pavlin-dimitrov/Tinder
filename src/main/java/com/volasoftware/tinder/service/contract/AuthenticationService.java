@@ -12,7 +12,7 @@ import javax.servlet.http.HttpServletResponse;
 
 public interface AuthenticationService {
 
-  ResponseDTO register(AccountRegisterDTO request, LocationDTO locationDTO);
+  ResponseDTO register(AccountRegisterDTO request);
 
   AuthenticationResponse login(AccountLoginDTO accountLoginDTO);
 

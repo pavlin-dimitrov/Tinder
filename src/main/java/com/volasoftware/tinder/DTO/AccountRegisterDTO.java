@@ -58,8 +58,4 @@ public class AccountRegisterDTO {
   @ApiModelProperty(value = "User age", required = true)
   @NotBlank
   private int age;
-
-  @ApiModelProperty(value = "User location", required = true)
-  @NotBlank
-  private Location location;
 }

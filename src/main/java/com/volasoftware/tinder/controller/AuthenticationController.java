@@ -47,10 +47,9 @@ public class AuthenticationController {
       })
   @PostMapping("/register")
   public ResponseEntity<ResponseDTO> register(
-      @ApiParam(value = "Account registration details", required = true) @RequestBody AccountRegisterDTO dto,
-      @ApiParam(value = "Account location", required = true)@RequestBody LocationDTO locationDTO) {
+      @ApiParam(value = "Account registration details", required = true) @RequestBody AccountRegisterDTO dto) {
     log.info("Received request to register new account with e-mail: " + dto.getEmail());
-    return new ResponseEntity<>(authenticationService.register(dto, locationDTO), HttpStatus.OK);
+    return new ResponseEntity<>(authenticationService.register(dto), HttpStatus.OK);
   }
 
   @ApiOperation(value = "Login")

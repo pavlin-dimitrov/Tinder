@@ -4,9 +4,11 @@ import com.volasoftware.tinder.DTO.FriendDTO;
 import com.volasoftware.tinder.DTO.LocationDTO;
 import com.volasoftware.tinder.DTO.ResponseDTO;
 import com.volasoftware.tinder.entity.Account;
+import com.volasoftware.tinder.entity.Location;
 import com.volasoftware.tinder.enums.AccountType;
 import com.volasoftware.tinder.exception.AccountNotFoundException;
 import com.volasoftware.tinder.repository.AccountRepository;
+import com.volasoftware.tinder.repository.LocationRepository;
 import com.volasoftware.tinder.service.contract.FriendsService;
 import java.security.Principal;
 import java.util.Comparator;
@@ -27,7 +29,7 @@ import org.springframework.stereotype.Service;
 public class FriendsServiceImpl implements FriendsService {
 
   private final AccountRepository accountRepository;
-  private final ModelMapper modelMapper;
+  private final LocationRepository locationRepository;
 
   @Override
   public ResponseDTO linkingAllRealAccountsWithRandomFriends() {
@@ -45,7 +47,10 @@ public class FriendsServiceImpl implements FriendsService {
   @Override
   public ResponseDTO linkingRequestedRealAccountWithRandomFriends(Long id) {
     List<Account> accounts = accountRepository.findAll();
-    Account account = accountRepository.findById(id).orElseThrow(() -> new AccountNotFoundException("Account not found!"));
+    Account account =
+        accountRepository
+            .findById(id)
+            .orElseThrow(() -> new AccountNotFoundException("Account not found!"));
     Set<Account> friends = new HashSet<>();
     seedFriends(accounts, account, friends);
     account.setFriends(friends);
@@ -54,19 +59,24 @@ public class FriendsServiceImpl implements FriendsService {
   }
 
   @Override
-  public List<FriendDTO> showAllMyFriendsOrderedByClosestLocation(Principal principal) {
+  public List<FriendDTO> showAllMyFriends(Principal principal, LocationDTO myLocation) {
     Account account =
         accountRepository
             .findAccountByEmail(principal.getName())
             .orElseThrow(() -> new AccountNotFoundException("This account is not present!"));
-    LocationDTO myLocation = modelMapper.map(account.getLocation(), LocationDTO.class);
+    if (myLocation != null) {
+      Location location = new Location();
+      location.setAccount(account);
+      location.setLatitude(myLocation.getLatitude());
+      location.setLongitude(myLocation.getLongitude());
+      locationRepository.save(location);
 
-    return account.getFriends().stream()
-        .map(friend -> new FriendDTO(friend.getFirstName(), friend.getLastName(),
-            friend.getImage(), friend.getGender(),
-            friend.getAge(), friend.getLocation()))
-        .sorted(Comparator.comparingDouble(f -> distance(myLocation, modelMapper.map(f.getLocation(), LocationDTO.class))))
-        .collect(Collectors.toList());
+      account.setLocation(location);
+      accountRepository.save(account);
+
+      return getListOfFriendsDTOsOrderedByDistance(myLocation, account);
+    }
+    return getListOfFriendsDTOsNotOrderedByDistance(account);
   }
 
   private static double distance(LocationDTO myLocation, LocationDTO friendLocation) {
@@ -94,7 +104,7 @@ public class FriendsServiceImpl implements FriendsService {
     }
   }
 
-  private int getNumberOfFriendsToSeed( List<Account> accounts ) {
+  private int getNumberOfFriendsToSeed(List<Account> accounts) {
     return ThreadLocalRandom.current().nextInt(2, accounts.size());
   }
 
@@ -105,5 +115,43 @@ public class FriendsServiceImpl implements FriendsService {
       return response;
     } else response.setResponse("Invalid account id or account is not of type REAL");
     return response;
+  }
+
+  private List<FriendDTO> getListOfFriendsDTOsOrderedByDistance(
+      LocationDTO myLocation, Account account) {
+    return account.getFriends().stream()
+        .map(
+            friend -> {
+              Location friendLocation = friend.getLocation();
+              LocationDTO friendLocationDTO =
+                  new LocationDTO(friendLocation.getLatitude(), friendLocation.getLongitude());
+              return new FriendDTO(
+                  friend.getFirstName(),
+                  friend.getLastName(),
+                  friend.getImage(),
+                  friend.getGender(),
+                  friend.getAge(),
+                  friendLocationDTO);
+            })
+        .sorted(Comparator.comparingDouble(f -> distance(myLocation, f.getLocationDTO())))
+        .collect(Collectors.toList());
+  }
+
+  private List<FriendDTO> getListOfFriendsDTOsNotOrderedByDistance(Account account) {
+    return account.getFriends().stream()
+        .map(
+            friend -> {
+              Location friendLocation = friend.getLocation();
+              LocationDTO friendLocationDTO =
+                  new LocationDTO(friendLocation.getLatitude(), friendLocation.getLongitude());
+              return new FriendDTO(
+                  friend.getFirstName(),
+                  friend.getLastName(),
+                  friend.getImage(),
+                  friend.getGender(),
+                  friend.getAge(),
+                  friendLocationDTO);
+            })
+        .collect(Collectors.toList());
   }
 }

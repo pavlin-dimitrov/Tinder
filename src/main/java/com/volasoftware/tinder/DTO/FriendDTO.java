@@ -1,6 +1,5 @@
 package com.volasoftware.tinder.DTO;
 
-import com.volasoftware.tinder.entity.Location;
 import com.volasoftware.tinder.enums.Gender;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -31,5 +30,5 @@ public class FriendDTO {
   private int age;
 
   @ApiModelProperty(value = "Friend location", required = true)
-  private Location location;
+  private LocationDTO locationDTO;
 }

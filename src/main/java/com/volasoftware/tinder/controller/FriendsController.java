@@ -1,6 +1,7 @@
 package com.volasoftware.tinder.controller;
 
 import com.volasoftware.tinder.DTO.FriendDTO;
+import com.volasoftware.tinder.DTO.LocationDTO;
 import com.volasoftware.tinder.DTO.ResponseDTO;
 import com.volasoftware.tinder.service.contract.FriendsService;
 import io.swagger.annotations.Api;
@@ -16,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -48,7 +50,7 @@ public class FriendsController {
 
   @GetMapping("/friends")
   public ResponseEntity<List<FriendDTO>> showListOfFriends(
-      @ApiParam(value = "The authenticated user") Principal principal) {
-    return new ResponseEntity<>(friendsService.showAllMyFriendsOrderedByClosestLocation(principal), HttpStatus.OK);
+      @ApiParam(value = "The authenticated user") Principal principal, @RequestBody(required = false) LocationDTO locationDTO) {
+    return new ResponseEntity<>(friendsService.showAllMyFriends(principal, locationDTO), HttpStatus.OK);
   }
 }
