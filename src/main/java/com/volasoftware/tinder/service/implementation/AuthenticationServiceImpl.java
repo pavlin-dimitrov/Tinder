@@ -5,15 +5,19 @@ import static org.springframework.http.HttpStatus.FORBIDDEN;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.volasoftware.tinder.DTO.AccountLoginDTO;
 import com.volasoftware.tinder.DTO.AccountRegisterDTO;
+import com.volasoftware.tinder.DTO.LocationDTO;
 import com.volasoftware.tinder.DTO.ResponseDTO;
 import com.volasoftware.tinder.auth.AuthenticationResponse;
 import com.volasoftware.tinder.entity.Account;
+import com.volasoftware.tinder.entity.Location;
 import com.volasoftware.tinder.entity.VerificationToken;
+import com.volasoftware.tinder.enums.AccountType;
 import com.volasoftware.tinder.enums.Role;
 import com.volasoftware.tinder.exception.AccountNotFoundException;
 import com.volasoftware.tinder.exception.AccountNotVerifiedException;
 import com.volasoftware.tinder.exception.EmailIsTakenException;
 import com.volasoftware.tinder.exception.MissingRefreshTokenException;
+import com.volasoftware.tinder.repository.LocationRepository;
 import com.volasoftware.tinder.service.contract.AccountService;
 import com.volasoftware.tinder.service.contract.AuthenticationService;
 import com.volasoftware.tinder.service.contract.EmailService;
@@ -46,6 +50,7 @@ import org.springframework.util.MimeTypeUtils;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class AuthenticationServiceImpl implements AuthenticationService {
   private final VerificationTokenService verificationTokenService;
+  private final LocationRepository locationRepository;
   private final AuthenticationManager authenticationManager;
   private final AccountService accountService;
   private final PasswordEncoder passwordEncoder;
@@ -65,7 +70,9 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     Account account = modelMapper.map(accountRegisterDTO, Account.class);
     account.setPassword(passwordEncoder.encode(accountRegisterDTO.getPassword()));
     account.setRole(Role.USER);
+    account.setType(AccountType.REAL);
     account = accountService.saveAccount(account);
+
     VerificationToken token = verificationTokenService.createVerificationToken(account);
     log.info("Verification token generated for email: {}", accountRegisterDTO.getEmail());
     try {

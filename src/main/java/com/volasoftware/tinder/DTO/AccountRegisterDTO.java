@@ -1,5 +1,6 @@
 package com.volasoftware.tinder.DTO;
 
+import com.volasoftware.tinder.entity.Location;
 import com.volasoftware.tinder.enums.Gender;
 import com.volasoftware.tinder.validator.password.ValidPassword;
 import io.swagger.annotations.ApiModel;
@@ -53,4 +54,8 @@ public class AccountRegisterDTO {
   @Enumerated(EnumType.STRING)
   @NotBlank
   private Gender gender;
+
+  @ApiModelProperty(value = "User age", required = true)
+  @NotBlank
+  private int age;
 }
