@@ -4,12 +4,10 @@ import com.volasoftware.tinder.DTO.RateFriendDTO;
 import com.volasoftware.tinder.DTO.ResponseDTO;
 import com.volasoftware.tinder.entity.Account;
 import com.volasoftware.tinder.entity.Rating;
-import com.volasoftware.tinder.exception.AccountNotFoundException;
-import com.volasoftware.tinder.exception.FriendNotFoundException;
 import com.volasoftware.tinder.exception.MissingFriendshipException;
 import com.volasoftware.tinder.exception.RatingRangeException;
-import com.volasoftware.tinder.repository.AccountRepository;
 import com.volasoftware.tinder.repository.RatingRepository;
+import com.volasoftware.tinder.service.contract.AccountService;
 import com.volasoftware.tinder.service.contract.RatingService;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -22,22 +20,14 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class RatingServiceImpl implements RatingService {
 
-  private final AccountRepository accountRepository;
+  private final AccountService accountService;
   private final RatingRepository ratingRepository;
 
   @Override
   public ResponseDTO rateFriend(String email, RateFriendDTO rateFriendDTO) {
     ResponseDTO response = new ResponseDTO();
-
-    Account account =
-        accountRepository
-            .findAccountByEmail(email)
-            .orElseThrow(() -> new AccountNotFoundException("User not found"));
-
-    Account friend =
-        accountRepository
-            .findById(rateFriendDTO.getFriendId())
-            .orElseThrow(() -> new FriendNotFoundException("Friend not found"));
+    Account account = accountService.getAccountByEmailIfExists(email);
+    Account friend = accountService.getAccountByIdIfExists(rateFriendDTO.getFriendId());
 
     if (!account.getFriends().contains(friend)) {
       log.warn("You are not friend with this user, cannot rate it!");

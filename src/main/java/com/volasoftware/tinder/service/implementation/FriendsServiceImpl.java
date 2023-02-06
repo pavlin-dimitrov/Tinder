@@ -9,7 +9,9 @@ import com.volasoftware.tinder.enums.AccountType;
 import com.volasoftware.tinder.exception.AccountNotFoundException;
 import com.volasoftware.tinder.repository.AccountRepository;
 import com.volasoftware.tinder.repository.LocationRepository;
+import com.volasoftware.tinder.service.contract.AccountService;
 import com.volasoftware.tinder.service.contract.FriendsService;
+import com.volasoftware.tinder.service.contract.LocationService;
 import java.security.Principal;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -29,6 +31,8 @@ import org.springframework.stereotype.Service;
 public class FriendsServiceImpl implements FriendsService {
 
   private final AccountRepository accountRepository;
+  private final LocationService locationService;
+  private final AccountService accountService;
   private final LocationRepository locationRepository;
 
   @Override
@@ -47,10 +51,7 @@ public class FriendsServiceImpl implements FriendsService {
   @Override
   public ResponseDTO linkingRequestedRealAccountWithRandomFriends(Long id) {
     List<Account> accounts = accountRepository.findAll();
-    Account account =
-        accountRepository
-            .findById(id)
-            .orElseThrow(() -> new AccountNotFoundException("Account not found!"));
+    Account account = accountService.getAccountByIdIfExists(id);
     Set<Account> friends = new HashSet<>();
     seedFriends(accounts, account, friends);
     account.setFriends(friends);
@@ -60,10 +61,7 @@ public class FriendsServiceImpl implements FriendsService {
 
   @Override
   public List<FriendDTO> showAllMyFriends(Principal principal, LocationDTO myLocation) {
-    Account account =
-        accountRepository
-            .findAccountByEmail(principal.getName())
-            .orElseThrow(() -> new AccountNotFoundException("This account is not present!"));
+    Account account = accountService.getAccountByEmailIfExists(principal.getName());
     if (myLocation != null) {
       Location location = new Location();
       location.setAccount(account);
@@ -77,22 +75,6 @@ public class FriendsServiceImpl implements FriendsService {
       return getListOfFriendsDTOsOrderedByDistance(myLocation, account);
     }
     return getListOfFriendsDTOsNotOrderedByDistance(account);
-  }
-
-  private static double distance(LocationDTO myLocation, LocationDTO friendLocation) {
-    final int R = 6371;
-    double latDistance = Math.toRadians(friendLocation.getLatitude() - myLocation.getLatitude());
-    double lonDistance = Math.toRadians(friendLocation.getLongitude() - myLocation.getLongitude());
-    double a =
-        Math.sin(latDistance / 2) * Math.sin(latDistance / 2)
-            + Math.cos(Math.toRadians(myLocation.getLatitude()))
-                * Math.cos(Math.toRadians(friendLocation.getLatitude()))
-                * Math.sin(lonDistance / 2)
-                * Math.sin(lonDistance / 2);
-    double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    double distance = R * c * 1000;
-    distance = Math.pow(distance, 2);
-    return Math.sqrt(distance);
   }
 
   private void seedFriends(List<Account> accounts, Account account, Set<Account> friends) {
@@ -133,7 +115,7 @@ public class FriendsServiceImpl implements FriendsService {
                   friend.getAge(),
                   friendLocationDTO);
             })
-        .sorted(Comparator.comparingDouble(f -> distance(myLocation, f.getLocationDTO())))
+        .sorted(Comparator.comparingDouble(f -> locationService.getFriendDistance(myLocation, f.getLocationDTO())))
         .collect(Collectors.toList());
   }
 
