@@ -16,5 +16,7 @@ public interface FriendsService {
 
   List<FriendDTO> showAllMyFriends(Principal principal, LocationDTO myLocation);
 
+  AccountDTO getFriendInfo(String email, Long friendId);
+
   void checkIfUsersAreFriends(Account account, Account friend);
 }
