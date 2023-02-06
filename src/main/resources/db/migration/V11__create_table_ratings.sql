@@ -5,5 +5,5 @@ CREATE TABLE ratings (
   rating INT NOT NULL,
   FOREIGN KEY (account_id) REFERENCES account(id),
   FOREIGN KEY (friend_id) REFERENCES account(id),
-  CHECK (rating >= 1 AND rating <= 5)
+  CHECK (rating >= 1 AND rating <= 10)
 );
