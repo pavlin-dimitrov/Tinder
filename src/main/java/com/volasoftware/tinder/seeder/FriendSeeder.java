@@ -47,7 +47,7 @@ public class FriendSeeder implements CommandLineRunner {
       for (int i = 0; i < 20; i++) {
         String firstName = firstNames.get(random.nextInt(firstNames.size()));
         String lastName = lastNames.get(random.nextInt(lastNames.size()));
-        String image = LINK_PREFIX + image().get(i) + LINK_SUFFIX;
+        String image = LINK_PREFIX + getImageName().get(i) + LINK_SUFFIX;
         Gender gender = Gender.values()[random.nextInt(Gender.values().length)];
         int age = random.nextInt(40) + 20;
 
@@ -76,7 +76,7 @@ public class FriendSeeder implements CommandLineRunner {
     }
   }
 
-  private List<String> image() {
+  private List<String> getImageName() {
     List<String> images = new ArrayList<>();
     images.add("1-zh9GCLyY6lVGzdqUYQXCEq157wlGv-l");
     images.add("1Q2m6ddQsBCLh57T1T5kbQskjC4VonsPa");
