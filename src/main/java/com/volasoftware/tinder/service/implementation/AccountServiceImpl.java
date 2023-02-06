@@ -115,4 +115,18 @@ public class AccountServiceImpl implements AccountService {
     account.setPassword(newPassword);
     accountRepository.save(account);
   }
+
+  @Override
+  public Account getAccountByIdIfExists(Long id) {
+    return accountRepository
+        .findById(id)
+        .orElseThrow(() -> new AccountNotFoundException("Account not found!"));
+  }
+
+  @Override
+  public Account getAccountByEmailIfExists(String email) {
+    return accountRepository
+        .findAccountByEmail(email)
+        .orElseThrow(() -> new AccountNotFoundException("This account is not present!"));
+  }
 }

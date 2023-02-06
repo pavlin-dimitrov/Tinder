@@ -21,7 +21,7 @@ import org.springframework.stereotype.Service;
 public class JwtServiceImpl implements JwtService {
 
   private static final String SECRET_KEY = "404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970";
-  private static final long  accessTokenTwentyFourMinutes = 1000 * 60 * 2;
+  private static final long  accessTokenTwentyFourMinutes = 1000 * 60 * 24;
   //1000 * 60 * 24
   private static final long refreshTokenOneWeek = 1000 * 60 * 60 * 24 * 7;
 

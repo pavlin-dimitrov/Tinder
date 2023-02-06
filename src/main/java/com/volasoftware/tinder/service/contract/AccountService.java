@@ -32,4 +32,8 @@ public interface AccountService {
       throws NotAuthorizedException;
 
   void saveNewPasswordInToDatabase(String newPassword, Account account);
+
+  Account getAccountByIdIfExists(Long id);
+
+  Account getAccountByEmailIfExists(String email);
 }
