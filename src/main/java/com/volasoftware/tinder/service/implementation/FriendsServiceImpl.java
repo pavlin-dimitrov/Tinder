@@ -1,5 +1,6 @@
 package com.volasoftware.tinder.service.implementation;
 
+import com.volasoftware.tinder.DTO.AccountDTO;
 import com.volasoftware.tinder.DTO.FriendDTO;
 import com.volasoftware.tinder.DTO.LocationDTO;
 import com.volasoftware.tinder.DTO.ResponseDTO;
@@ -7,6 +8,7 @@ import com.volasoftware.tinder.entity.Account;
 import com.volasoftware.tinder.entity.Location;
 import com.volasoftware.tinder.enums.AccountType;
 import com.volasoftware.tinder.exception.AccountNotFoundException;
+import com.volasoftware.tinder.exception.MissingFriendshipException;
 import com.volasoftware.tinder.repository.AccountRepository;
 import com.volasoftware.tinder.repository.LocationRepository;
 import com.volasoftware.tinder.service.contract.AccountService;
@@ -34,6 +36,7 @@ public class FriendsServiceImpl implements FriendsService {
   private final LocationService locationService;
   private final AccountService accountService;
   private final LocationRepository locationRepository;
+  private final ModelMapper modelMapper;
 
   @Override
   public ResponseDTO linkingAllRealAccountsWithRandomFriends() {
@@ -77,6 +80,14 @@ public class FriendsServiceImpl implements FriendsService {
     return getListOfFriendsDTOsNotOrderedByDistance(account);
   }
 
+  @Override
+  public void checkIfUsersAreFriends(Account account, Account friend) {
+    if (!account.getFriends().contains(friend)) {
+      log.warn("You are not friend with this user, cannot rate it!");
+      throw new MissingFriendshipException("You are not friend with this user, cannot rate it!");
+    }
+  }
+
   private void seedFriends(List<Account> accounts, Account account, Set<Account> friends) {
     for (int i = 0; i < getNumberOfFriendsToSeed(accounts); i++) {
       Account friend = accounts.get(i);
@@ -115,7 +126,7 @@ public class FriendsServiceImpl implements FriendsService {
                   friend.getAge(),
                   friendLocationDTO);
             })
-        .sorted(Comparator.comparingDouble(f -> locationService.getFriendDistance(myLocation, f.getLocationDTO())))
+        .sorted(Comparator.comparingDouble(friend -> locationService.getFriendDistance(myLocation, friend.getLocationDTO())))
         .collect(Collectors.toList());
   }
 
