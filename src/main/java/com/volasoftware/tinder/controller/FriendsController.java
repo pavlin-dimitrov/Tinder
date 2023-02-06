@@ -57,6 +57,14 @@ public class FriendsController {
         friendsService.showAllMyFriends(principal, locationDTO), HttpStatus.OK);
   }
 
+  @ApiOperation(value = "Rate friend")
+  @ApiResponses(
+      value = {
+        @ApiResponse(code = 200, message = "Successfully rated friend"),
+        @ApiResponse(code = 401, message = "Not authorized action"),
+        @ApiResponse(code = 403, message = "Accessing the resource is forbidden"),
+        @ApiResponse(code = 404, message = "The resource is not found")
+      })
   @PostMapping("/rate")
   public ResponseEntity<ResponseDTO> rateFriend(
       Principal principal, @Valid @RequestBody RateFriendDTO rateFriendDTO) {
@@ -64,5 +72,18 @@ public class FriendsController {
         ratingService.rateFriend(principal.getName(), rateFriendDTO), HttpStatus.OK);
   }
 
-
+  @ApiOperation(value = "Get friend info")
+  @ApiResponses(
+      value = {
+          @ApiResponse(code = 200, message = "Success"),
+          @ApiResponse(code = 401, message = "Not authorized action"),
+          @ApiResponse(code = 403, message = "Accessing the resource is forbidden"),
+          @ApiResponse(code = 404, message = "The resource is not found")
+      })
+  @GetMapping("/info/{id}")
+  public ResponseEntity<AccountDTO> showFriendInfo(
+      Principal principal, @PathVariable("id") Long friendId) {
+    return new ResponseEntity<>(
+        friendsService.getFriendInfo(principal.getName(), friendId), HttpStatus.OK);
+  }
 }

@@ -88,6 +88,14 @@ public class FriendsServiceImpl implements FriendsService {
     }
   }
 
+  @Override
+  public AccountDTO getFriendInfo(String email, Long userId) {
+    Account principalAccount = accountService.getAccountByEmailIfExists(email);
+    Account user = accountService.getAccountByIdIfExists(userId);
+    checkIfUsersAreFriends(principalAccount, user);
+    return modelMapper.map(user, AccountDTO.class);
+  }
+
   private void seedFriends(List<Account> accounts, Account account, Set<Account> friends) {
     for (int i = 0; i < getNumberOfFriendsToSeed(accounts); i++) {
       Account friend = accounts.get(i);
