@@ -8,6 +8,7 @@ import com.volasoftware.tinder.exception.MissingFriendshipException;
 import com.volasoftware.tinder.exception.RatingRangeException;
 import com.volasoftware.tinder.repository.RatingRepository;
 import com.volasoftware.tinder.service.contract.AccountService;
+import com.volasoftware.tinder.service.contract.FriendsService;
 import com.volasoftware.tinder.service.contract.RatingService;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +22,7 @@ import org.springframework.stereotype.Service;
 public class RatingServiceImpl implements RatingService {
 
   private final AccountService accountService;
+  private final FriendsService friendsService;
   private final RatingRepository ratingRepository;
 
   @Override
@@ -28,13 +30,7 @@ public class RatingServiceImpl implements RatingService {
     ResponseDTO response = new ResponseDTO();
     Account account = accountService.getAccountByEmailIfExists(email);
     Account friend = accountService.getAccountByIdIfExists(rateFriendDTO.getFriendId());
-
-    if (!account.getFriends().contains(friend)) {
-      log.warn("You are not friend with this user, cannot rate it!");
-      response.setResponse("You are not friend with this user, cannot rate it!");
-      throw new MissingFriendshipException("You are not friend with this user, cannot rate it!");
-    }
-
+    friendsService.checkIfUsersAreFriends(account, friend);
     int ratingValue = rateFriendDTO.getRating();
     if (ratingValue < 1 || ratingValue > 10) {
       log.warn("Rating must be between 1 and 10.");
