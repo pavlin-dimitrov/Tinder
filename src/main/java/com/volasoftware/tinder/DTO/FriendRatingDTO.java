@@ -15,7 +15,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @ApiModel(value = "Rating dto model ", description = "Model representing friend rating.")
-public class RateFriendDTO {
+public class FriendRatingDTO {
 
   @ApiModelProperty(value = "Friend id", required = true)
   private Long friendId;

@@ -2,6 +2,7 @@ package com.volasoftware.tinder.service.implementation;
 
 import com.volasoftware.tinder.DTO.AccountDTO;
 import com.volasoftware.tinder.DTO.FriendDTO;
+import com.volasoftware.tinder.DTO.FriendRatingDTO;
 import com.volasoftware.tinder.DTO.LocationDTO;
 import com.volasoftware.tinder.DTO.ResponseDTO;
 import com.volasoftware.tinder.entity.Account;
@@ -14,6 +15,7 @@ import com.volasoftware.tinder.repository.LocationRepository;
 import com.volasoftware.tinder.service.contract.AccountService;
 import com.volasoftware.tinder.service.contract.FriendsService;
 import com.volasoftware.tinder.service.contract.LocationService;
+import com.volasoftware.tinder.service.contract.RatingService;
 import java.security.Principal;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -33,6 +35,7 @@ import org.springframework.stereotype.Service;
 public class FriendsServiceImpl implements FriendsService {
 
   private final AccountRepository accountRepository;
+  private final RatingService ratingService;
   private final LocationService locationService;
   private final AccountService accountService;
   private final LocationRepository locationRepository;
@@ -89,6 +92,12 @@ public class FriendsServiceImpl implements FriendsService {
   }
 
   @Override
+  public List<FriendDTO> showFilteredListOfFriends(
+      Principal principal, LocationDTO locationDTO, int limit) {
+    return null;
+  }
+
+  @Override
   public AccountDTO getFriendInfo(String email, Long userId) {
     Account principalAccount = accountService.getAccountByEmailIfExists(email);
     Account user = accountService.getAccountByIdIfExists(userId);
@@ -97,16 +106,16 @@ public class FriendsServiceImpl implements FriendsService {
   }
 
   private void seedFriends(List<Account> accounts, Account account, Set<Account> friends) {
-    for (int i = 0; i < getNumberOfFriendsToSeed(accounts); i++) {
-      Account friend = accounts.get(i);
+    for (int i = 0; i < accounts.size(); i++) {
+      Account friend = accounts.get(getRandomFriendId());
       if (!friend.getId().equals(account.getId()) && friend.getType() == AccountType.BOT) {
         friends.add(friend);
       }
     }
   }
 
-  private int getNumberOfFriendsToSeed(List<Account> accounts) {
-    return ThreadLocalRandom.current().nextInt(2, accounts.size());
+  private int getRandomFriendId() {
+    return ThreadLocalRandom.current().nextInt(2, 20);
   }
 
   private ResponseDTO getResponseDTO(List<Account> accounts) {
@@ -134,7 +143,9 @@ public class FriendsServiceImpl implements FriendsService {
                   friend.getAge(),
                   friendLocationDTO);
             })
-        .sorted(Comparator.comparingDouble(friend -> locationService.getFriendDistance(myLocation, friend.getLocationDTO())))
+        .sorted(
+            Comparator.comparingDouble(
+                friend -> locationService.getFriendDistance(myLocation, friend.getLocationDTO())))
         .collect(Collectors.toList());
   }
 
@@ -153,6 +164,16 @@ public class FriendsServiceImpl implements FriendsService {
                   friend.getAge(),
                   friendLocationDTO);
             })
+        .collect(Collectors.toList());
+  }
+
+  private List<FriendDTO> getListOfFriendsFilteredByRatingOrderedAsc(Account account) {
+    List<FriendRatingDTO> friendRatingDTOs =
+        ratingService.showListOfAllMyRatedFriends(account).stream()
+            .sorted(Comparator.comparing(FriendRatingDTO::getRating))
+            .collect(Collectors.toList());
+    return friendRatingDTOs.stream()
+        .map(friendRatingDTO -> modelMapper.map(friendRatingDTO, FriendDTO.class))
         .collect(Collectors.toList());
   }
 }

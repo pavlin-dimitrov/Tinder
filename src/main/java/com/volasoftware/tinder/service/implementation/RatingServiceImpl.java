@@ -1,15 +1,15 @@
 package com.volasoftware.tinder.service.implementation;
 
-import com.volasoftware.tinder.DTO.RateFriendDTO;
+import com.volasoftware.tinder.DTO.FriendRatingDTO;
 import com.volasoftware.tinder.DTO.ResponseDTO;
 import com.volasoftware.tinder.entity.Account;
 import com.volasoftware.tinder.entity.Rating;
-import com.volasoftware.tinder.exception.MissingFriendshipException;
 import com.volasoftware.tinder.exception.RatingRangeException;
 import com.volasoftware.tinder.repository.RatingRepository;
 import com.volasoftware.tinder.service.contract.AccountService;
 import com.volasoftware.tinder.service.contract.FriendsService;
 import com.volasoftware.tinder.service.contract.RatingService;
+import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,12 +26,12 @@ public class RatingServiceImpl implements RatingService {
   private final RatingRepository ratingRepository;
 
   @Override
-  public ResponseDTO rateFriend(String email, RateFriendDTO rateFriendDTO) {
+  public ResponseDTO rateFriend(String email, FriendRatingDTO friendRatingDTO) {
     ResponseDTO response = new ResponseDTO();
     Account account = accountService.getAccountByEmailIfExists(email);
-    Account friend = accountService.getAccountByIdIfExists(rateFriendDTO.getFriendId());
+    Account friend = accountService.getAccountByIdIfExists(friendRatingDTO.getFriendId());
     friendsService.checkIfUsersAreFriends(account, friend);
-    int ratingValue = rateFriendDTO.getRating();
+    int ratingValue = friendRatingDTO.getRating();
     if (ratingValue < 1 || ratingValue > 10) {
       log.warn("Rating must be between 1 and 10.");
       response.setResponse("Rating must be between 1 and 10.");
@@ -39,8 +39,8 @@ public class RatingServiceImpl implements RatingService {
     }
 
     Optional<Rating> rating = ratingRepository.findByAccountAndFriend(account, friend);
-    if (rating.isPresent()){
-      rating.get().setRating(rateFriendDTO.getRating());
+    if (rating.isPresent()) {
+      rating.get().setRating(friendRatingDTO.getRating());
       ratingRepository.save(rating.get());
       response.setResponse("Successfully updated rating!");
       log.info("Successfully updated rating!");
@@ -48,11 +48,22 @@ public class RatingServiceImpl implements RatingService {
       Rating newRating = new Rating();
       newRating.setAccount(account);
       newRating.setFriend(friend);
-      newRating.setRating(rateFriendDTO.getRating());
+      newRating.setRating(friendRatingDTO.getRating());
       ratingRepository.save(newRating);
       response.setResponse("Successfully rated fried!");
       log.info("Successfully rated fried!");
     }
     return response;
+  }
+
+  @Override
+  public List<FriendRatingDTO> showListOfAllMyRatedFriends(Account account){
+   return ratingRepository.findAllRatedFriends(account);
+  }
+
+  public int averageRatingOfAllUsers(List<FriendRatingDTO> friendRatings) {
+    return (int) friendRatings.stream()
+        .mapToInt(FriendRatingDTO::getRating)
+        .average().orElse(0);
   }
 }

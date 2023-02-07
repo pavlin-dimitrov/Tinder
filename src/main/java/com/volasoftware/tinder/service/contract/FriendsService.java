@@ -19,4 +19,7 @@ public interface FriendsService {
   AccountDTO getFriendInfo(String email, Long friendId);
 
   void checkIfUsersAreFriends(Account account, Account friend);
+
+  List<FriendDTO> showFilteredListOfFriends(
+      Principal principal, LocationDTO locationDTO, int limit);
 }

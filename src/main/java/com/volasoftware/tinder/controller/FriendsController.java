@@ -3,7 +3,7 @@ package com.volasoftware.tinder.controller;
 import com.volasoftware.tinder.DTO.AccountDTO;
 import com.volasoftware.tinder.DTO.FriendDTO;
 import com.volasoftware.tinder.DTO.LocationDTO;
-import com.volasoftware.tinder.DTO.RateFriendDTO;
+import com.volasoftware.tinder.DTO.FriendRatingDTO;
 import com.volasoftware.tinder.DTO.ResponseDTO;
 import com.volasoftware.tinder.service.contract.FriendsService;
 import com.volasoftware.tinder.service.contract.RatingService;
@@ -25,8 +25,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -57,6 +55,12 @@ public class FriendsController {
         friendsService.showAllMyFriends(principal, locationDTO), HttpStatus.OK);
   }
 
+  @GetMapping("/filters")
+  public ResponseEntity<List<FriendDTO>> showFilteredListOfFriends(
+      Principal principal, LocationDTO locationDTO, int limit) {
+    return new ResponseEntity<>(friendsService.showFilteredListOfFriends(principal, locationDTO, limit), HttpStatus.OK);
+  }
+
   @ApiOperation(value = "Rate friend")
   @ApiResponses(
       value = {
@@ -67,18 +71,18 @@ public class FriendsController {
       })
   @PostMapping("/rate")
   public ResponseEntity<ResponseDTO> rateFriend(
-      Principal principal, @Valid @RequestBody RateFriendDTO rateFriendDTO) {
+      Principal principal, @Valid @RequestBody FriendRatingDTO friendRatingDTO) {
     return new ResponseEntity<>(
-        ratingService.rateFriend(principal.getName(), rateFriendDTO), HttpStatus.OK);
+        ratingService.rateFriend(principal.getName(), friendRatingDTO), HttpStatus.OK);
   }
 
   @ApiOperation(value = "Get friend info")
   @ApiResponses(
       value = {
-          @ApiResponse(code = 200, message = "Success"),
-          @ApiResponse(code = 401, message = "Not authorized action"),
-          @ApiResponse(code = 403, message = "Accessing the resource is forbidden"),
-          @ApiResponse(code = 404, message = "The resource is not found")
+        @ApiResponse(code = 200, message = "Success"),
+        @ApiResponse(code = 401, message = "Not authorized action"),
+        @ApiResponse(code = 403, message = "Accessing the resource is forbidden"),
+        @ApiResponse(code = 404, message = "The resource is not found")
       })
   @GetMapping("/info/{id}")
   public ResponseEntity<AccountDTO> showFriendInfo(
