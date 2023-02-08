@@ -5,6 +5,7 @@ import com.volasoftware.tinder.DTO.FriendDTO;
 import com.volasoftware.tinder.DTO.LocationDTO;
 import com.volasoftware.tinder.DTO.FriendRatingDTO;
 import com.volasoftware.tinder.DTO.ResponseDTO;
+import com.volasoftware.tinder.entity.Account;
 import com.volasoftware.tinder.service.contract.FriendsService;
 import com.volasoftware.tinder.service.contract.RatingService;
 import io.swagger.annotations.Api;
@@ -25,6 +26,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -57,8 +59,12 @@ public class FriendsController {
 
   @GetMapping("/filters")
   public ResponseEntity<List<FriendDTO>> showFilteredListOfFriends(
-      Principal principal, LocationDTO locationDTO, int limit) {
-    return new ResponseEntity<>(friendsService.showFilteredListOfFriends(principal, locationDTO, limit), HttpStatus.OK);
+      Principal principal,
+      @RequestBody(required = false) LocationDTO locationDTO,
+      @RequestParam(value = "limit", required = false) Integer limit) {
+
+    return new ResponseEntity<>(
+        friendsService.showFilteredListOfFriends(principal, locationDTO, limit), HttpStatus.OK);
   }
 
   @ApiOperation(value = "Rate friend")

@@ -9,7 +9,6 @@ import com.volasoftware.tinder.repository.RatingRepository;
 import com.volasoftware.tinder.service.contract.AccountService;
 import com.volasoftware.tinder.service.contract.FriendsService;
 import com.volasoftware.tinder.service.contract.RatingService;
-import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -54,16 +53,5 @@ public class RatingServiceImpl implements RatingService {
       log.info("Successfully rated fried!");
     }
     return response;
-  }
-
-  @Override
-  public List<FriendRatingDTO> showListOfAllMyRatedFriends(Account account){
-   return ratingRepository.findAllRatedFriends(account);
-  }
-
-  public int averageRatingOfAllUsers(List<FriendRatingDTO> friendRatings) {
-    return (int) friendRatings.stream()
-        .mapToInt(FriendRatingDTO::getRating)
-        .average().orElse(0);
   }
 }

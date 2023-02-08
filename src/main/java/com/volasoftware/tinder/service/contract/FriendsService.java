@@ -21,5 +21,7 @@ public interface FriendsService {
   void checkIfUsersAreFriends(Account account, Account friend);
 
   List<FriendDTO> showFilteredListOfFriends(
-      Principal principal, LocationDTO locationDTO, int limit);
+      Principal principal, LocationDTO locationDTO, Integer limit);
+
+//  List<FriendDTO> getListOfFriendsFilteredByRatingOrderedDesc(Account account, Integer limit);
 }

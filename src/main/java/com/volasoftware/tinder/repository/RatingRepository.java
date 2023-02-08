@@ -1,6 +1,5 @@
 package com.volasoftware.tinder.repository;
 
-import com.volasoftware.tinder.DTO.FriendRatingDTO;
 import com.volasoftware.tinder.entity.Account;
 import com.volasoftware.tinder.entity.Rating;
 import java.util.List;
@@ -11,5 +10,5 @@ public interface RatingRepository extends JpaRepository<Rating, Long> {
 
   Optional<Rating> findByAccountAndFriend(Account account, Account friend);
 
-  List<FriendRatingDTO> findAllRatedFriends(Account account);
+  List<Rating> findAllByAccount(Account account);
 }

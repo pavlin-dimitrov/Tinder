@@ -2,20 +2,19 @@ package com.volasoftware.tinder.service.implementation;
 
 import com.volasoftware.tinder.DTO.AccountDTO;
 import com.volasoftware.tinder.DTO.FriendDTO;
-import com.volasoftware.tinder.DTO.FriendRatingDTO;
 import com.volasoftware.tinder.DTO.LocationDTO;
 import com.volasoftware.tinder.DTO.ResponseDTO;
 import com.volasoftware.tinder.entity.Account;
 import com.volasoftware.tinder.entity.Location;
+import com.volasoftware.tinder.entity.Rating;
 import com.volasoftware.tinder.enums.AccountType;
-import com.volasoftware.tinder.exception.AccountNotFoundException;
 import com.volasoftware.tinder.exception.MissingFriendshipException;
 import com.volasoftware.tinder.repository.AccountRepository;
 import com.volasoftware.tinder.repository.LocationRepository;
+import com.volasoftware.tinder.repository.RatingRepository;
 import com.volasoftware.tinder.service.contract.AccountService;
 import com.volasoftware.tinder.service.contract.FriendsService;
 import com.volasoftware.tinder.service.contract.LocationService;
-import com.volasoftware.tinder.service.contract.RatingService;
 import java.security.Principal;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -35,7 +34,7 @@ import org.springframework.stereotype.Service;
 public class FriendsServiceImpl implements FriendsService {
 
   private final AccountRepository accountRepository;
-  private final RatingService ratingService;
+  private final RatingRepository ratingRepository;
   private final LocationService locationService;
   private final AccountService accountService;
   private final LocationRepository locationRepository;
@@ -93,8 +92,9 @@ public class FriendsServiceImpl implements FriendsService {
 
   @Override
   public List<FriendDTO> showFilteredListOfFriends(
-      Principal principal, LocationDTO locationDTO, int limit) {
-    return null;
+      Principal principal, LocationDTO locationDTO, Integer limit) {
+    Account account = accountService.getAccountByEmailIfExists(principal.getName());
+    return getListOfFriendsFilteredByRatingOrderedDesc(account, limit);
   }
 
   @Override
@@ -130,50 +130,26 @@ public class FriendsServiceImpl implements FriendsService {
   private List<FriendDTO> getListOfFriendsDTOsOrderedByDistance(
       LocationDTO myLocation, Account account) {
     return account.getFriends().stream()
-        .map(
-            friend -> {
-              Location friendLocation = friend.getLocation();
-              LocationDTO friendLocationDTO =
-                  new LocationDTO(friendLocation.getLatitude(), friendLocation.getLongitude());
-              return new FriendDTO(
-                  friend.getFirstName(),
-                  friend.getLastName(),
-                  friend.getImage(),
-                  friend.getGender(),
-                  friend.getAge(),
-                  friendLocationDTO);
-            })
-        .sorted(
-            Comparator.comparingDouble(
-                friend -> locationService.getFriendDistance(myLocation, friend.getLocationDTO())))
+        .map(friend -> modelMapper.map(friend, FriendDTO.class))
+        .sorted(Comparator.comparingDouble(friend -> locationService.getFriendDistance(myLocation, friend.getLocationDTO())))
         .collect(Collectors.toList());
   }
 
   private List<FriendDTO> getListOfFriendsDTOsNotOrderedByDistance(Account account) {
     return account.getFriends().stream()
-        .map(
-            friend -> {
-              Location friendLocation = friend.getLocation();
-              LocationDTO friendLocationDTO =
-                  new LocationDTO(friendLocation.getLatitude(), friendLocation.getLongitude());
-              return new FriendDTO(
-                  friend.getFirstName(),
-                  friend.getLastName(),
-                  friend.getImage(),
-                  friend.getGender(),
-                  friend.getAge(),
-                  friendLocationDTO);
-            })
+        .map(friend -> modelMapper.map(friend, FriendDTO.class))
         .collect(Collectors.toList());
   }
 
-  private List<FriendDTO> getListOfFriendsFilteredByRatingOrderedAsc(Account account) {
-    List<FriendRatingDTO> friendRatingDTOs =
-        ratingService.showListOfAllMyRatedFriends(account).stream()
-            .sorted(Comparator.comparing(FriendRatingDTO::getRating))
-            .collect(Collectors.toList());
-    return friendRatingDTOs.stream()
-        .map(friendRatingDTO -> modelMapper.map(friendRatingDTO, FriendDTO.class))
+  private List<FriendDTO> getListOfFriendsFilteredByRatingOrderedDesc(Account account, Integer limit) {
+    if (limit == null) {
+      limit = Integer.MAX_VALUE;
+    }
+    List<Rating> ratings = ratingRepository.findAllByAccount(account);
+    return ratings.stream()
+        .sorted(Comparator.comparingInt(Rating::getRating).reversed())
+        .map(rating -> modelMapper.map(rating.getFriend(), FriendDTO.class))
+        .limit(limit)
         .collect(Collectors.toList());
   }
 }
