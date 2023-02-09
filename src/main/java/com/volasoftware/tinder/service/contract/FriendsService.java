@@ -20,7 +20,7 @@ public interface FriendsService {
 
   void checkIfUsersAreFriends(Account account, Account friend);
 
-  List<FriendDTO> showFilteredListOfFriends(
+  List<FriendDTO> showFilteredListOfFriends(String sortedBy, String orderedBy,
       Principal principal, LocationDTO locationDTO, Integer limit);
 
 //  List<FriendDTO> getListOfFriendsFilteredByRatingOrderedDesc(Account account, Integer limit);

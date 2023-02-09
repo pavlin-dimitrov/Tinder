@@ -59,12 +59,16 @@ public class FriendsController {
 
   @GetMapping("/filters")
   public ResponseEntity<List<FriendDTO>> showFilteredListOfFriends(
+      @RequestParam(value = "sortedBy", required = false) String sortedBy,
+      @RequestParam(value = "orderedBy", required = false) String orderedBy,
       Principal principal,
       @RequestBody(required = false) LocationDTO locationDTO,
       @RequestParam(value = "limit", required = false) Integer limit) {
 
     return new ResponseEntity<>(
-        friendsService.showFilteredListOfFriends(principal, locationDTO, limit), HttpStatus.OK);
+        friendsService.showFilteredListOfFriends(
+            sortedBy, orderedBy, principal, locationDTO, limit),
+        HttpStatus.OK);
   }
 
   @ApiOperation(value = "Rate friend")

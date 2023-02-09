@@ -16,6 +16,7 @@ import com.volasoftware.tinder.service.contract.AccountService;
 import com.volasoftware.tinder.service.contract.FriendsService;
 import com.volasoftware.tinder.service.contract.LocationService;
 import java.security.Principal;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
@@ -73,11 +74,9 @@ public class FriendsServiceImpl implements FriendsService {
       location.setLatitude(myLocation.getLatitude());
       location.setLongitude(myLocation.getLongitude());
       locationRepository.save(location);
-
       account.setLocation(location);
       accountRepository.save(account);
-
-      return getListOfFriendsDTOsOrderedByDistance(myLocation, account);
+      return sortFriendsByLocationOrderedByDistanceAsc(myLocation, account, null);
     }
     return getListOfFriendsDTOsNotOrderedByDistance(account);
   }
@@ -92,9 +91,68 @@ public class FriendsServiceImpl implements FriendsService {
 
   @Override
   public List<FriendDTO> showFilteredListOfFriends(
-      Principal principal, LocationDTO locationDTO, Integer limit) {
+      String sortedBy,
+      String orderedBy,
+      Principal principal,
+      LocationDTO locationDTO,
+      Integer limit) {
     Account account = accountService.getAccountByEmailIfExists(principal.getName());
-    return getListOfFriendsFilteredByRatingOrderedDesc(account, limit);
+    if (sortedBy.equals("location") || sortedBy.isEmpty() && orderedBy.equals("DESC") || orderedBy == null) {
+      return sortFriendsByLocationOrderedByDistanceDesc(locationDTO, account, limit);
+    } else if (sortedBy.equals("location") && orderedBy.equals("ASC")) {
+      return sortFriendsByLocationOrderedByDistanceAsc(locationDTO, account, limit);
+    } else if (sortedBy.equals("rating") && orderedBy.equals("DESC")) {
+      return sortFriendsByRatingOrderedDesc(account, limit);
+    } else return sortFriendsByRatingOrderedAsc(account, limit);
+  }
+
+  private List<FriendDTO> sortFriendsByRatingOrderedAsc(Account account, Integer limit) {
+    List<Rating> ratings = ratingRepository.findAllByAccount(account);
+    return ratings.stream()
+        .sorted(Comparator.comparingInt(Rating::getRating))
+        .map(rating -> modelMapper.map(rating.getFriend(), FriendDTO.class))
+        .limit(getLimit(limit))
+        .collect(Collectors.toList());
+  }
+
+  private List<FriendDTO> sortFriendsByRatingOrderedDesc(Account account, Integer limit) {
+    List<Rating> ratings = ratingRepository.findAllByAccount(account);
+    return ratings.stream()
+        .sorted(Comparator.comparingInt(Rating::getRating).reversed())
+        .map(rating -> modelMapper.map(rating.getFriend(), FriendDTO.class))
+        .limit(getLimit(limit))
+        .collect(Collectors.toList());
+  }
+
+  private List<FriendDTO> sortFriendsByLocationOrderedByDistanceDesc(
+      LocationDTO myLocation, Account account, Integer limit) {
+     List<FriendDTO> friends =  account.getFriends().stream()
+        .map(friend -> modelMapper.map(friend, FriendDTO.class))
+        .sorted(
+            Comparator.comparingDouble(
+                friend -> locationService.getFriendDistance(myLocation, friend.getLocationDTO())))
+        .limit(getLimit(limit))
+        .collect(Collectors.toList());
+    Collections.reverse(friends);
+    return friends;
+  }
+
+  private List<FriendDTO> sortFriendsByLocationOrderedByDistanceAsc(
+      LocationDTO myLocation, Account account, Integer limit) {
+    return account.getFriends().stream()
+        .map(friend -> modelMapper.map(friend, FriendDTO.class))
+        .sorted(
+            Comparator.comparingDouble(
+                friend -> locationService.getFriendDistance(myLocation, friend.getLocationDTO())))
+        .limit(getLimit(limit))
+        .collect(Collectors.toList());
+  }
+
+  private Integer getLimit(Integer limit) {
+    if (limit == null) {
+      limit = Integer.MAX_VALUE;
+    }
+    return limit;
   }
 
   @Override
@@ -127,29 +185,9 @@ public class FriendsServiceImpl implements FriendsService {
     return response;
   }
 
-  private List<FriendDTO> getListOfFriendsDTOsOrderedByDistance(
-      LocationDTO myLocation, Account account) {
-    return account.getFriends().stream()
-        .map(friend -> modelMapper.map(friend, FriendDTO.class))
-        .sorted(Comparator.comparingDouble(friend -> locationService.getFriendDistance(myLocation, friend.getLocationDTO())))
-        .collect(Collectors.toList());
-  }
-
   private List<FriendDTO> getListOfFriendsDTOsNotOrderedByDistance(Account account) {
     return account.getFriends().stream()
         .map(friend -> modelMapper.map(friend, FriendDTO.class))
-        .collect(Collectors.toList());
-  }
-
-  private List<FriendDTO> getListOfFriendsFilteredByRatingOrderedDesc(Account account, Integer limit) {
-    if (limit == null) {
-      limit = Integer.MAX_VALUE;
-    }
-    List<Rating> ratings = ratingRepository.findAllByAccount(account);
-    return ratings.stream()
-        .sorted(Comparator.comparingInt(Rating::getRating).reversed())
-        .map(rating -> modelMapper.map(rating.getFriend(), FriendDTO.class))
-        .limit(limit)
         .collect(Collectors.toList());
   }
 }
