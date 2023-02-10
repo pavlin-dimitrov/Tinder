@@ -14,9 +14,10 @@ public interface FriendsService {
 
   ResponseDTO linkingRequestedRealAccountWithRandomFriends(Long id);
 
-  List<FriendDTO> showAllMyFriends(Principal principal, LocationDTO myLocation);
-
   AccountDTO getFriendInfo(String email, Long friendId);
 
   void checkIfUsersAreFriends(Account account, Account friend);
+
+  List<FriendDTO> showFilteredListOfFriends(String sortedBy, String orderedBy,
+      Principal principal, LocationDTO locationDTO, Integer limit);
 }
