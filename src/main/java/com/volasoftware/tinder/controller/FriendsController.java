@@ -48,8 +48,8 @@ public class FriendsController {
       })
   @GetMapping("")
   public ResponseEntity<List<FriendDTO>> showFilteredListOfFriends(
-      @RequestParam(value = "sortedBy", required = false) String sortedBy,
-      @RequestParam(value = "orderedBy", required = false) String orderedBy,
+      @RequestParam(value = "sortedBy", required = false, defaultValue = "location") String sortedBy,
+      @RequestParam(value = "orderedBy", required = false, defaultValue = "desc") String orderedBy,
       Principal principal,
       @RequestBody(required = false) LocationDTO locationDTO,
       @RequestParam(value = "limit", required = false) Integer limit) {
