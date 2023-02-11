@@ -39,6 +39,10 @@ public class FriendsServiceImpl implements FriendsService {
   private final LocationService locationService;
   private final AccountService accountService;
   private final ModelMapper modelMapper;
+  private final static String location = "location";
+  private final static String rating = "rating";
+  private final static String asc = "asc";
+  private final static String desc = "desc";
 
   @Override
   public AccountDTO getFriendInfo(String email, Long userId) {
@@ -91,43 +95,46 @@ public class FriendsServiceImpl implements FriendsService {
 
     Account account = accountService.getAccountByEmailIfExists(principal.getName());
     log.info("Get account: " + account.getEmail());
-    sortedBy = getSortedBy(sortedBy);
-    log.info("Set sortBy filter to: " + sortedBy);
-    orderedBy = getOrderedBy(orderedBy);
-    log.info("Set orderedBy filter to: " + orderedBy);
+//    sortedBy = getSortedBy(sortedBy);
+//    log.info("Set sortBy filter to: " + sortedBy);
+//    orderedBy = getOrderedBy(orderedBy);
+//    log.info("Set orderedBy filter to: " + orderedBy);
+
     List<FriendDTO> friends = getFriendsList(account);
     log.info("Get list of friends. List size: " + friends.size());
 
-    if (sortedBy.equals("location")) {
+    if (sortedBy.equalsIgnoreCase(location)) {
       friends = sortFriendsByLocation(locationDTO, friends);
       log.info("List, sorted by location in ASC order.");
-    } else {
+    } else if (sortedBy.equalsIgnoreCase(rating)) {
       friends = sortFriendsByRating(account);
       log.info("List, sorted by rating in ASC order.");
     }
 
-    if (orderedBy.equals("ASC")) {
+    if (orderedBy.equalsIgnoreCase(asc)) {
       log.info("Filtered list ordered by ASC with limit: ");
       return getLimitedListOfFriends(limit, friends);
+    } else if (orderedBy.equalsIgnoreCase(desc)) {
+      friends = orderFriendsDescending(account, friends, sortedBy, locationDTO);
+      log.info("Filtered list ordered by ASC with limit: " + limit);
+      return getLimitedListOfFriends(limit, friends);
     }
-    friends = orderFriendsDescending(account, friends, sortedBy, locationDTO);
-    log.info("Filtered list ordered by ASC with limit: " + limit);
-    return getLimitedListOfFriends(limit, friends);
+    return friends;
   }
 
-  private String getOrderedBy(String orderedBy) {
-    if (orderedBy == null || (!orderedBy.equals("ASC") && !orderedBy.equals("DESC"))) {
-      orderedBy = "DESC";
-    }
-    return orderedBy;
-  }
-
-  private String getSortedBy(String sortedBy) {
-    if (sortedBy == null || (!sortedBy.equals("location") && !sortedBy.equals("rating"))) {
-      sortedBy = "location";
-    }
-    return sortedBy;
-  }
+//  private String getOrderedBy(String orderedBy) {
+//    if (orderedBy == null || (!orderedBy.equals("ASC") && !orderedBy.equals("DESC"))) {
+//      orderedBy = "DESC";
+//    }
+//    return orderedBy;
+//  }
+//
+//  private String getSortedBy(String sortedBy) {
+//    if (sortedBy == null || (!sortedBy.equals("location") && !sortedBy.equals("rating"))) {
+//      sortedBy = "location";
+//    }
+//    return sortedBy;
+//  }
 
   private List<FriendDTO> orderFriendsDescending(
       Account account, List<FriendDTO> friends, String sortedBy, LocationDTO locationDTO) {
