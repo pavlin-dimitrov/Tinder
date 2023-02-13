@@ -1,6 +1,5 @@
 package com.volasoftware.tinder.DTO;
 
-import com.volasoftware.tinder.entity.Location;
 import com.volasoftware.tinder.enums.Gender;
 import com.volasoftware.tinder.validator.password.ValidPassword;
 import io.swagger.annotations.ApiModel;
