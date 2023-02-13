@@ -55,7 +55,6 @@ public class JwtServiceImpl implements JwtService {
       Map<String, Object> extraClaims,
       UserDetails userDetails
   ) {
-    log.info("Generated access token");
     return Jwts
         .builder()
         .setClaims(extraClaims)
@@ -71,7 +70,6 @@ public class JwtServiceImpl implements JwtService {
           Map<String, Object> extraClaims,
           UserDetails userDetails
   ) {
-    log.info("Generated refresh token");
     return Jwts
             .builder()
             .setClaims(extraClaims)
