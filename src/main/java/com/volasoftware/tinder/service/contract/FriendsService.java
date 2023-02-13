@@ -10,6 +10,8 @@ import java.util.List;
 
 public interface FriendsService {
 
+  void linkFriendsAsync(Long id);
+
   ResponseDTO linkingAllRealAccountsWithRandomFriends();
 
   ResponseDTO linkingRequestedRealAccountWithRandomFriends(Long id);

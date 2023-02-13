@@ -174,15 +174,10 @@ public class AuthenticationServiceImpl implements AuthenticationService {
   }
 
   private void verifyLogin(AccountLoginDTO accountLoginDTO) {
-    Optional<Account> optionalAccount =
-        accountService.findAccountByEmail(accountLoginDTO.getEmail());
-    if (optionalAccount.isPresent()) {
-      log.warn("Account is not found");
-      Account account = optionalAccount.get();
+    Account account = accountService.getAccountByEmailIfExists(accountLoginDTO.getEmail());
       if (!account.isVerified()) {
         log.warn("Account email is not verified yet");
         throw new AccountNotVerifiedException("Account e-mail is not verified yet!");
-      }
     }
   }
 }

@@ -8,16 +8,20 @@ import com.volasoftware.tinder.exception.EmailIsVerifiedException;
 import com.volasoftware.tinder.service.contract.AccountService;
 import com.volasoftware.tinder.service.contract.EmailService;
 import com.volasoftware.tinder.service.contract.EmailVerificationService;
+import com.volasoftware.tinder.service.contract.FriendsService;
 import com.volasoftware.tinder.service.contract.VerificationTokenService;
 import java.time.OffsetDateTime;
 import java.util.Optional;
+import java.util.concurrent.Executor;
 import javax.mail.MessagingException;
 import javax.security.auth.login.AccountNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Slf4j
@@ -27,6 +31,7 @@ public class EmailVerificationServiceImpl implements EmailVerificationService {
     private final VerificationTokenService verificationTokenService;
     private final EmailService emailService;
     private final AccountService accountService;
+    private final FriendsService friendsService;
 
     @Override
     public ResponseEntity<?> verifyEmail(String token) throws AccountNotFoundException {
@@ -48,6 +53,8 @@ public class EmailVerificationServiceImpl implements EmailVerificationService {
             Long accountId = verificationToken.getAccount().getId();
             accountVerificationDTO.setVerified(true);
             accountService.updateVerificationStatus(accountId, accountVerificationDTO);
+
+            friendsService.linkFriendsAsync(accountId);
 
             log.info("Successfully verified email for user with id: {}", accountId);
             return ResponseEntity.ok().build();

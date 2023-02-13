@@ -10,7 +10,6 @@ import com.volasoftware.tinder.entity.Rating;
 import com.volasoftware.tinder.enums.AccountType;
 import com.volasoftware.tinder.exception.MissingFriendshipException;
 import com.volasoftware.tinder.repository.AccountRepository;
-import com.volasoftware.tinder.repository.LocationRepository;
 import com.volasoftware.tinder.repository.RatingRepository;
 import com.volasoftware.tinder.service.contract.AccountService;
 import com.volasoftware.tinder.service.contract.FriendsService;
@@ -23,10 +22,12 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
+import javax.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -82,6 +83,18 @@ public class FriendsServiceImpl implements FriendsService {
   }
 
   @Override
+  @Transactional
+  @Async("threadPoolTaskExecutor")
+  public void linkFriendsAsync(Long id){
+    try {
+      Thread.sleep(20000);
+      linkingRequestedRealAccountWithRandomFriends(id);
+    } catch (InterruptedException e) {
+      e.printStackTrace();
+    }
+  }
+
+  @Override
   public void checkIfUsersAreFriends(Account account, Account friend) {
     if (!account.getFriends().contains(friend)) {
       log.warn("You are not friend with this user, cannot rate it!");
@@ -95,11 +108,6 @@ public class FriendsServiceImpl implements FriendsService {
 
     Account account = accountService.getAccountByEmailIfExists(principal.getName());
     log.info("Get account: " + account.getEmail());
-//    sortedBy = getSortedBy(sortedBy);
-//    log.info("Set sortBy filter to: " + sortedBy);
-//    orderedBy = getOrderedBy(orderedBy);
-//    log.info("Set orderedBy filter to: " + orderedBy);
-
     List<FriendDTO> friends = getFriendsList(account);
     log.info("Get list of friends. List size: " + friends.size());
 
@@ -121,20 +129,6 @@ public class FriendsServiceImpl implements FriendsService {
     }
     return friends;
   }
-
-//  private String getOrderedBy(String orderedBy) {
-//    if (orderedBy == null || (!orderedBy.equals("ASC") && !orderedBy.equals("DESC"))) {
-//      orderedBy = "DESC";
-//    }
-//    return orderedBy;
-//  }
-//
-//  private String getSortedBy(String sortedBy) {
-//    if (sortedBy == null || (!sortedBy.equals("location") && !sortedBy.equals("rating"))) {
-//      sortedBy = "location";
-//    }
-//    return sortedBy;
-//  }
 
   private List<FriendDTO> orderFriendsDescending(
       Account account, List<FriendDTO> friends, String sortedBy, LocationDTO locationDTO) {
