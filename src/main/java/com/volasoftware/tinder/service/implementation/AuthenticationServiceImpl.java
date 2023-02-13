@@ -15,6 +15,7 @@ import com.volasoftware.tinder.exception.AccountNotFoundException;
 import com.volasoftware.tinder.exception.AccountNotVerifiedException;
 import com.volasoftware.tinder.exception.EmailIsTakenException;
 import com.volasoftware.tinder.exception.MissingRefreshTokenException;
+import com.volasoftware.tinder.mapper.AccountRegisterMapper;
 import com.volasoftware.tinder.service.contract.AccountService;
 import com.volasoftware.tinder.service.contract.AuthenticationService;
 import com.volasoftware.tinder.service.contract.EmailService;
@@ -62,10 +63,13 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     if (accountByEmail.isPresent()) {
       throw new EmailIsTakenException("Email is taken! Use another e-mail address!");
     }
-    Account account = modelMapper.map(accountRegisterDTO, Account.class);
-    account.setPassword(passwordEncoder.encode(accountRegisterDTO.getPassword()));
-    account.setRole(Role.USER);
-    account.setType(AccountType.REAL);
+//    Account account = modelMapper.map(accountRegisterDTO, Account.class);
+//    account.setPassword(passwordEncoder.encode(accountRegisterDTO.getPassword()));
+//    account.setRole(Role.USER);
+//    account.setType(AccountType.REAL);
+//    account = accountService.saveAccount(account);
+
+    Account account = AccountRegisterMapper.INSTANCE.dtoToAccount(accountRegisterDTO);
     account = accountService.saveAccount(account);
 
     VerificationToken token = verificationTokenService.createVerificationToken(account);
