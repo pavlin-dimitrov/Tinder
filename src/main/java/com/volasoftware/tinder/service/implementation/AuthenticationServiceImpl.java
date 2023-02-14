@@ -9,8 +9,6 @@ import com.volasoftware.tinder.DTO.ResponseDTO;
 import com.volasoftware.tinder.auth.AuthenticationResponse;
 import com.volasoftware.tinder.entity.Account;
 import com.volasoftware.tinder.entity.VerificationToken;
-import com.volasoftware.tinder.enums.AccountType;
-import com.volasoftware.tinder.enums.Role;
 import com.volasoftware.tinder.exception.AccountNotFoundException;
 import com.volasoftware.tinder.exception.AccountNotVerifiedException;
 import com.volasoftware.tinder.exception.EmailIsTakenException;
@@ -32,7 +30,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -50,7 +47,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
   private final AuthenticationManager authenticationManager;
   private final AccountService accountService;
   private final PasswordEncoder passwordEncoder;
-  private final ModelMapper modelMapper;
   private final JwtService jwtService;
   private final EmailService emailService;
 
@@ -63,13 +59,9 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     if (accountByEmail.isPresent()) {
       throw new EmailIsTakenException("Email is taken! Use another e-mail address!");
     }
-//    Account account = modelMapper.map(accountRegisterDTO, Account.class);
-//    account.setPassword(passwordEncoder.encode(accountRegisterDTO.getPassword()));
-//    account.setRole(Role.USER);
-//    account.setType(AccountType.REAL);
-//    account = accountService.saveAccount(account);
 
     Account account = AccountRegisterMapper.INSTANCE.dtoToAccount(accountRegisterDTO);
+    account.setPassword(passwordEncoder.encode(accountRegisterDTO.getPassword()));
     account = accountService.saveAccount(account);
 
     VerificationToken token = verificationTokenService.createVerificationToken(account);
