@@ -3,6 +3,8 @@ package com.volasoftware.tinder.service.implementation;
 import com.volasoftware.tinder.DTO.AccountDTO;
 import com.volasoftware.tinder.DTO.AccountVerificationDTO;
 import com.volasoftware.tinder.entity.Account;
+import com.volasoftware.tinder.enums.AccountType;
+import com.volasoftware.tinder.enums.Role;
 import com.volasoftware.tinder.exception.AccountNotFoundException;
 import com.volasoftware.tinder.exception.NotAuthorizedException;
 import com.volasoftware.tinder.repository.AccountRepository;
@@ -15,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,11 +25,24 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class AccountServiceImpl implements AccountService {
+  private static final String DEFAULT_IMAGE_LINK =
+      "https://drive.google.com/file/d/1W1viYGAN02JMMPbBnbewuaCdR9OHQS1r/view?usp=share_link";
   private final AccountRepository accountRepository;
+  private final PasswordEncoder passwordEncoder;
   private final ModelMapper modelMapper;
 
   @Override
   public Account saveAccount(Account account) {
+    if (account.getImage() == null) {
+      account.setImage(DEFAULT_IMAGE_LINK);
+    }
+    if (account.getRole() == null) {
+      account.setRole(Role.USER);
+    }
+    if (account.getType() == null) {
+      account.setType(AccountType.REAL);
+    }
+    account.setPassword(passwordEncoder.encode(account.getPassword()));
     return accountRepository.save(account);
   }
 

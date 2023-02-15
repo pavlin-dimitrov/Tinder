@@ -15,8 +15,8 @@ import org.mapstruct.factory.Mappers;
 @Mapper(componentModel = "spring")
 public interface AccountRegisterMapper {
 
-  String DEFAULT_IMAGE_LINK =
-      "https://drive.google.com/file/d/1W1viYGAN02JMMPbBnbewuaCdR9OHQS1r/view?usp=share_link";
+//  String DEFAULT_IMAGE_LINK =
+//      "https://drive.google.com/file/d/1W1viYGAN02JMMPbBnbewuaCdR9OHQS1r/view?usp=share_link";
 
   AccountRegisterMapper INSTANCE = Mappers.getMapper(AccountRegisterMapper.class);
 
@@ -30,15 +30,15 @@ public interface AccountRegisterMapper {
   @Mapping(target = "type", ignore = true)
   Account dtoToAccount(AccountRegisterDTO accountRegisterDTO);
 
-  @AfterMapping
-  @BeanMapping(builder = @Builder(disableBuilder = true))
-  default void setDefaultImageLink(@MappingTarget Account.AccountBuilder account) {
-    account
-        .image(DEFAULT_IMAGE_LINK)
-        .role(Role.USER)
-        .type(AccountType.REAL)
-        .build();
-  }
+//  @AfterMapping
+//  @BeanMapping(builder = @Builder(disableBuilder = true))
+//  default void setDefaultImageLink(@MappingTarget Account.AccountBuilder account) {
+//    account
+//        .image(DEFAULT_IMAGE_LINK)
+//        .role(Role.USER)
+//        .type(AccountType.REAL)
+//        .build();
+//  }
 
   AccountRegisterDTO accountToDto(Account account);
 }

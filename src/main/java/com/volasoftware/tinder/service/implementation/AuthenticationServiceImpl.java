@@ -53,15 +53,9 @@ public class AuthenticationServiceImpl implements AuthenticationService {
   @Override
   public ResponseDTO register(AccountRegisterDTO accountRegisterDTO) {
     log.info("Register new account with email {}", accountRegisterDTO.getEmail());
-    Optional<Account> accountByEmail =
-        accountService.findAccountByEmail(accountRegisterDTO.getEmail());
+    checkForExistingEmail(accountRegisterDTO);
     ResponseDTO response = new ResponseDTO();
-    if (accountByEmail.isPresent()) {
-      throw new EmailIsTakenException("Email is taken! Use another e-mail address!");
-    }
-
     Account account = AccountRegisterMapper.INSTANCE.dtoToAccount(accountRegisterDTO);
-    account.setPassword(passwordEncoder.encode(accountRegisterDTO.getPassword()));
     account = accountService.saveAccount(account);
 
     VerificationToken token = verificationTokenService.createVerificationToken(account);
@@ -112,12 +106,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
       try {
         refresh_jwt = authHeader.substring(7);
         userEmail = jwtService.extractUsername(refresh_jwt);
-        Optional<Account> optionalAccount = accountService.findAccountByEmail(userEmail);
-        if (optionalAccount.isEmpty()) {
-          log.error("Account was not found in /refresh endpoint");
-          throw new AccountNotFoundException("Account not found for the refresh token!");
-        }
-        Account account = optionalAccount.get();
+        Account account = accountService.getAccountByEmailIfExists(userEmail);
         String access_jwt = jwtService.generateAccessToken(account);
         Map<String, String> tokens = new HashMap<>();
         tokens.put("refreshToken", refresh_jwt);
@@ -140,11 +129,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
   @Override
   public ResponseDTO recoverPassword(Principal principal) {
-    Account account =
-        accountService
-            .findAccountByEmail(principal.getName())
-            .orElseThrow(() -> new AccountNotFoundException("Account was not found"));
-
+    Account account = accountService.getAccountByEmailIfExists(principal.getName());
     String newPassword = UUID.randomUUID().toString();
     ResponseDTO response = new ResponseDTO();
 
@@ -162,6 +147,14 @@ public class AuthenticationServiceImpl implements AuthenticationService {
       e.printStackTrace();
     }
     return response;
+  }
+
+  private void checkForExistingEmail(AccountRegisterDTO accountRegisterDTO) {
+    Optional<Account> accountByEmail =
+        accountService.findAccountByEmail(accountRegisterDTO.getEmail());
+    if (accountByEmail.isPresent()) {
+      throw new EmailIsTakenException("Email is taken! Use another e-mail address!");
+    }
   }
 
   private void verifyLogin(AccountLoginDTO accountLoginDTO) {
