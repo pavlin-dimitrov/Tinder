@@ -43,7 +43,7 @@ public class EmailVerificationServiceImpl implements EmailVerificationService {
             return ResponseEntity.badRequest().body("Token expired or invalid");
         } else {
             AccountVerificationDTO accountVerificationDTO =
-                    accountService.findAccountVerificationById(verificationToken.getAccount().getId()).orElse(null);
+                    accountService.findAccountVerificationById(verificationToken.getAccount().getId());
 
             if (accountVerificationDTO == null) {
                 log.warn("User not found for token: {}", token);

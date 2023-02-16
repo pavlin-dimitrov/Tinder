@@ -1,21 +1,26 @@
 package com.volasoftware.tinder.controller;
 
 import com.volasoftware.tinder.DTO.AccountDTO;
-import com.volasoftware.tinder.entity.Account;
-import com.volasoftware.tinder.exception.AccountNotFoundException;
 import com.volasoftware.tinder.exception.NotAuthorizedException;
-import com.volasoftware.tinder.repository.AccountRepository;
 import com.volasoftware.tinder.service.contract.AccountService;
-import io.swagger.annotations.*;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
+import java.security.Principal;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import java.security.Principal;
-import java.util.List;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @Slf4j
@@ -25,7 +30,6 @@ import java.util.List;
 public class AccountController {
 
   private final AccountService accountService;
-  private final AccountRepository repository;
 
   @ApiOperation(value = "Retrieves a list of accounts", response = AccountDTO.class)
   @ApiResponses(

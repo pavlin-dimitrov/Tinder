@@ -9,7 +9,6 @@ import com.volasoftware.tinder.DTO.ResponseDTO;
 import com.volasoftware.tinder.auth.AuthenticationResponse;
 import com.volasoftware.tinder.entity.Account;
 import com.volasoftware.tinder.entity.VerificationToken;
-import com.volasoftware.tinder.exception.AccountNotFoundException;
 import com.volasoftware.tinder.exception.AccountNotVerifiedException;
 import com.volasoftware.tinder.exception.EmailIsTakenException;
 import com.volasoftware.tinder.exception.MissingRefreshTokenException;
@@ -55,7 +54,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     log.info("Register new account with email {}", accountRegisterDTO.getEmail());
     checkForExistingEmail(accountRegisterDTO);
     ResponseDTO response = new ResponseDTO();
-    Account account = AccountRegisterMapper.INSTANCE.dtoToAccount(accountRegisterDTO);
+    Account account = AccountRegisterMapper.INSTANCE.mapAccountRegisterDtoToAccount(accountRegisterDTO);
+    account.setPassword(passwordEncoder.encode(accountRegisterDTO.getPassword()));
     account = accountService.saveAccount(account);
 
     VerificationToken token = verificationTokenService.createVerificationToken(account);
@@ -84,8 +84,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     SecurityContextHolder.getContext().setAuthentication(authentication);
     log.info("Authentication successfully added to Security Context Holder");
 
-    var user = accountService.findAccountByEmail(accountLoginDTO.getEmail()).orElseThrow();
-    var accessToken = jwtService.generateAccessToken(user);
+    Account user = accountService.getAccountByEmailIfExists(accountLoginDTO.getEmail());
+    String accessToken = jwtService.generateAccessToken(user);
     log.info("Access token created after the Login.");
     var refreshToken = jwtService.generateRefreshToken(user);
     log.info("Refresh token created after Login.");
