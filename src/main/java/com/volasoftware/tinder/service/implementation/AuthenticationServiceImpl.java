@@ -9,12 +9,10 @@ import com.volasoftware.tinder.DTO.ResponseDTO;
 import com.volasoftware.tinder.auth.AuthenticationResponse;
 import com.volasoftware.tinder.entity.Account;
 import com.volasoftware.tinder.entity.VerificationToken;
-import com.volasoftware.tinder.enums.AccountType;
-import com.volasoftware.tinder.enums.Role;
-import com.volasoftware.tinder.exception.AccountNotFoundException;
 import com.volasoftware.tinder.exception.AccountNotVerifiedException;
 import com.volasoftware.tinder.exception.EmailIsTakenException;
 import com.volasoftware.tinder.exception.MissingRefreshTokenException;
+import com.volasoftware.tinder.mapper.AccountRegisterMapper;
 import com.volasoftware.tinder.service.contract.AccountService;
 import com.volasoftware.tinder.service.contract.AuthenticationService;
 import com.volasoftware.tinder.service.contract.EmailService;
@@ -31,7 +29,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -49,23 +46,16 @@ public class AuthenticationServiceImpl implements AuthenticationService {
   private final AuthenticationManager authenticationManager;
   private final AccountService accountService;
   private final PasswordEncoder passwordEncoder;
-  private final ModelMapper modelMapper;
   private final JwtService jwtService;
   private final EmailService emailService;
 
   @Override
   public ResponseDTO register(AccountRegisterDTO accountRegisterDTO) {
     log.info("Register new account with email {}", accountRegisterDTO.getEmail());
-    Optional<Account> accountByEmail =
-        accountService.findAccountByEmail(accountRegisterDTO.getEmail());
+    checkForExistingEmail(accountRegisterDTO);
     ResponseDTO response = new ResponseDTO();
-    if (accountByEmail.isPresent()) {
-      throw new EmailIsTakenException("Email is taken! Use another e-mail address!");
-    }
-    Account account = modelMapper.map(accountRegisterDTO, Account.class);
+    Account account = AccountRegisterMapper.INSTANCE.mapAccountRegisterDtoToAccount(accountRegisterDTO);
     account.setPassword(passwordEncoder.encode(accountRegisterDTO.getPassword()));
-    account.setRole(Role.USER);
-    account.setType(AccountType.REAL);
     account = accountService.saveAccount(account);
 
     VerificationToken token = verificationTokenService.createVerificationToken(account);
@@ -94,8 +84,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     SecurityContextHolder.getContext().setAuthentication(authentication);
     log.info("Authentication successfully added to Security Context Holder");
 
-    var user = accountService.findAccountByEmail(accountLoginDTO.getEmail()).orElseThrow();
-    var accessToken = jwtService.generateAccessToken(user);
+    Account user = accountService.getAccountByEmailIfExists(accountLoginDTO.getEmail());
+    String accessToken = jwtService.generateAccessToken(user);
     log.info("Access token created after the Login.");
     var refreshToken = jwtService.generateRefreshToken(user);
     log.info("Refresh token created after Login.");
@@ -116,12 +106,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
       try {
         refresh_jwt = authHeader.substring(7);
         userEmail = jwtService.extractUsername(refresh_jwt);
-        Optional<Account> optionalAccount = accountService.findAccountByEmail(userEmail);
-        if (optionalAccount.isEmpty()) {
-          log.error("Account was not found in /refresh endpoint");
-          throw new AccountNotFoundException("Account not found for the refresh token!");
-        }
-        Account account = optionalAccount.get();
+        Account account = accountService.getAccountByEmailIfExists(userEmail);
         String access_jwt = jwtService.generateAccessToken(account);
         Map<String, String> tokens = new HashMap<>();
         tokens.put("refreshToken", refresh_jwt);
@@ -144,11 +129,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
   @Override
   public ResponseDTO recoverPassword(Principal principal) {
-    Account account =
-        accountService
-            .findAccountByEmail(principal.getName())
-            .orElseThrow(() -> new AccountNotFoundException("Account was not found"));
-
+    Account account = accountService.getAccountByEmailIfExists(principal.getName());
     String newPassword = UUID.randomUUID().toString();
     ResponseDTO response = new ResponseDTO();
 
@@ -166,6 +147,14 @@ public class AuthenticationServiceImpl implements AuthenticationService {
       e.printStackTrace();
     }
     return response;
+  }
+
+  private void checkForExistingEmail(AccountRegisterDTO accountRegisterDTO) {
+    Optional<Account> accountByEmail =
+        accountService.findAccountByEmail(accountRegisterDTO.getEmail());
+    if (accountByEmail.isPresent()) {
+      throw new EmailIsTakenException("Email is taken! Use another e-mail address!");
+    }
   }
 
   private void verifyLogin(AccountLoginDTO accountLoginDTO) {

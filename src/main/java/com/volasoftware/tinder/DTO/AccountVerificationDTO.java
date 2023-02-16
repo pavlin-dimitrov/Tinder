@@ -1,5 +1,6 @@
 package com.volasoftware.tinder.DTO;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -17,5 +18,6 @@ import lombok.Setter;
 public class AccountVerificationDTO {
 
   @ApiModelProperty(value = "The verification status of email", example = "false", required = true)
+  @JsonProperty("isVerified")
   private boolean isVerified;
 }

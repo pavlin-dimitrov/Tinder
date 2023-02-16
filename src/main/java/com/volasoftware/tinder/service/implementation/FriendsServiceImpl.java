@@ -9,6 +9,8 @@ import com.volasoftware.tinder.entity.Location;
 import com.volasoftware.tinder.entity.Rating;
 import com.volasoftware.tinder.enums.AccountType;
 import com.volasoftware.tinder.exception.MissingFriendshipException;
+import com.volasoftware.tinder.mapper.AccountMapper;
+import com.volasoftware.tinder.mapper.FriendMapper;
 import com.volasoftware.tinder.repository.AccountRepository;
 import com.volasoftware.tinder.repository.RatingRepository;
 import com.volasoftware.tinder.service.contract.AccountService;
@@ -25,7 +27,6 @@ import java.util.stream.Collectors;
 import javax.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -39,11 +40,10 @@ public class FriendsServiceImpl implements FriendsService {
   private final RatingRepository ratingRepository;
   private final LocationService locationService;
   private final AccountService accountService;
-  private final ModelMapper modelMapper;
-  private final static String location = "location";
-  private final static String rating = "rating";
-  private final static String asc = "asc";
-  private final static String desc = "desc";
+  private static final String location = "location";
+  private static final String rating = "rating";
+  private static final String asc = "asc";
+  private static final String desc = "desc";
 
   @Override
   public AccountDTO getFriendInfo(String email, Long userId) {
@@ -51,7 +51,7 @@ public class FriendsServiceImpl implements FriendsService {
     Account friend = accountService.getAccountByIdIfExists(userId);
     checkIfUsersAreFriends(user, friend);
     log.info("Check if the users are friends and if they are, return info.");
-    return modelMapper.map(user, AccountDTO.class);
+    return AccountMapper.INSTANCE.mapAccountToAccountDto(user);
   }
 
   @Override
@@ -85,7 +85,7 @@ public class FriendsServiceImpl implements FriendsService {
   @Override
   @Transactional
   @Async("threadPoolTaskExecutor")
-  public void linkFriendsAsync(Long id){
+  public void linkFriendsAsync(Long id) {
     try {
       Thread.sleep(20000);
       linkingRequestedRealAccountWithRandomFriends(id);
@@ -103,8 +103,12 @@ public class FriendsServiceImpl implements FriendsService {
   }
 
   @Override
-  public List<FriendDTO> showFilteredListOfFriends(String sortedBy, String orderedBy,
-      Principal principal, LocationDTO locationDTO, Integer limit) {
+  public List<FriendDTO> showFilteredListOfFriends(
+      String sortedBy,
+      String orderedBy,
+      Principal principal,
+      LocationDTO locationDTO,
+      Integer limit) {
 
     Account account = accountService.getAccountByEmailIfExists(principal.getName());
     log.info("Get account: " + account.getEmail());
@@ -134,7 +138,7 @@ public class FriendsServiceImpl implements FriendsService {
       Account account, List<FriendDTO> friends, String sortedBy, LocationDTO locationDTO) {
     List<Rating> ratings = ratingRepository.findAllByAccount(account);
     List<FriendDTO> sortedFriends;
-    if (sortedBy.equals("location")) {
+    if (sortedBy.equals(location)) {
       sortedFriends =
           friends.stream()
               .sorted(
@@ -142,11 +146,11 @@ public class FriendsServiceImpl implements FriendsService {
                       friend ->
                           locationService.getFriendDistance(locationDTO, friend.getLocationDTO())))
               .collect(Collectors.toList());
-    } else if (sortedBy.equals("rating")) {
+    } else if (sortedBy.equals(rating)) {
       sortedFriends =
           ratings.stream()
               .sorted(Comparator.comparingInt(Rating::getRating))
-              .map(rating -> modelMapper.map(rating.getFriend(), FriendDTO.class))
+              .map(rating -> FriendMapper.INSTANCE.accountToFriendDTO(rating.getFriend()))
               .collect(Collectors.toList());
     } else {
       sortedFriends = friends;
@@ -166,7 +170,7 @@ public class FriendsServiceImpl implements FriendsService {
     List<Rating> ratings = ratingRepository.findAllByAccount(account);
     return ratings.stream()
         .sorted(Comparator.comparingInt(Rating::getRating))
-        .map(rating -> modelMapper.map(rating.getFriend(), FriendDTO.class))
+        .map(rating -> FriendMapper.INSTANCE.accountToFriendDTO(rating.getFriend()))
         .collect(Collectors.toList());
   }
 

@@ -118,11 +118,10 @@ public class AccountServiceTests {
     Mockito.when(modelMapper.map(account, AccountVerificationDTO.class))
         .thenReturn(accountVerificationDTO);
 
-    Optional<AccountVerificationDTO> returnedAccount =
+    AccountVerificationDTO returnedAccount =
         service.findAccountVerificationById(account.getId());
     verify(repository).findById(account.getId());
-    assertTrue(returnedAccount.isPresent());
-    assertTrue(returnedAccount.get().isVerified());
+    assertTrue(returnedAccount.isVerified());
   }
 
   @Test
