@@ -64,7 +64,7 @@ public class AuthenticationController {
   public ResponseEntity<AuthenticationResponse> login(
       @ApiParam(value = "Login details", required = true) @RequestBody AccountLoginDTO request) {
     log.info("Received request to login");
-    return ResponseEntity.ok(authenticationService.login(request));
+    return new ResponseEntity<>(authenticationService.login(request), HttpStatus.OK);
   }
 
   @ApiOperation(value = "Get new Access Token")
