@@ -17,6 +17,7 @@ import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -87,7 +88,7 @@ public class AccountServiceImpl implements AccountService {
               + principal.getName()
               + " is not authorized to edit account of: "
               + accountDTO.getEmail());
-      throw new NotAuthorizedException("Not authorized to edit this account!");
+      throw new NotAuthorizedException();
     }
 
     Account account = getAccountByIdIfExists(accountDTO.getId());
@@ -113,13 +114,13 @@ public class AccountServiceImpl implements AccountService {
   public Account getAccountByIdIfExists(Long id) {
     return accountRepository
         .findById(id)
-        .orElseThrow(() -> new AccountNotFoundException("Account not found!"));
+        .orElseThrow(AccountNotFoundException::new);
   }
 
   @Override
   public Account getAccountByEmailIfExists(String email) {
     return accountRepository
         .findAccountByEmail(email)
-        .orElseThrow(() -> new AccountNotFoundException("This account is not present!"));
+        .orElseThrow(AccountNotFoundException::new);
   }
 }

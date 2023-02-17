@@ -123,7 +123,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
       }
     } else {
       log.warn("Refresh token is missing, can not refresh the access token.");
-      throw new MissingRefreshTokenException("Refresh token is missing!");
+      throw new MissingRefreshTokenException();
     }
   }
 
@@ -153,7 +153,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     Optional<Account> accountByEmail =
         accountService.findAccountByEmail(accountRegisterDTO.getEmail());
     if (accountByEmail.isPresent()) {
-      throw new EmailIsTakenException("Email is taken! Use another e-mail address!");
+      throw new EmailIsTakenException();
     }
   }
 
@@ -161,7 +161,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     Account account = accountService.getAccountByEmailIfExists(accountLoginDTO.getEmail());
       if (!account.isVerified()) {
         log.warn("Account email is not verified yet");
-        throw new AccountNotVerifiedException("Account e-mail is not verified yet!");
+        throw new AccountNotVerifiedException();
     }
   }
 }
