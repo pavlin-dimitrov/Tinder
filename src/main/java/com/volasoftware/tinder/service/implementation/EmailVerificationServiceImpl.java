@@ -95,7 +95,7 @@ public class EmailVerificationServiceImpl implements EmailVerificationService {
     private void isEmailVerified(String email) throws AccountNotFoundException {
         if (isAccountPresent(email).isVerified()) {
             log.warn("Email address for email: " + email + " is already verified");
-            throw new EmailIsVerifiedException("This e-mail: " + email + " is already verified!");
+            throw new EmailIsVerifiedException(email);
         }
     }
 }

@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 @ResponseStatus(HttpStatus.NOT_FOUND)
 public class MissingFriendshipException extends IllegalArgumentException {
 
-  public MissingFriendshipException(String message) {
-    super(message);
+  public MissingFriendshipException() {
+    super("You are not friend with this user, cannot rate it!");
   }
 }

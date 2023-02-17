@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 @ResponseStatus(HttpStatus.NOT_FOUND)
 public class RatingRangeException extends IllegalArgumentException {
 
-  public RatingRangeException(String message) {
-    super(message);
+  public RatingRangeException() {
+    super("Rating must be between 1 and 10.");
   }
 }

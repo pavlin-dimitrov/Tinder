@@ -5,7 +5,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 @ResponseStatus(HttpStatus.UNAUTHORIZED)
 public class AccountNotVerifiedException extends RuntimeException {
-    public AccountNotVerifiedException(String s) {
-        super(s);
+    public AccountNotVerifiedException() {
+        super("Account e-mail is not verified yet!");
     }
 }

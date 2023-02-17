@@ -34,7 +34,7 @@ public class RatingServiceImpl implements RatingService {
     if (ratingValue < 1 || ratingValue > 10) {
       log.warn("Rating must be between 1 and 10.");
       response.setResponse("Rating must be between 1 and 10.");
-      throw new RatingRangeException("Rating must be between 1 and 10.");
+      throw new RatingRangeException();
     }
 
     Optional<Rating> rating = ratingRepository.findByAccountAndFriend(account, friend);

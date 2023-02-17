@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 @ResponseStatus(HttpStatus.UNAUTHORIZED)
 public class NotAuthorizedException extends AuthenticationException {
 
-  public NotAuthorizedException(String explanation) {
-    super(explanation);
+  public NotAuthorizedException() {
+    super("Not authorized to edit this account!");
   }
 }

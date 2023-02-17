@@ -1,7 +1,10 @@
 package com.volasoftware.tinder.controller;
 
 import com.volasoftware.tinder.DTO.AccountDTO;
+import com.volasoftware.tinder.auth.ErrorResponse;
+import com.volasoftware.tinder.entity.Account;
 import com.volasoftware.tinder.exception.NotAuthorizedException;
+import com.volasoftware.tinder.mapper.AccountMapper;
 import com.volasoftware.tinder.service.contract.AccountService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;

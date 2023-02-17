@@ -98,7 +98,7 @@ public class FriendsServiceImpl implements FriendsService {
   public void checkIfUsersAreFriends(Account account, Account friend) {
     if (!account.getFriends().contains(friend)) {
       log.warn("You are not friend with this user, cannot rate it!");
-      throw new MissingFriendshipException("You are not friend with this user, cannot rate it!");
+      throw new MissingFriendshipException();
     }
   }
 
