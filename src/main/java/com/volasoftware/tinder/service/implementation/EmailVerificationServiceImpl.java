@@ -12,16 +12,13 @@ import com.volasoftware.tinder.service.contract.FriendsService;
 import com.volasoftware.tinder.service.contract.VerificationTokenService;
 import java.time.OffsetDateTime;
 import java.util.Optional;
-import java.util.concurrent.Executor;
 import javax.mail.MessagingException;
 import javax.security.auth.login.AccountNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Slf4j

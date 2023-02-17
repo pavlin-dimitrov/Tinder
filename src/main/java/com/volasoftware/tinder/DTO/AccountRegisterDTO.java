@@ -7,7 +7,10 @@ import io.swagger.annotations.ApiModelProperty;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.validation.constraints.Email;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -46,15 +49,14 @@ public class AccountRegisterDTO {
 
   @ApiModelProperty(value = "Account's password", required = true)
   @ValidPassword
-  @NotBlank
   private String password;
 
   @ApiModelProperty(value = "Account's gender", required = true)
   @Enumerated(EnumType.STRING)
-  @NotBlank
+  @NotNull
   private Gender gender;
 
   @ApiModelProperty(value = "User age", required = true)
-  @NotBlank
+  @NotNull
   private int age;
 }
