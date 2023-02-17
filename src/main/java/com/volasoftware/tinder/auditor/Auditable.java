@@ -20,17 +20,15 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @NoArgsConstructor
 @Getter
 @Setter
-@MappedSuperclass // This means that this class has not table created for it
+@MappedSuperclass
 @EntityListeners(AuditingEntityListener.class)
 public abstract class Auditable<T> {
 
   @CreatedBy
- // @Column(updatable = false)
   protected T createdBy;
 
   @CreatedDate
   @Temporal(TIMESTAMP)
- // @Column(updatable = false)
   protected Date createdAt;
 
   @LastModifiedBy

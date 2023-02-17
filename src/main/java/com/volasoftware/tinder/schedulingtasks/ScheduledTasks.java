@@ -18,7 +18,7 @@ public class ScheduledTasks {
   @Scheduled(fixedDelay = 30000)
   public void deleteExpiredVerificationTokens(){
     OffsetDateTime currentDateTime = OffsetDateTime.now();
-    verificationTokenRepository.deleteByExpirationDateBefore(
+    verificationTokenRepository.deleteAllByExpirationDateBefore(
         currentDateTime);
   }
 }

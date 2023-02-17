@@ -26,7 +26,6 @@ public class PasswordConstraintValidator implements ConstraintValidator<ValidPas
     @Override
     public boolean isValid(String password, ConstraintValidatorContext context) {
 
-        // customizing validation messages
         Properties props = new Properties();
         InputStream inputStream = getClass().getClassLoader().getResourceAsStream("passay.properties");
         props.load(inputStream);
@@ -35,13 +34,9 @@ public class PasswordConstraintValidator implements ConstraintValidator<ValidPas
                 new PasswordValidator(
                         resolver,
                         Arrays.asList(
-                                // min 8 characters
-//                                new LengthRule(8, Integer.MAX_VALUE),
-                                // at least one upper-case character
+                                new LengthRule(8, 30),
                                 new CharacterRule(EnglishCharacterData.Alphabetical, 1),
-                                // at least one digit character
                                 new CharacterRule(EnglishCharacterData.Digit, 1),
-                                // no whitespace
                                 new WhitespaceRule()));
         RuleResult result = validator.validate(new PasswordData(password));
         if (result.isValid()) {

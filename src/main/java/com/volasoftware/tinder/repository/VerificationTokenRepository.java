@@ -19,5 +19,6 @@ public interface VerificationTokenRepository extends JpaRepository<VerificationT
 
   void delete(@NotNull VerificationToken token);
 
-  void deleteByExpirationDateBefore(OffsetDateTime dateTime);
+  void deleteAllByExpirationDateBefore(OffsetDateTime current);
+
 }
