@@ -13,5 +13,5 @@ public interface VerificationTokenService {
 
   void delete(VerificationToken token);
 
-  public void updateToken(VerificationToken token);
+  void updateToken(VerificationToken token);
 }

@@ -2,7 +2,6 @@ package com.volasoftware.tinder.controller;
 
 import com.volasoftware.tinder.DTO.AccountLoginDTO;
 import com.volasoftware.tinder.DTO.AccountRegisterDTO;
-import com.volasoftware.tinder.DTO.LocationDTO;
 import com.volasoftware.tinder.DTO.ResponseDTO;
 import com.volasoftware.tinder.auth.AuthenticationResponse;
 import com.volasoftware.tinder.service.contract.AuthenticationService;
@@ -15,6 +14,7 @@ import java.io.IOException;
 import java.security.Principal;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,7 +47,7 @@ public class AuthenticationController {
       })
   @PostMapping("/register")
   public ResponseEntity<ResponseDTO> register(
-      @ApiParam(value = "Account registration details", required = true) @RequestBody AccountRegisterDTO dto) {
+      @ApiParam(value = "Account registration details", required = true) @Valid @RequestBody AccountRegisterDTO dto) {
     log.info("Received request to register new account with e-mail: " + dto.getEmail());
     return new ResponseEntity<>(authenticationService.register(dto), HttpStatus.OK);
   }
@@ -88,6 +88,14 @@ public class AuthenticationController {
     authenticationService.getNewPairAuthTokens(request, response);
   }
 
+  @ApiOperation(value = "Recover password")
+  @ApiResponses(
+      value = {
+          @ApiResponse(code = 200, message = "Successfully recovered password!"),
+          @ApiResponse(code = 401, message = "Not authorized action"),
+          @ApiResponse(code = 403, message = "Accessing the resource is forbidden"),
+          @ApiResponse(code = 404, message = "The resource is not found")
+      })
   @PostMapping("/password-recovery")
   public ResponseEntity<ResponseDTO> recoverPassword(
       @ApiParam(value = "The authenticated user", required = true) Principal principal) {

@@ -1,6 +1,7 @@
 package com.volasoftware.tinder.controller;
 
 import com.volasoftware.tinder.DTO.ResponseDTO;
+import com.volasoftware.tinder.repository.VerificationTokenRepository;
 import com.volasoftware.tinder.service.contract.EmailVerificationService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -25,6 +26,7 @@ import org.springframework.web.servlet.view.RedirectView;
 public class VerificationController {
 
   private final EmailVerificationService emailVerificationService;
+  private final VerificationTokenRepository verificationTokenRepository;
 
   @ApiOperation(value = "Verification of new account e-mail address.")
   @ApiResponses(
