@@ -1,10 +1,7 @@
 package com.volasoftware.tinder.controller;
 
 import com.volasoftware.tinder.DTO.AccountDTO;
-import com.volasoftware.tinder.auth.ErrorResponse;
-import com.volasoftware.tinder.entity.Account;
 import com.volasoftware.tinder.exception.NotAuthorizedException;
-import com.volasoftware.tinder.mapper.AccountMapper;
 import com.volasoftware.tinder.service.contract.AccountService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -47,7 +44,7 @@ public class AccountController {
   @GetMapping
   public ResponseEntity<List<AccountDTO>> getAllAccounts() {
     log.info("Received request to get all accounts");
-    return ResponseEntity.ok(accountService.getAccounts());
+    return new ResponseEntity<>(accountService.getAccounts(), HttpStatus.OK);
   }
 
   @ApiOperation(value = "Edit personal account", response = AccountDTO.class)
@@ -60,12 +57,10 @@ public class AccountController {
       })
   @PutMapping("/profile")
   public ResponseEntity<AccountDTO> editAccountInfo(
-      @ApiParam(value = "Account information to update", required = true) @RequestBody
-          AccountDTO accountDTO,
+      @ApiParam(value = "Account to update", required = true) @RequestBody AccountDTO accountDTO,
       @ApiParam(value = "The authenticated user", required = true) Principal principal)
       throws NotAuthorizedException {
-    AccountDTO updatedAccountDto = accountService.updateAccountInfo(accountDTO, principal);
-    return new ResponseEntity<>(updatedAccountDto, HttpStatus.OK);
+    return new ResponseEntity<>(accountService.updateAccountInfo(accountDTO, principal), HttpStatus.OK);
   }
 
   @ApiOperation(value = "Retrieves an account profile", response = AccountDTO.class)
@@ -78,7 +73,7 @@ public class AccountController {
       })
   @GetMapping("profile")
   public ResponseEntity<AccountDTO> showUserProfile(
-      @ApiParam(value = "Id of account to be shown", required = true) @RequestParam Long id) {
+      @ApiParam(value = "Account id", required = true) @RequestParam Long id) {
     return new ResponseEntity<>(accountService.findAccountById(id), HttpStatus.OK);
   }
 }
