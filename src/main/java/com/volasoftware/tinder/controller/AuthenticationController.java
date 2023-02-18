@@ -3,7 +3,7 @@ package com.volasoftware.tinder.controller;
 import com.volasoftware.tinder.DTO.AccountLoginDTO;
 import com.volasoftware.tinder.DTO.AccountRegisterDTO;
 import com.volasoftware.tinder.DTO.ResponseDTO;
-import com.volasoftware.tinder.auth.AuthenticationResponse;
+import com.volasoftware.tinder.DTO.AuthenticationResponseDTO;
 import com.volasoftware.tinder.service.contract.AuthenticationService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -61,7 +61,7 @@ public class AuthenticationController {
         @ApiResponse(code = 404, message = "The resource is not found")
       })
   @PostMapping("/login")
-  public ResponseEntity<AuthenticationResponse> login(
+  public ResponseEntity<AuthenticationResponseDTO> login(
       @ApiParam(value = "Login details", required = true) @RequestBody AccountLoginDTO request) {
     log.info("Received request to login");
     return new ResponseEntity<>(authenticationService.login(request), HttpStatus.OK);

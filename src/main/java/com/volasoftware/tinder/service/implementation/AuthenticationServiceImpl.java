@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.volasoftware.tinder.DTO.AccountLoginDTO;
 import com.volasoftware.tinder.DTO.AccountRegisterDTO;
 import com.volasoftware.tinder.DTO.ResponseDTO;
-import com.volasoftware.tinder.auth.AuthenticationResponse;
+import com.volasoftware.tinder.DTO.AuthenticationResponseDTO;
 import com.volasoftware.tinder.entity.Account;
 import com.volasoftware.tinder.entity.VerificationToken;
 import com.volasoftware.tinder.exception.AccountNotVerifiedException;
@@ -73,7 +73,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
   }
 
   @Override
-  public AuthenticationResponse login(AccountLoginDTO accountLoginDTO) {
+  public AuthenticationResponseDTO login(AccountLoginDTO accountLoginDTO) {
     verifyLogin(accountLoginDTO);
     log.info("Login verified.");
 
@@ -90,7 +90,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     var refreshToken = jwtService.generateRefreshToken(user);
     log.info("Refresh token created after Login.");
 
-    return AuthenticationResponse.builder()
+    return AuthenticationResponseDTO.builder()
         .accessToken(accessToken)
         .refreshToken(refreshToken)
         .build();
