@@ -47,12 +47,6 @@ public class VerificationTokenServiceImpl implements VerificationTokenService {
   }
 
   @Override
-  public void delete(VerificationToken token){
-    log.info("Deleting expired verification token");
-    verificationTokenRepository.delete(token);
-  }
-
-  @Override
   @Transactional
   public void updateToken(VerificationToken token){
     log.info("Updated verification token");
