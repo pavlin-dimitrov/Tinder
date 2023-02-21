@@ -4,6 +4,7 @@ import com.volasoftware.tinder.DTO.AccountDTO;
 import com.volasoftware.tinder.entity.Account;
 import java.util.List;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.mapstruct.ReportingPolicy;
 import org.mapstruct.factory.Mappers;
 
