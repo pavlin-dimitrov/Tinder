@@ -87,7 +87,7 @@ public class FriendsServiceImpl implements FriendsService {
   @Async("threadPoolTaskExecutor")
   public void linkFriendsAsync(Long id) {
     try {
-      Thread.sleep(20000);
+      Thread.sleep(5000);
       linkingRequestedRealAccountWithRandomFriends(id);
     } catch (InterruptedException e) {
       e.printStackTrace();
