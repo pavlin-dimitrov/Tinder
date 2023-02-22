@@ -9,6 +9,7 @@ import com.volasoftware.tinder.entity.Location;
 import com.volasoftware.tinder.entity.Rating;
 import com.volasoftware.tinder.enums.AccountType;
 import com.volasoftware.tinder.exception.MissingFriendshipException;
+import com.volasoftware.tinder.exception.OriginGreaterThenBoundException;
 import com.volasoftware.tinder.mapper.AccountMapper;
 import com.volasoftware.tinder.mapper.FriendMapper;
 import com.volasoftware.tinder.repository.AccountRepository;
@@ -51,7 +52,7 @@ public class FriendsServiceImpl implements FriendsService {
     Account friend = accountService.getAccountByIdIfExists(userId);
     checkIfUsersAreFriends(user, friend);
     log.info("Check if the users are friends and if they are, return info.");
-    return AccountMapper.INSTANCE.mapAccountToAccountDto(user);
+    return AccountMapper.INSTANCE.mapAccountToAccountDto(friend);
   }
 
   @Override
@@ -210,7 +211,12 @@ public class FriendsServiceImpl implements FriendsService {
   }
 
   private int getRandomFriendId() {
-    return ThreadLocalRandom.current().nextInt(2, 20);
+    int origin = 0;
+    int bound = accountRepository.findAllByType(AccountType.BOT).size();
+    if (bound <= origin){
+      throw new OriginGreaterThenBoundException();
+    }
+    return ThreadLocalRandom.current().nextInt(origin, bound);
   }
 
   private ResponseDTO getResponseDTO(List<Account> accounts) {
