@@ -2,6 +2,7 @@ package com.volasoftware.tinder.repository;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import com.volasoftware.tinder.DTO.AccountRegisterDTO;
 import com.volasoftware.tinder.entity.Account;
@@ -11,6 +12,7 @@ import com.volasoftware.tinder.mapper.AccountRegisterMapper;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -64,6 +66,7 @@ class AccountRepositoryTest {
     List<Account> resultAccounts = underTest.findAllByType(AccountType.REAL);
     //then
     assertEquals(2, resultAccounts.size());
+    assertNotNull(resultAccounts);
   }
 
   @Test
@@ -73,7 +76,8 @@ class AccountRepositoryTest {
     //when
     int numberOfAccounts = underTest.findAll().size();
     //then
-    assertEquals(3, numberOfAccounts);
+    assertEquals(3, numberOfAccounts);;
+    assertNotNull(underTest.findAll());
   }
 
   private void accounts() {

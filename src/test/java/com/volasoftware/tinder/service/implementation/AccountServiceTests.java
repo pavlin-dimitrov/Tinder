@@ -1,6 +1,7 @@
 package com.volasoftware.tinder.service.implementation;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -13,6 +14,7 @@ import static org.mockito.Mockito.when;
 import com.volasoftware.tinder.DTO.AccountDTO;
 import com.volasoftware.tinder.DTO.AccountVerificationDTO;
 import com.volasoftware.tinder.entity.Account;
+import com.volasoftware.tinder.enums.AccountType;
 import com.volasoftware.tinder.enums.Gender;
 import com.volasoftware.tinder.enums.Role;
 import com.volasoftware.tinder.exception.AccountNotFoundException;
@@ -23,7 +25,6 @@ import java.security.Principal;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -33,13 +34,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.modelmapper.ModelMapper;
 
 @ExtendWith(MockitoExtension.class)
 public class AccountServiceTests {
   @Mock private AccountRepository repository;
-  //  @Mock private ModelMapper modelMapper;
   @InjectMocks private AccountServiceImpl underTest;
+  private static final String DEFAULT_IMAGE_LINK =
+      "https://drive.google.com/file/d/1W1viYGAN02JMMPbBnbewuaCdR9OHQS1r/view?usp=share_link";
 
   @BeforeEach
   void setUp() {
@@ -48,7 +49,7 @@ public class AccountServiceTests {
 
   @Test
   @DisplayName("Test get all accounts")
-  public void testWhenRetrieveAllAccountsThenExpectedListOfThreeAccountsToBeReturned() {
+  void testWhenRetrieveAllAccountsThenExpectedListOfThreeAccountsToBeReturned() {
     // given
     List<Account> accounts = getAccounts();
     when(repository.findAll()).thenReturn(accounts);
@@ -62,7 +63,7 @@ public class AccountServiceTests {
 
   @Test
   @DisplayName("Test creating account")
-  public void testCreateAccountThenExpectSuccessfulAccountCreation() {
+  void testCreateAccountThenExpectSuccessfulAccountCreation() {
     // given
     Account account = createAccount("John", "Doe", "john.doe@example.com", Gender.MALE);
     ArgumentCaptor<Account> captor = ArgumentCaptor.forClass(Account.class);
@@ -71,11 +72,14 @@ public class AccountServiceTests {
     Account createdAccount = underTest.saveAccount(account);
     // then
     assertThat(createdAccount).isEqualTo(account);
+    assertThat(createdAccount.getType()).isEqualTo(AccountType.REAL);
+    assertThat(createdAccount.getRole()).isEqualTo(Role.USER);
+    assertThat(createdAccount.getImage()).isEqualTo(DEFAULT_IMAGE_LINK);
   }
 
   @Test
   @DisplayName("Find account by valid e-mail address")
-  public void testFindAccountByEmailWhenTheGivenAddressIsValidThenFindAccount() {
+  void testFindAccountByEmailWhenTheGivenAddressIsValidThenFindAccount() {
     Account account = createAccount("John", "Doe", "john.doe@example.com", Gender.MALE);
     when(repository.findAccountByEmail("john.doe@example.com")).thenReturn(Optional.of(account));
     Optional<Account> returnedAccount = underTest.findAccountByEmail("john.doe@example.com");
@@ -84,7 +88,7 @@ public class AccountServiceTests {
 
   @Test
   @DisplayName("Find account by e-mail address, using invalid address")
-  public void testFindAccountByEmailWhenTheGivenAddressIsNotValidThenFindThatAccountIsEmpty() {
+  void testFindAccountByEmailWhenTheGivenAddressIsNotValidThenFindThatAccountIsEmpty() {
     // given
     when(repository.findAccountByEmail("invalid@example.com")).thenReturn(Optional.empty());
     // when
@@ -95,7 +99,7 @@ public class AccountServiceTests {
 
   @Test
   @DisplayName("Find account by given id")
-  public void testFindAccountByIdWhenTheCorrectIdIsGivenThenExpectCorrectAccountDTO() {
+  void testFindAccountByIdWhenTheCorrectIdIsGivenThenExpectCorrectAccountDTO() {
     // given
     Long accountId = 1L;
     Account account = createAccount("John", "Doe", "john.doe@example.com", Gender.MALE);
@@ -110,23 +114,49 @@ public class AccountServiceTests {
   }
 
   @Test
+  @DisplayName("Throw exception Account Not Found when wrong ID is given")
+  void testFindAccountByIdWhenTheInvalidIdIsGivenThenExpectException() {
+    // given
+    Long accountId = 1L;
+    Account account = createAccount("John", "Doe", "john.doe@example.com", Gender.MALE);
+    account.setId(accountId);
+    // when and then
+    assertThatThrownBy(() -> underTest.findAccountById(2L))
+        .isInstanceOf(AccountNotFoundException.class)
+        .hasMessageContaining("User not found");
+    verify(repository, never()).save(any());
+  }
+
+  @Test
   @DisplayName("Find account verification by valid Id")
-  public void testFindAccountVerificationWhenValidIdIsProvidedAccountVerificationDTO() {
+  void testFindAccountVerificationWhenValidIdIsProvidedAccountVerificationDTO() {
     // given
     Account account = createAccount("John", "Doe", "john.doe@example.com", Gender.MALE);
     account.setId(1L);
     account.setVerified(true);
-    // when
     Mockito.when(repository.findById(account.getId())).thenReturn(Optional.of(account));
-    // then
+    // when
     AccountVerificationDTO returnedAccount = underTest.findAccountVerificationById(account.getId());
+    // then
     verify(repository).findById(account.getId());
     assertTrue(returnedAccount.isVerified());
   }
 
   @Test
+  @DisplayName("Throw exception on Find Account Verification when invalid account Id is given")
+  void testFindAccountVerificationWhenInvalidIdIsGivenThenExpectException() {
+    // given
+    Account account = createAccount("John", "Doe", "john.doe@example.com", Gender.MALE);
+    account.setId(1L);
+    //when and then
+    assertThatThrownBy(() -> underTest.findAccountVerificationById(2L))
+        .isInstanceOf(AccountNotFoundException.class)
+        .hasMessageContaining("User not found");
+  }
+
+  @Test
   @DisplayName("Update verification status for valid account")
-  public void testWhenUpdatingVerificationStatusForAccountThenExpectedTrue() {
+  void testWhenUpdatingVerificationStatusForAccountThenExpectedTrue() {
     // given
     Account account = createAccount("John", "Doe", "john.doe@example.com", Gender.MALE);
     account.setId(1L);
@@ -144,7 +174,7 @@ public class AccountServiceTests {
 
   @Test
   @DisplayName("Update account info for authorized user")
-  public void testUpdateAccountInfoWhenUserIsAuthorizedThenExpectedAccountCorrectlyUpdated()
+  void testUpdateAccountInfoWhenUserIsAuthorizedThenExpectedAccountCorrectlyUpdated()
       throws NotAuthorizedException {
     // given
     Account account = createAccount("John", "Doe", "john.doe@example.com", Gender.MALE);
@@ -164,7 +194,7 @@ public class AccountServiceTests {
   @Test
   @DisplayName(
       "Throw NotAuthorizedException when unauthorized user attempts to update account info")
-  public void testUpdateAccountInfoWhenUserIsNotAuthorizedThenThrowAnNotAuthorizedException() {
+  void testUpdateAccountInfoWhenUserIsNotAuthorizedThenThrowAnNotAuthorizedException() {
     // given
     AccountDTO accountDTO = new AccountDTO(1L, "John", "Doe", "john.doe@example.com", Gender.MALE);
     Account account = createAccount("Johny", "Doe", "john.doe@example.com", Gender.MALE);
@@ -175,6 +205,44 @@ public class AccountServiceTests {
     assertThrows(
         NotAuthorizedException.class, () -> underTest.updateAccountInfo(accountDTO, principal));
     verify(repository, never()).save(account);
+  }
+
+  @Test
+  @DisplayName("Test saving new account password")
+  void testSaveNewPasswordInToDatabase(){
+    //given
+    Account account = createAccount("John", "Doe", "john.doe@gmail.com", Gender.MALE);
+    account.setPassword("Aa012345678");
+    String newPassword = "Bb012345678";
+    //when
+    underTest.saveNewPasswordInToDatabase(newPassword, account);
+    //then
+    assertThat(account.getPassword()).isEqualTo(newPassword);
+  }
+
+  @Test
+  @DisplayName("Get account by e-mail if exists")
+  void testGetAccountWhenGivenEmailExistsThenExpectAccount(){
+    //given
+    String email = "john.doe@gmail.com";
+    Account account = createAccount("John", "Doe", "john.doe@gmail.com", Gender.MALE);
+    when(repository.findAccountByEmail(email)).thenReturn(Optional.of(account));
+    //when
+    Account resultAccount = underTest.getAccountByEmailIfExists(email);
+    //then
+    assertThat(resultAccount).isEqualTo(account);
+    verify(repository).findAccountByEmail(email);
+  }
+
+  @Test
+  @DisplayName("Get account by e-mail if exists")
+  void testGetAccountWhenGivenEmailNotExistsThenExpectException(){
+    //given
+    String email = "jane.doe@gmail.com";
+    //then
+    assertThatThrownBy(() -> underTest.getAccountByEmailIfExists(email))
+        .isInstanceOf(AccountNotFoundException.class)
+        .hasMessage("User not found");
   }
 
   private Account createAccount(String firstName, String lastName, String email, Gender gender) {
