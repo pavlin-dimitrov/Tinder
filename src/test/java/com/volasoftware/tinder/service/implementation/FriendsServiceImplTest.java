@@ -1,9 +1,8 @@
 package com.volasoftware.tinder.service.implementation;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -12,18 +11,21 @@ import static org.mockito.Mockito.when;
 import com.volasoftware.tinder.DTO.AccountDTO;
 import com.volasoftware.tinder.DTO.ResponseDTO;
 import com.volasoftware.tinder.entity.Account;
+import com.volasoftware.tinder.entity.Location;
 import com.volasoftware.tinder.enums.AccountType;
 import com.volasoftware.tinder.enums.Gender;
 import com.volasoftware.tinder.enums.Role;
-import com.volasoftware.tinder.exception.AccountNotFoundException;
 import com.volasoftware.tinder.exception.MissingFriendshipException;
 import com.volasoftware.tinder.exception.OriginGreaterThenBoundException;
 import com.volasoftware.tinder.repository.AccountRepository;
 import com.volasoftware.tinder.repository.RatingRepository;
 import com.volasoftware.tinder.service.contract.LocationService;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
@@ -34,11 +36,17 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ContextConfiguration;
 
 @ExtendWith(MockitoExtension.class)
 class FriendsServiceImplTest {
 
-  @InjectMocks private FriendsServiceImpl underTest;
+  @Autowired FriendsServiceImpl underTest;
   @Mock private AccountRepository repository;
   @Mock private AccountServiceImpl service;
   @Mock private RatingRepository ratingRepository;
@@ -157,19 +165,123 @@ class FriendsServiceImplTest {
 
   @Test
   @DisplayName("Seed random friends for requested real accounts")
-  void linkingRequestedRealAccountWithRandomFriends() {}
+  void linkingRequestedRealAccountWithRandomFriends() {
+    //given
+    Account requestedAccount = createAccount("John", "Doe", "john.doe@gmail.com", Gender.MALE, AccountType.REAL);
+    requestedAccount.setId(1L);
+    Account bot1 = createAccount("Bob", "Saab", "bob.saab@gmail.com", Gender.MALE, AccountType.BOT);
+    bot1.setId(2L);
+    Account bot2 = createAccount("Jamie","Johns","jamie.johns@gmail.com", Gender.MALE, AccountType.BOT);
+    bot2.setId(3L);
+    List<Account> allAccounts = List.of(requestedAccount, bot1, bot2);
+    repository.saveAll(allAccounts);
+
+    when(repository.findAll()).thenReturn(allAccounts);
+    when(service.getAccountByIdIfExists(requestedAccount.getId())).thenReturn(requestedAccount);
+    when(repository.findAllByType(AccountType.BOT)).thenReturn(List.of(bot1, bot2));
+    //when
+    ResponseDTO responseDTO = underTest.linkingRequestedRealAccountWithRandomFriends(requestedAccount.getId());
+    //then
+    assertThat(responseDTO.getResponse()).isEqualTo("Friends seeded successfully!");
+    assertThat(requestedAccount.getFriends()).isNotNull();
+    assertThat(bot1.getFriends()).isNull();
+    assertThat(bot2.getFriends()).isNull();
+  }
+
+  @Test
+  @DisplayName("Seed random friends for requested NOT real account")
+  void linkingRequestedNotRealAccountWithRandomFriendsExpectException() {
+    //given
+    Account requestedAccount = createAccount("John", "Doe", "john.doe@gmail.com", Gender.MALE, AccountType.BOT);
+    requestedAccount.setId(1L);
+    repository.saveAndFlush(requestedAccount);
+    when(service.getAccountByIdIfExists(requestedAccount.getId())).thenReturn(requestedAccount);
+    //when
+    ResponseDTO responseDTO = underTest.linkingRequestedRealAccountWithRandomFriends(requestedAccount.getId());
+    //then
+    assertThat(responseDTO.getResponse()).isEqualTo("Seeding friends was not successful!");
+  }
 
   @Test
   @DisplayName("Seed friends asynchronously")
-  void linkFriendsAsync() {}
+  void linkFriendsAsync() {
+    //given
+    Account requestedAccount = createAccount("John", "Doe", "john.doe@gmail.com", Gender.MALE, AccountType.REAL);
+    requestedAccount.setId(1L);
+    Account bot1 = createAccount("Bob", "Saab", "bob.saab@gmail.com", Gender.MALE, AccountType.BOT);
+    bot1.setId(2L);
+    Account bot2 = createAccount("Jamie","Johns","jamie.johns@gmail.com", Gender.MALE, AccountType.BOT);
+    bot2.setId(3L);
+    List<Account> allAccounts = List.of(requestedAccount, bot1, bot2);
+    repository.saveAll(allAccounts);
+
+    when(repository.findAll()).thenReturn(allAccounts);
+    when(service.getAccountByIdIfExists(requestedAccount.getId())).thenReturn(requestedAccount);
+    when(repository.findAllByType(AccountType.BOT)).thenReturn(List.of(bot1, bot2));
+    //when
+    underTest.linkFriendsAsync(requestedAccount.getId());
+    //then
+    assertThat(requestedAccount.getFriends()).isNotNull();
+    assertThat(bot1.getFriends()).isNull();
+    assertThat(bot2.getFriends()).isNull();
+  }
 
   @Test
-  @DisplayName("Check if user and friend are friends")
-  void checkIfUsersAreFriends() {}
+  @DisplayName("Show filtered list of friends sorted by Location, ordered by Asc")
+  void showFilteredListOfFriendsSortedByLocationOrderedByASC() {
+    //given
+    // Accounts, Friends, Locations
+    //when
+    //then
+  }
 
   @Test
-  @DisplayName("Show filtered list of friends")
-  void showFilteredListOfFriends() {}
+  @DisplayName("Show filtered list of friends sorted by Location, ordered by DESC")
+  void showFilteredListOfFriendsSortedByLocationOrderedByDESC() {
+  }
+
+  @Test
+  @DisplayName("Show filtered list of friends sorted by Location, ordered by Default")
+  void showFilteredListOfFriendsSortedByLocationOrderedByDefault() {
+  }
+
+  @Test
+  @DisplayName("Show filtered list of friends sorted by Rating, ordered by Asc")
+  void showFilteredListOfFriendsSortedByRatingOrderedByASC() {
+  }
+
+  @Test
+  @DisplayName("Show filtered list of friends sorted by Rating, ordered by DESC")
+  void showFilteredListOfFriendsSortedByRatingOrderedByDESC() {
+  }
+
+  @Test
+  @DisplayName("Show filtered list of friends sorted by Rating, ordered by Default")
+  void showFilteredListOfFriendsSortedByRatingOrderedByDefault() {
+  }
+
+  @Test
+  @DisplayName("Show filtered list of friends sorted by Default, ordered by Asc")
+  void showFilteredListOfFriendsSortedByDefaultOrderedByASC() {
+  }
+
+  @Test
+  @DisplayName("Show filtered list of friends sorted by Default, ordered by DESC")
+  void showFilteredListOfFriendsSortedByDefaultOrderedByDESC() {
+  }
+
+  @Test
+  void testIfAccount1IsFriendWithAccount2(){
+    //given
+    List<Account> accounts = accountsWithLocation();
+    Account account1 = accounts.get(0);
+    Account account2 = accounts.get(1);
+
+    if (account1.getFriends().contains(account2)){
+      String friendName = account2.getEmail();
+      assertThat(friendName).isEqualTo("jane.care@mail.com");
+    }
+  }
 
   private Set<Account> setFriends(Account account, Account friend) {
     Set<Account> friends = new HashSet<>();
@@ -190,7 +302,27 @@ class FriendsServiceImplTest {
     account.setGender(gender);
     account.setRole(Role.USER);
     account.setType(type);
-    account.setFriends(new HashSet<>());
     return account;
+  }
+
+  private List<Account> accountsWithLocation(){
+    List<Account> accounts = new ArrayList<>();
+    Account account1 = Account.builder().id(1L).email("john.doe@gmail.com").build();
+    Account account2 = Account.builder().id(2L).email("jane.care@mail.com").build();
+    Account account3 = Account.builder().id(3L).email("bob.davide@gmail.com").build();
+
+    Location location1 = Location.builder().id(1L).account(account1).latitude(10.0).longitude(20.0).build();
+    Location location2 = Location.builder().id(2L).account(account2).latitude(10.5).longitude(21.0).build();
+    Location location3 = Location.builder().id(3L).account(account3).latitude(9.0).longitude(22.0).build();
+
+    account1.setFriends(setFriends(account1, account2));
+    account1.setFriends(setFriends(account1, account3));
+    account2.setFriends(setFriends(account2, account3));
+
+    accounts.add(account1);
+    accounts.add(account2);
+    accounts.add(account3);
+
+    return accounts;
   }
 }

@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
@@ -75,6 +76,9 @@ public class FriendsServiceImpl implements FriendsService {
     log.info("Seed friends for requested REAL account.");
     List<Account> accounts = accountRepository.findAll();
     Account account = accountService.getAccountByIdIfExists(id);
+    if (!account.getType().equals(AccountType.REAL)){
+      return getResponseDTO(accounts);
+    }
     Set<Account> friends = new HashSet<>();
     seedFriends(accounts, account, friends);
     account.setFriends(friends);
@@ -224,7 +228,7 @@ public class FriendsServiceImpl implements FriendsService {
     if (accounts.stream().anyMatch(a -> !a.getFriends().isEmpty())) {
       response.setResponse("Friends seeded successfully!");
       return response;
-    } else response.setResponse("Invalid account id or account is not of type REAL");
+    } else response.setResponse("Seeding friends was not successful!");
     return response;
   }
 }
