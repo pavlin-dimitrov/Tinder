@@ -115,6 +115,12 @@ public class FriendsServiceImpl implements FriendsService {
       LocationDTO locationDTO,
       Integer limit) {
 
+    if (orderedBy == null)
+      orderedBy = desc;
+
+    if (sortedBy == null)
+      sortedBy = location;
+
     Account account = accountService.getAccountByEmailIfExists(principal.getName());
     log.info("Get account: " + account.getEmail());
     List<FriendDTO> friends = getFriendsList(account);
@@ -122,10 +128,10 @@ public class FriendsServiceImpl implements FriendsService {
 
     if (sortedBy.equalsIgnoreCase(location)) {
       friends = sortFriendsByLocation(locationDTO, friends);
-      log.info("List, sorted by location in ASC order.");
+      log.info("List, sorted by location.");
     } else if (sortedBy.equalsIgnoreCase(rating)) {
       friends = sortFriendsByRating(account);
-      log.info("List, sorted by rating in ASC order.");
+      log.info("List, sorted by rating.");
     }
 
     if (orderedBy.equalsIgnoreCase(asc)) {
@@ -133,7 +139,7 @@ public class FriendsServiceImpl implements FriendsService {
       return getLimitedListOfFriends(limit, friends);
     } else if (orderedBy.equalsIgnoreCase(desc)) {
       friends = orderFriendsDescending(account, friends, sortedBy, locationDTO);
-      log.info("Filtered list ordered by ASC with limit: " + limit);
+      log.info("Filtered list ordered by DESC with limit: " + limit);
       return getLimitedListOfFriends(limit, friends);
     }
     return friends;
