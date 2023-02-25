@@ -54,9 +54,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     log.info("Register new account with email {}", accountRegisterDTO.getEmail());
     checkForExistingEmail(accountRegisterDTO);
     ResponseDTO response = new ResponseDTO();
-    Account account = AccountRegisterMapper.INSTANCE.mapAccountRegisterDtoToAccount(accountRegisterDTO);
-    account.setPassword(passwordEncoder.encode(accountRegisterDTO.getPassword()));
-    account = accountService.saveAccount(account);
+    Account account = getAccount(accountRegisterDTO);
 
     VerificationToken token = verificationTokenService.createVerificationToken(account);
     log.info("Verification token generated for email: {}", accountRegisterDTO.getEmail());
@@ -70,6 +68,14 @@ public class AuthenticationServiceImpl implements AuthenticationService {
       e.printStackTrace();
     }
     return response;
+  }
+
+  private Account getAccount(AccountRegisterDTO accountRegisterDTO) {
+    Account account = AccountRegisterMapper.INSTANCE.mapAccountRegisterDtoToAccount(
+        accountRegisterDTO);
+    account.setPassword(passwordEncoder.encode(accountRegisterDTO.getPassword()));
+    account = accountService.saveAccount(account);
+    return account;
   }
 
   @Override

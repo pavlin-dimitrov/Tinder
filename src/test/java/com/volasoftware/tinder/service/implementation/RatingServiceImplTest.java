@@ -34,7 +34,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 @ExtendWith(MockitoExtension.class)
 class RatingServiceImplTest {
 
-  @Autowired @Mock private RatingService underTest;
+  @Autowired private RatingService underTest;
   @Mock private AccountService accountService;
   @Mock private FriendsService friendsService;
   @Mock private RatingRepository repository;
