@@ -26,32 +26,45 @@ public class RatingServiceImpl implements RatingService {
 
   @Override
   public ResponseDTO rateFriend(String email, FriendRatingDTO friendRatingDTO) {
-    ResponseDTO response = new ResponseDTO();
     Account account = accountService.getAccountByEmailIfExists(email);
     Account friend = accountService.getAccountByIdIfExists(friendRatingDTO.getFriendId());
     friendsService.checkIfUsersAreFriends(account, friend);
-    int ratingValue = friendRatingDTO.getRating();
+
+    validateRatingRange(friendRatingDTO.getRating());
+
+    String status =
+        ratingRepository.findByAccountAndFriend(account, friend).isEmpty()
+            ? "rated"
+            : "updated rating";
+
+    Rating rating =
+        ratingRepository
+            .findByAccountAndFriend(account, friend)
+            .orElseGet(() -> createRating(account, friend, friendRatingDTO.getRating()));
+
+    rating.setRating(friendRatingDTO.getRating());
+    ratingRepository.save(rating);
+
+    ResponseDTO response = new ResponseDTO();
+    response.setResponse("Successfully " + status + " friend!");
+    log.info(response.getResponse());
+
+    return response;
+  }
+
+  private void validateRatingRange(int ratingValue) {
     if (ratingValue < 1 || ratingValue > 10) {
       log.warn("Rating must be between 1 and 10.");
-      response.setResponse("Rating must be between 1 and 10.");
       throw new RatingRangeException();
     }
+  }
 
-    Optional<Rating> rating = ratingRepository.findByAccountAndFriend(account, friend);
-    if (rating.isPresent()) {
-      rating.get().setRating(friendRatingDTO.getRating());
-      ratingRepository.save(rating.get());
-      response.setResponse("Successfully updated rating!");
-      log.info("Successfully updated rating!");
-    } else {
-      Rating newRating = new Rating();
-      newRating.setAccount(account);
-      newRating.setFriend(friend);
-      newRating.setRating(friendRatingDTO.getRating());
-      ratingRepository.save(newRating);
-      response.setResponse("Successfully rated fried!");
-      log.info("Successfully rated fried!");
-    }
-    return response;
+  private Rating createRating(Account account, Account friend, int ratingValue) {
+    Rating newRating = new Rating();
+    newRating.setAccount(account);
+    newRating.setFriend(friend);
+    newRating.setRating(ratingValue);
+    ratingRepository.save(newRating);
+    return newRating;
   }
 }
