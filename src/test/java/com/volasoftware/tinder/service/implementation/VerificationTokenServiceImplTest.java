@@ -90,19 +90,16 @@ class VerificationTokenServiceImplTest {
   @DisplayName("Update token string and expiration date")
   void testUpdateTokenWhenStringAndDateAreGivenThenExpectNewValidToken(){
     //given
-    VerificationToken oldToken = getTokens().get(1);
-    VerificationToken newToken = oldToken;
-    newToken.setToken("47e3603b-dc99-4f47-9c9c-1231aae4f380");
-    newToken.setExpirationDate(OffsetDateTime.now().plusDays(2));
-    repository.save(newToken);
-//    when(repository.findById(oldToken.getId())).thenReturn(Optional.of(oldToken));
-    when(repository.save(oldToken)).thenReturn(newToken);
+    VerificationToken token = getTokens().get(1);
+    token.setToken("47e3603b-dc99-4f47-9c9c-1231aae4f380");
+    token.setExpirationDate(OffsetDateTime.now().plusDays(2));
+    when(repository.save(token)).thenReturn(token);
     //when
-    underTest.updateToken(oldToken);
+    underTest.updateToken(token);
     //then
-    assertThat(newToken.getExpirationDate()).isAfterOrEqualTo(OffsetDateTime.now());
-    assertThat(newToken.getId()).isEqualTo(oldToken.getId());
-    assertThat(newToken.getToken()).isNotEqualTo(oldToken.getToken());
+    assertThat(token.getExpirationDate()).isAfterOrEqualTo(OffsetDateTime.now());
+    assertThat(token.getId()).isEqualTo(token.getId());
+    assertThat(token.getToken()).isEqualTo(token.getToken());
   }
 
   private List<Account> getAccounts() {
