@@ -28,6 +28,7 @@ import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -62,17 +63,19 @@ public class AuthenticationServiceImpl implements AuthenticationService {
       emailService.sendVerificationEmail(accountRegisterDTO.getEmail(), token.getToken());
       log.info("Email with verification token sent to email: {}", accountRegisterDTO.getEmail());
       response.setResponse("Check your e-mail to confirm the registration");
-    } catch (MessagingException e) {
-      log.error("Failed to send email for: " + account.getEmail() + "\n" + e);
-      response.setResponse("Failed to re-send verification e-mail!");
-      e.printStackTrace();
+    } catch (MessagingException messagingException) {
+      log.error(
+          "Failed to send email for: "
+              + (account != null ? account.getEmail() : "Missing account")
+              + "\n");
+      response.setResponse("Failed to send verification e-mail!");
     }
     return response;
   }
 
   private Account getAccount(AccountRegisterDTO accountRegisterDTO) {
-    Account account = AccountRegisterMapper.INSTANCE.mapAccountRegisterDtoToAccount(
-        accountRegisterDTO);
+    Account account =
+        AccountRegisterMapper.INSTANCE.mapAccountRegisterDtoToAccount(accountRegisterDTO);
     account.setPassword(passwordEncoder.encode(accountRegisterDTO.getPassword()));
     account = accountService.saveAccount(account);
     return account;
@@ -80,6 +83,9 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
   @Override
   public AuthenticationResponseDTO login(AccountLoginDTO accountLoginDTO) {
+    Account user = accountService.
+        getAccountByEmailIfExists(accountLoginDTO.getEmail());
+
     verifyLogin(accountLoginDTO);
     log.info("Login verified.");
 
@@ -90,7 +96,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     SecurityContextHolder.getContext().setAuthentication(authentication);
     log.info("Authentication successfully added to Security Context Holder");
 
-    Account user = accountService.getAccountByEmailIfExists(accountLoginDTO.getEmail());
     String accessToken = jwtService.generateAccessToken(user);
     log.info("Access token created after the Login.");
     var refreshToken = jwtService.generateRefreshToken(user);
@@ -165,9 +170,9 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
   private void verifyLogin(AccountLoginDTO accountLoginDTO) {
     Account account = accountService.getAccountByEmailIfExists(accountLoginDTO.getEmail());
-      if (!account.isVerified()) {
-        log.warn("Account email is not verified yet");
-        throw new AccountNotVerifiedException();
+    if (!account.isVerified()) {
+      log.warn("Account email is not verified yet");
+      throw new AccountNotVerifiedException();
     }
   }
 }
