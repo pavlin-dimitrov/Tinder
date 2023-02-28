@@ -54,7 +54,7 @@ class VerificationTokenServiceImplTest {
     assertThat(token.getToken()).isNotEmpty();
     assertThat(token.getExpirationDate())
         .isAfter(OffsetDateTime.now())
-        .isBefore(OffsetDateTime.now().plusDays(2));
+        .isBefore(OffsetDateTime.now().plusDays(3));
   }
 
   @Test

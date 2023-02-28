@@ -28,7 +28,8 @@ public class VerificationTokenServiceImpl implements VerificationTokenService {
     token.setToken(UUID.randomUUID().toString());
     OffsetDateTime expirationDate = OffsetDateTime.now().plusDays(2);
     token.setExpirationDate(expirationDate);
-    return verificationTokenRepository.save(token);
+    verificationTokenRepository.save(token);
+    return token;
   }
 
   @Override

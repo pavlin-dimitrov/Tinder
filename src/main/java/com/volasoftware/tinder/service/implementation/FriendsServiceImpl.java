@@ -231,7 +231,7 @@ public class FriendsServiceImpl implements FriendsService {
 
   private ResponseDTO getResponseDTO(List<Account> accounts) {
     ResponseDTO response = new ResponseDTO();
-    if (accounts.stream().anyMatch(a -> !a.getFriends().isEmpty())) {
+    if (accounts.stream().anyMatch(account -> !account.getFriends().isEmpty())) {
       response.setResponse("Friends seeded successfully!");
       return response;
     } else response.setResponse("Seeding friends was not successful!");

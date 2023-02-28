@@ -155,7 +155,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     } catch (MessagingException e) {
       log.error("Failed to send email for: " + account.getEmail() + "\n" + e);
       response.setResponse("Failed to send new password!");
-      e.printStackTrace();
     }
     return response;
   }

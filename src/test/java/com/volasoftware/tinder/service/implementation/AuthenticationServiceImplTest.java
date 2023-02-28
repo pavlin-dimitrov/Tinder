@@ -53,6 +53,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -232,7 +234,7 @@ class AuthenticationServiceImplTest {
 
   @Test
   void testGetNewPairAuthTokensWhenRefreshTokenExistsThenExpectNewPair() throws IOException {
-    //given
+    // given
   }
 
   @Test
@@ -249,7 +251,7 @@ class AuthenticationServiceImplTest {
 
   @Test
   void testRecoverPasswordWhenCorrectDataIsGivenThenExpectOldPassNotMatchingNewPass() {
-    //given
+    // given
     String oldPassword = "oldPassword";
     Account account = new Account();
     account.setId(1L);
@@ -260,34 +262,34 @@ class AuthenticationServiceImplTest {
     when(principal.getName()).thenReturn(account.getEmail());
 
     when(accountService.getAccountByEmailIfExists(principal.getName())).thenReturn(account);
-    //when
+    // when
     underTest.recoverPassword(principal);
-    //then
+    // then
     assertFalse(passwordEncoder.matches(oldPassword, account.getPassword()));
   }
+
   @Test
   void testRecoverPasswordThenExpectMessagingException() throws MessagingException {
-    //given
-    String oldPassword = "oldPassword";
+    // given
+    ArgumentCaptor<String> newPasswordCaptor = ArgumentCaptor.forClass(String.class);
+    String email = "test@example.com";
+    String oldPass = "oldPassword";
+
     Account account = new Account();
-    account.setId(1L);
-    account.setEmail("john.doe@gmail.com");
-    account.setPassword(oldPassword);
+    account.setEmail(email);
+    account.setPassword(oldPass);
 
-    Principal principal = Mockito.mock(Principal.class);
-    when(principal.getName()).thenReturn(account.getEmail());
+    Principal principal = mock(Principal.class);
+    when(principal.getName()).thenReturn(email);
 
-    ResponseDTO expected = new ResponseDTO();
-    expected.setResponse("Failed to send new password!");
+    when(accountService.getAccountByEmailIfExists(email)).thenReturn(account);
 
-    EmailService emailService = mock(EmailService.class);
-    doThrow(new MessagingException())
+    doThrow(new MessagingException("Failed to send new password!"))
         .when(emailService)
-        .sendPasswordRecoveryEmail(null, null);
-
-    when(accountService.getAccountByEmailIfExists(principal.getName())).thenReturn(account);
-    //when and then
-    String actual = underTest.recoverPassword(principal).getResponse();
-    assertEquals(expected.getResponse(), actual);
+        .sendPasswordRecoveryEmail(eq(email), newPasswordCaptor.capture());
+    //when
+    ResponseDTO response = underTest.recoverPassword(principal);
+    //then
+    assertThat(response.getResponse()).isEqualTo("Failed to send new password!");
   }
 }
