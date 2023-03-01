@@ -51,6 +51,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -91,6 +92,7 @@ class AuthenticationServiceImplTest {
   }
 
   @Test
+  @DisplayName("Register new user with correct data!")
   void testRegisterNewAccountWhenCorrectDataIsGivenThenReturnSuccessResponse() {
     // given
     AccountRegisterDTO registerDTO = new AccountRegisterDTO();
@@ -118,6 +120,7 @@ class AuthenticationServiceImplTest {
   }
 
   @Test
+  @DisplayName("Try to Register new user with wrong Email address.")
   void testRegisterNewAccountWhenWrongEmailIsGivenThenExpectException() throws MessagingException {
     // given
     AccountRegisterDTO registerDTO = new AccountRegisterDTO();
@@ -149,6 +152,7 @@ class AuthenticationServiceImplTest {
   }
 
   @Test
+  @DisplayName("Try to Register new user when Email is taken")
   void testRegisterNewAccountWhenGivenEmailIsTakenThenExpectException() {
     // given
     AccountRegisterDTO registerDTO = new AccountRegisterDTO();
@@ -165,6 +169,7 @@ class AuthenticationServiceImplTest {
   }
 
   @Test
+  @DisplayName("Login when correct data is given")
   void testToLoginWhenCorrectDataIsGivenThenExpectAuthResponseDto() {
     // given
     Account account = new Account();
@@ -196,6 +201,7 @@ class AuthenticationServiceImplTest {
   }
 
   @Test
+  @DisplayName("Login when account is not Verified")
   void testToLoginWhenNotVerifiedAccountIsGivenThenExpectException() {
     // given
     Account account = new Account();
@@ -216,6 +222,7 @@ class AuthenticationServiceImplTest {
   }
 
   @Test
+  @DisplayName("Login with not existing email")
   void testToLoginWhitNotExistingEmailThenExpectException() {
     // given
     String nonExistingEmail = "nonexistingemail@example.com";
@@ -233,11 +240,13 @@ class AuthenticationServiceImplTest {
   }
 
   @Test
+  @DisplayName("Get new Pair of Authentication Tokens")
   void testGetNewPairAuthTokensWhenRefreshTokenExistsThenExpectNewPair() throws IOException {
     // given
   }
 
   @Test
+  @DisplayName("Try to Get new pair of Authentication tokens when refresh token is missing")
   void testGetNewPairAuthTokensWhenRefreshTokenIsMissingThenExpectException() {
     // given
     HttpServletRequest request = mock(HttpServletRequest.class);
@@ -250,6 +259,7 @@ class AuthenticationServiceImplTest {
   }
 
   @Test
+  @DisplayName("Recover password when correct data is given")
   void testRecoverPasswordWhenCorrectDataIsGivenThenExpectOldPassNotMatchingNewPass() {
     // given
     String oldPassword = "oldPassword";
@@ -269,6 +279,7 @@ class AuthenticationServiceImplTest {
   }
 
   @Test
+  @DisplayName("Try to Recover password, then expect exception")
   void testRecoverPasswordThenExpectMessagingException() throws MessagingException {
     // given
     ArgumentCaptor<String> newPasswordCaptor = ArgumentCaptor.forClass(String.class);

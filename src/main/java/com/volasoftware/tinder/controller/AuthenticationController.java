@@ -2,6 +2,7 @@ package com.volasoftware.tinder.controller;
 
 import com.volasoftware.tinder.DTO.AccountLoginDTO;
 import com.volasoftware.tinder.DTO.AccountRegisterDTO;
+import com.volasoftware.tinder.DTO.ErrorResponseDTO;
 import com.volasoftware.tinder.DTO.ResponseDTO;
 import com.volasoftware.tinder.DTO.AuthenticationResponseDTO;
 import com.volasoftware.tinder.service.contract.AuthenticationService;
@@ -12,6 +13,8 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import java.io.IOException;
 import java.security.Principal;
+import java.time.Instant;
+import java.util.Objects;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
@@ -20,10 +23,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -47,9 +53,23 @@ public class AuthenticationController {
       })
   @PostMapping("/register")
   public ResponseEntity<ResponseDTO> register(
-      @ApiParam(value = "Account registration details", required = true) @Valid @RequestBody AccountRegisterDTO dto) {
+      @ApiParam(value = "Account registration details", required = true) @Valid @RequestBody
+          AccountRegisterDTO dto) {
     log.info("Received request to register new account with e-mail: " + dto.getEmail());
     return new ResponseEntity<>(authenticationService.register(dto), HttpStatus.OK);
+  }
+
+  // https://www.aykutbuyukkaya.codes/how-to-validate-passwords-with-constraints-in-java-spring/
+  @ExceptionHandler(MethodArgumentNotValidException.class)
+  @ResponseStatus(HttpStatus.BAD_REQUEST)
+  public ErrorResponseDTO handlePasswordValidationException(MethodArgumentNotValidException e) {
+    return ErrorResponseDTO.builder()
+        .status(HttpStatus.BAD_REQUEST)
+        .message(
+            String.join(
+                ",",
+                Objects.requireNonNull(e.getBindingResult().getFieldError()).getDefaultMessage()))
+        .build();
   }
 
   @ApiOperation(value = "Login")
@@ -91,10 +111,10 @@ public class AuthenticationController {
   @ApiOperation(value = "Recover password")
   @ApiResponses(
       value = {
-          @ApiResponse(code = 200, message = "Successfully recovered password!"),
-          @ApiResponse(code = 401, message = "Not authorized action"),
-          @ApiResponse(code = 403, message = "Accessing the resource is forbidden"),
-          @ApiResponse(code = 404, message = "The resource is not found")
+        @ApiResponse(code = 200, message = "Successfully recovered password!"),
+        @ApiResponse(code = 401, message = "Not authorized action"),
+        @ApiResponse(code = 403, message = "Accessing the resource is forbidden"),
+        @ApiResponse(code = 404, message = "The resource is not found")
       })
   @PostMapping("/password-recovery")
   public ResponseEntity<ResponseDTO> recoverPassword(

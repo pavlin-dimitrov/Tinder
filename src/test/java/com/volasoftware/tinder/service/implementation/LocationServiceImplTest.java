@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -31,6 +32,7 @@ class LocationServiceImplTest {
   }
 
   @Test
+  @DisplayName("Calculate distance between two users.")
   void getFriendDistance() {
     // given
     List<LocationDTO> locationsDto =
