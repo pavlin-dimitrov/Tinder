@@ -27,7 +27,8 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
     MissingFriendshipException.class,
     MissingRefreshTokenException.class,
     NotAuthorizedException.class,
-    RatingRangeException.class
+    RatingRangeException.class,
+    InvalidPasswordException.class
   })
   @ResponseStatus(HttpStatus.BAD_REQUEST)
   public ResponseEntity<ErrorResponseDTO> handleBadRequestException(RuntimeException ex) {

@@ -1,6 +1,6 @@
 package com.volasoftware.tinder.service.implementation;
 
-import com.volasoftware.tinder.email.EmailDetails;
+import com.volasoftware.tinder.DTO.EmailDetailsDTO;
 import com.volasoftware.tinder.service.contract.EmailService;
 import java.nio.charset.StandardCharsets;
 import javax.mail.MessagingException;
@@ -65,8 +65,8 @@ public class EmailServiceImpl implements EmailService {
     }
   }
 
-  private EmailDetails mail(String recipientEmail, String token) {
-    EmailDetails mail = new EmailDetails();
+  private EmailDetailsDTO mail(String recipientEmail, String token) {
+    EmailDetailsDTO mail = new EmailDetailsDTO();
     mail.setRecipient(recipientEmail);
     mail.setSubject(subject);
     mail.setMsgBody(
@@ -87,8 +87,8 @@ public class EmailServiceImpl implements EmailService {
     return mail;
   }
 
-  private EmailDetails passwordMail(String recipient, String newPassword) {
-    EmailDetails mail = new EmailDetails();
+  private EmailDetailsDTO passwordMail(String recipient, String newPassword) {
+    EmailDetailsDTO mail = new EmailDetailsDTO();
     mail.setRecipient(recipient);
     mail.setSubject(pass_subject);
     mail.setMsgBody(

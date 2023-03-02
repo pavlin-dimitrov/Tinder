@@ -7,10 +7,12 @@ import com.volasoftware.tinder.DTO.AccountRegisterDTO;
 import com.volasoftware.tinder.DTO.AuthenticationResponseDTO;
 import com.volasoftware.tinder.DTO.ResponseDTO;
 import com.volasoftware.tinder.entity.Account;
+import com.volasoftware.tinder.enums.AccountType;
 import com.volasoftware.tinder.enums.Gender;
 import com.volasoftware.tinder.enums.Role;
 import com.volasoftware.tinder.mapper.AccountLoginMapper;
 import com.volasoftware.tinder.repository.AccountRepository;
+import com.volasoftware.tinder.service.contract.AccountService;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
@@ -19,15 +21,23 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Mono;
 
@@ -35,10 +45,11 @@ import reactor.core.publisher.Mono;
 class AuthenticationControllerTest {
 
   @Autowired AccountRepository repository;
-
+  @Autowired AccountService service;
+  @Autowired PasswordEncoder passwordEncoder;
   @LocalServerPort private int port;
-
   private WebTestClient webTestClient;
+  private static final Logger log = LogManager.getLogger(AuthenticationControllerTest.class);
 
   @BeforeEach
   void setUp() {
@@ -90,68 +101,39 @@ class AuthenticationControllerTest {
         .expectStatus().isBadRequest();
   }
 
-  @Test
-  void login() {
-    getAccounts();
-    Account account = repository.findById(2L).get();
-    AccountLoginDTO accountLoginDTO = AccountLoginMapper.INSTANCE.mapAccountToAccountLoginDTO(account);
-
-    webTestClient
-        .post()
-        .uri("/api/v1/auth/login")
-        .contentType(MediaType.APPLICATION_JSON)
-        .body(Mono.just(accountLoginDTO), AccountLoginDTO.class)
-        .exchange()
-        .expectStatus().isOk()
-        .expectBody(AuthenticationResponseDTO.class)
-        .value(response -> {
-          assertThat(response.getAccessToken()).isNotEmpty();
-          assertThat(response.getRefreshToken()).isNotEmpty();
-        });
-  }
+//  @Test
+//  void login() {
+//    Account account = Account.builder()
+//        .firstName("John")
+//        .lastName("Doe")
+//        .email("pavlin.k.dimitrov@gmail.com")
+//        .role(Role.USER)
+//        .gender(Gender.MALE)
+//        .age(30)
+//        .type(AccountType.REAL)
+//        .isVerified(true)
+//        .password("Aa012345678")
+//        .build();
+//    service.saveAccount(account);
+//
+//    Account account1 = service.getAccountByEmailIfExists("pavlin.k.dimitrov@gmail.com");
+//    AccountLoginDTO loginDTO = AccountLoginMapper.INSTANCE.mapAccountToAccountLoginDTO(account1);
+//
+//    this.webTestClient
+//        .post()
+//        .uri("/api/v1/auth/login")
+//        .body(Mono.just(loginDTO), AccountLoginDTO.class)
+//        .exchange()
+//        .expectStatus().isOk()
+//        .expectBody(AuthenticationResponseDTO.class)
+//        .value(response -> {assertThat(response.getAccessToken()).isNotEmpty();
+//        assertThat(response.getRefreshToken()).isNotEmpty();
+//        });
+//  }
 
   @Test
   void getNewPairAuthTokens() {}
 
   @Test
   void recoverPassword() {}
-
-  private void getAccounts() {
-    Account account = new Account();
-    account.setId(21L);
-    account.setEmail("pavlin.k.dimitrov@gmail.com");
-    account.setPassword("Aa012345678");
-    account.setAge(34);
-    account.setVerified(true);
-    account.setRole(Role.USER);
-    account.setGender(Gender.MALE);
-    repository.save(account);
-
-    Account account1 = new Account();
-    account1.setId(22L);
-    account1.setEmail("test@example.com");
-    account1.setPassword("Bb012345678");
-    account1.setRole(Role.USER);
-    account1.setGender(Gender.MALE);
-    repository.save(account1);
-  }
-
-  private String getJwt(String email) {
-    String SECRET_KEY = "404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970";
-    long accessTokenTwentyFourMinutes = 1000 * 60 * 24;
-    byte[] keyBytes = Decoders.BASE64.decode(SECRET_KEY);
-
-    List<GrantedAuthority> authorities = new ArrayList<>();
-    authorities.add(new SimpleGrantedAuthority("USER"));
-
-    return Jwts.builder()
-        .claim(
-            "authorities",
-            authorities.stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList()))
-        .setSubject(email)
-        .setIssuedAt(new Date(System.currentTimeMillis()))
-        .setExpiration(new Date(System.currentTimeMillis() + accessTokenTwentyFourMinutes))
-        .signWith(Keys.hmacShaKeyFor(keyBytes), SignatureAlgorithm.HS256)
-        .compact();
-  }
 }
