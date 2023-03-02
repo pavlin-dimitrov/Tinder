@@ -20,6 +20,7 @@ import com.volasoftware.tinder.enums.Gender;
 import com.volasoftware.tinder.enums.Role;
 import com.volasoftware.tinder.exception.MissingFriendshipException;
 import com.volasoftware.tinder.exception.OriginGreaterThenBoundException;
+import com.volasoftware.tinder.mapper.FriendMapper;
 import com.volasoftware.tinder.mapper.LocationMapper;
 import com.volasoftware.tinder.repository.AccountRepository;
 import com.volasoftware.tinder.repository.RatingRepository;
@@ -48,6 +49,7 @@ class FriendsServiceImplTest {
   @Mock private AccountServiceImpl service;
   @Mock private RatingRepository ratingRepository;
   @Mock private LocationService locationService;
+  @Mock private FriendMapper friendMapper;
   private final static String location = "location";
   private final static String rating = "rating";
   private final static String asc = "asc";
@@ -56,7 +58,7 @@ class FriendsServiceImplTest {
 
   @BeforeEach
   void setUp() {
-    underTest = new FriendsServiceImpl(repository, ratingRepository, locationService, service);
+    underTest = new FriendsServiceImpl(repository, ratingRepository, locationService, service, friendMapper);
   }
 
   @AfterEach

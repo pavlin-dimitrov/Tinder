@@ -18,4 +18,5 @@ public interface FriendMapper {
 
   @InheritInverseConfiguration
   Account friendDTOToAccount(FriendDTO friendDTO);
+
 }

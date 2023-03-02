@@ -46,6 +46,7 @@ public class FriendsServiceImpl implements FriendsService {
   private static final String rating = "rating";
   private static final String asc = "asc";
   private static final String desc = "desc";
+  private final FriendMapper friendMapper;
 
   @Override
   public AccountDTO getFriendInfo(String email, Long userId) {
@@ -195,21 +196,27 @@ public class FriendsServiceImpl implements FriendsService {
 
   private List<FriendDTO> getFriendsList(Account account) {
     return account.getFriends().stream()
-        .map(
-            friend -> {
-              Location friendLocation = friend.getLocation();
-              LocationDTO friendLocationDTO =
-                  new LocationDTO(friendLocation.getLatitude(), friendLocation.getLongitude());
-              return new FriendDTO(
-                  friend.getFirstName(),
-                  friend.getLastName(),
-                  friend.getImage(),
-                  friend.getGender(),
-                  friend.getAge(),
-                  friendLocationDTO);
-            })
+        .map(friendMapper::accountToFriendDTO)
         .collect(Collectors.toList());
   }
+
+//  private List<FriendDTO> getFriendsList(Account account) {
+//    return account.getFriends().stream()
+//        .map(
+//            friend -> {
+//              Location friendLocation = friend.getLocation();
+//              LocationDTO friendLocationDTO =
+//                  new LocationDTO(friendLocation.getLatitude(), friendLocation.getLongitude());
+//              return new FriendDTO(
+//                  friend.getFirstName(),
+//                  friend.getLastName(),
+//                  friend.getImage(),
+//                  friend.getGender(),
+//                  friend.getAge(),
+//                  friendLocationDTO);
+//            })
+//        .collect(Collectors.toList());
+//  }
 
   private void seedFriends(List<Account> accounts, Account account, Set<Account> friends) {
     for (int i = 0; i < accounts.size(); i++) {

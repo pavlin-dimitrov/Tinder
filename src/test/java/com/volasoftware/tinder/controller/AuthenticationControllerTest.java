@@ -101,35 +101,35 @@ class AuthenticationControllerTest {
         .expectStatus().isBadRequest();
   }
 
-//  @Test
-//  void login() {
-//    Account account = Account.builder()
-//        .firstName("John")
-//        .lastName("Doe")
-//        .email("pavlin.k.dimitrov@gmail.com")
-//        .role(Role.USER)
-//        .gender(Gender.MALE)
-//        .age(30)
-//        .type(AccountType.REAL)
-//        .isVerified(true)
-//        .password("Aa012345678")
-//        .build();
-//    service.saveAccount(account);
-//
-//    Account account1 = service.getAccountByEmailIfExists("pavlin.k.dimitrov@gmail.com");
-//    AccountLoginDTO loginDTO = AccountLoginMapper.INSTANCE.mapAccountToAccountLoginDTO(account1);
-//
-//    this.webTestClient
-//        .post()
-//        .uri("/api/v1/auth/login")
-//        .body(Mono.just(loginDTO), AccountLoginDTO.class)
-//        .exchange()
-//        .expectStatus().isOk()
-//        .expectBody(AuthenticationResponseDTO.class)
-//        .value(response -> {assertThat(response.getAccessToken()).isNotEmpty();
-//        assertThat(response.getRefreshToken()).isNotEmpty();
-//        });
-//  }
+  @Test
+  void login() {
+    Account account = Account.builder()
+        .firstName("John")
+        .lastName("Doe")
+        .email("pavlin.k.dimitrov@gmail.com")
+        .role(Role.USER)
+        .gender(Gender.MALE)
+        .age(30)
+        .type(AccountType.REAL)
+        .isVerified(true)
+        .password("Aa012345678")
+        .build();
+    service.saveAccount(account);
+
+    Account account1 = service.getAccountByEmailIfExists("pavlin.k.dimitrov@gmail.com");
+    AccountLoginDTO loginDTO = AccountLoginMapper.INSTANCE.mapAccountToAccountLoginDTO(account1);
+
+    this.webTestClient
+        .post()
+        .uri("/api/v1/auth/login")
+        .body(Mono.just(loginDTO), AccountLoginDTO.class)
+        .exchange()
+        .expectStatus().isOk()
+        .expectBody(AuthenticationResponseDTO.class)
+        .value(response -> {assertThat(response.getAccessToken()).isNotEmpty();
+        assertThat(response.getRefreshToken()).isNotEmpty();
+        });
+  }
 
   @Test
   void getNewPairAuthTokens() {}

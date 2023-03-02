@@ -91,7 +91,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     String accessToken = jwtService.generateAccessToken(user);
     log.info("Access token created after the Login.");
 
-    String refreshToken = jwtService.generateRefreshToken(user);
+    var refreshToken = jwtService.generateRefreshToken(user);
     log.info("Refresh token created after Login.");
 
     return AuthenticationResponseDTO.builder()
@@ -181,7 +181,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         authenticationManager.authenticate(
             new UsernamePasswordAuthenticationToken(
                 accountLoginDTO.getEmail(), accountLoginDTO.getPassword()));
-    System.out.println("AUTH OBJECT:   " + authentication.getCredentials().toString());
     SecurityContextHolder.getContext().setAuthentication(authentication);
     log.info("Security filter chain was SET");
   }

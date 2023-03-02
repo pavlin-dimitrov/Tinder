@@ -22,7 +22,7 @@ public class AuthConfig {
   @Bean
   public UserDetailsService userDetailsService() {
     return username -> repository.findAccountByEmail(username)
-        .orElseThrow(AccountNotFoundException::new);
+        .orElseThrow(() -> new AccountNotFoundException());
   }
 
   @Bean
