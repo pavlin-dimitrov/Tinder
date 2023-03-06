@@ -11,7 +11,6 @@ import com.volasoftware.tinder.service.contract.EmailVerificationService;
 import com.volasoftware.tinder.service.contract.FriendsService;
 import com.volasoftware.tinder.service.contract.VerificationTokenService;
 import java.time.OffsetDateTime;
-import java.util.Optional;
 import javax.mail.MessagingException;
 import javax.security.auth.login.AccountNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -59,7 +58,7 @@ public class EmailVerificationServiceImpl implements EmailVerificationService {
     }
 
     @Override
-    public ResponseDTO resendVerificationEmail(String email) throws AccountNotFoundException {
+    public ResponseDTO resendVerificationEmail(String email) {
         Account account = isAccountPresent(email);
         isEmailVerified(email);
         VerificationToken verificationToken = verificationTokenService.createVerificationToken(account);
@@ -79,17 +78,11 @@ public class EmailVerificationServiceImpl implements EmailVerificationService {
         return response;
     }
 
-    private Account isAccountPresent(String email) throws AccountNotFoundException {
-        Optional<Account> optionalAccount = accountService.findAccountByEmail(email);
-        if (optionalAccount.isEmpty()) {
-            log.warn("Account was not found!");
-            throw new AccountNotFoundException("Account with e-mail: " + email + " is not found!");
-        } else {
-            return optionalAccount.get();
-        }
+    private Account isAccountPresent(String email) {
+        return accountService.getAccountByEmailIfExists(email);
     }
 
-    private void isEmailVerified(String email) throws AccountNotFoundException {
+    private void isEmailVerified(String email) {
         if (isAccountPresent(email).isVerified()) {
             log.warn("Email address for email: " + email + " is already verified");
             throw new EmailIsVerifiedException(email);

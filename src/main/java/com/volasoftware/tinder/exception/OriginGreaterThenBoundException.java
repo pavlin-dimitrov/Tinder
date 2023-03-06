@@ -4,9 +4,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 @ResponseStatus(HttpStatus.BAD_REQUEST)
-public class MissingFriendshipException extends IllegalArgumentException {
+public class OriginGreaterThenBoundException extends IllegalArgumentException{
 
-  public MissingFriendshipException() {
-    super("You are not friend with this user!");
+  public OriginGreaterThenBoundException() {
+    super("Bound must be greater then origin");
   }
 }

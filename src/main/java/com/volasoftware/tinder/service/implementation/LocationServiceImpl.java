@@ -24,7 +24,7 @@ public class LocationServiceImpl implements LocationService {
                 * Math.sin(lonDistance / 2)
                 * Math.sin(lonDistance / 2);
     double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    double distance = R * c * 1000;
+    double distance = R * c; // * 1000
     distance = Math.pow(distance, 2);
     return Math.sqrt(distance);
   }

@@ -28,7 +28,8 @@ public class VerificationTokenServiceImpl implements VerificationTokenService {
     token.setToken(UUID.randomUUID().toString());
     OffsetDateTime expirationDate = OffsetDateTime.now().plusDays(2);
     token.setExpirationDate(expirationDate);
-    return verificationTokenRepository.save(token);
+    verificationTokenRepository.save(token);
+    return token;
   }
 
   @Override
@@ -44,12 +45,6 @@ public class VerificationTokenServiceImpl implements VerificationTokenService {
     List<VerificationToken> expiredTokens =
         verificationTokenRepository.findByExpirationDateBefore(now);
     verificationTokenRepository.deleteAll(expiredTokens);
-  }
-
-  @Override
-  public void delete(VerificationToken token){
-    log.info("Deleting expired verification token");
-    verificationTokenRepository.delete(token);
   }
 
   @Override

@@ -24,6 +24,9 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-data-jdbc'
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 
+	//H2
+	testImplementation 'com.h2database:h2:2.1.210'
+
 	//Spring Security
 	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
 	implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
@@ -89,6 +92,9 @@ dependencies {
 	implementation "org.mapstruct:mapstruct:1.4.2.Final"
 	annotationProcessor "org.projectlombok:lombok-mapstruct-binding:0.2.0"
 	annotationProcessor "org.mapstruct:mapstruct-processor:1.4.2.Final"
+
+	testImplementation 'org.springframework.boot:spring-boot-starter-webflux'
+
 }
 
 flyway {

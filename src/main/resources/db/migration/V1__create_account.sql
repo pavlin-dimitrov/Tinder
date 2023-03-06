@@ -10,7 +10,7 @@ create TABLE `account` (
   `last_name` varchar(50) NOT NULL,
   `password` varchar(255) NOT NULL,
   CONSTRAINT account_pkey PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+);
 
 insert into account(email, first_name, gender, last_name, password) values ('konov88@abv.bg', 'Kalin', 'MALE' ,'Konov',  '12345678');
 insert into account(email, first_name, gender, last_name, password) values ('adams88@gmail.com', 'J.', 'FEMALE', 'Adams',  'dramaQueen');
