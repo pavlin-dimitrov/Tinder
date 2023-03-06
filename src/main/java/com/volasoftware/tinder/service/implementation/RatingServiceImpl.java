@@ -9,7 +9,6 @@ import com.volasoftware.tinder.repository.RatingRepository;
 import com.volasoftware.tinder.service.contract.AccountService;
 import com.volasoftware.tinder.service.contract.FriendsService;
 import com.volasoftware.tinder.service.contract.RatingService;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,25 +30,29 @@ public class RatingServiceImpl implements RatingService {
     friendsService.checkIfUsersAreFriends(account, friend);
 
     validateRatingRange(friendRatingDTO.getRating());
+    String ratingStatus = getRatingStatus(account, friend);
+    setRatingForFriend(friendRatingDTO, account, friend);
 
-    String status =
-        ratingRepository.findByAccountAndFriend(account, friend).isEmpty()
-            ? "rated"
-            : "updated rating";
+    ResponseDTO response = new ResponseDTO();
+    response.setResponse("Successfully " + ratingStatus + " friend!");
+    log.info(response.getResponse());
 
+    return response;
+  }
+
+  private void setRatingForFriend(FriendRatingDTO friendRatingDTO, Account account, Account friend) {
     Rating rating =
         ratingRepository
             .findByAccountAndFriend(account, friend)
             .orElseGet(() -> createRating(account, friend, friendRatingDTO.getRating()));
-
     rating.setRating(friendRatingDTO.getRating());
     ratingRepository.save(rating);
+  }
 
-    ResponseDTO response = new ResponseDTO();
-    response.setResponse("Successfully " + status + " friend!");
-    log.info(response.getResponse());
-
-    return response;
+  private String getRatingStatus(Account account, Account friend) {
+    return ratingRepository.findByAccountAndFriend(account, friend).isEmpty()
+        ? "rated"
+        : "updated rating";
   }
 
   private void validateRatingRange(int ratingValue) {

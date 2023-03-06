@@ -81,14 +81,7 @@ public class AccountServiceImpl implements AccountService {
   @Transactional
   public AccountDTO updateAccountInfo(AccountDTO accountDTO, Principal principal)
       throws NotAuthorizedException {
-    if (!principal.getName().equals(accountDTO.getEmail())) {
-      log.warn(
-          "Account: "
-              + principal.getName()
-              + " is not authorized to edit account of: "
-              + accountDTO.getEmail());
-      throw new NotAuthorizedException();
-    }
+    validateAccountOwnership(accountDTO, principal);
 
     Account account = getAccountByIdIfExists(accountDTO.getId());
 
@@ -111,15 +104,23 @@ public class AccountServiceImpl implements AccountService {
 
   @Override
   public Account getAccountByIdIfExists(Long id) {
-    return accountRepository
-        .findById(id)
-        .orElseThrow(AccountNotFoundException::new);
+    return accountRepository.findById(id).orElseThrow(AccountNotFoundException::new);
   }
 
   @Override
   public Account getAccountByEmailIfExists(String email) {
-    return accountRepository
-        .findAccountByEmail(email)
-        .orElseThrow(AccountNotFoundException::new);
+    return accountRepository.findAccountByEmail(email).orElseThrow(AccountNotFoundException::new);
+  }
+
+  private void validateAccountOwnership(AccountDTO accountDTO, Principal principal)
+      throws NotAuthorizedException {
+    if (!principal.getName().equals(accountDTO.getEmail())) {
+      log.warn(
+          "Account: "
+              + principal.getName()
+              + " is not authorized to edit account of: "
+              + accountDTO.getEmail());
+      throw new NotAuthorizedException();
+    }
   }
 }

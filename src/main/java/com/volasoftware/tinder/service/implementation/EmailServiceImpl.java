@@ -35,8 +35,8 @@ public class EmailServiceImpl implements EmailService {
               StandardCharsets.UTF_8.name());
       helper.setFrom(new InternetAddress("tinderapplicationsender@gmail.com"));
       helper.setTo(recipientEmail);
-      helper.setSubject(mail(recipientEmail, token).getSubject());
-      helper.setText(mail(recipientEmail, token).getMsgBody(), true);
+      helper.setSubject(setVerificationTokenEmailContent(recipientEmail, token).getSubject());
+      helper.setText(setVerificationTokenEmailContent(recipientEmail, token).getMsgBody(), true);
       log.info("New email details generated");
       javaMailSender.send(message);
     } catch (Exception e) {
@@ -56,8 +56,8 @@ public class EmailServiceImpl implements EmailService {
               StandardCharsets.UTF_8.name());
       helper.setFrom(new InternetAddress("tinderapplicationsender@gmail.com"));
       helper.setTo(email);
-      helper.setSubject(passwordMail(email, newPassword).getSubject());
-      helper.setText(passwordMail(email, newPassword).getMsgBody(), true);
+      helper.setSubject(setPasswordRecoveryEmailContent(email, newPassword).getSubject());
+      helper.setText(setPasswordRecoveryEmailContent(email, newPassword).getMsgBody(), true);
       log.info("New email details generated");
       javaMailSender.send(message);
     } catch (Exception e) {
@@ -65,7 +65,7 @@ public class EmailServiceImpl implements EmailService {
     }
   }
 
-  private EmailDetailsDTO mail(String recipientEmail, String token) {
+  private EmailDetailsDTO setVerificationTokenEmailContent(String recipientEmail, String token) {
     EmailDetailsDTO mail = new EmailDetailsDTO();
     mail.setRecipient(recipientEmail);
     mail.setSubject(subject);
@@ -87,7 +87,7 @@ public class EmailServiceImpl implements EmailService {
     return mail;
   }
 
-  private EmailDetailsDTO passwordMail(String recipient, String newPassword) {
+  private EmailDetailsDTO setPasswordRecoveryEmailContent(String recipient, String newPassword) {
     EmailDetailsDTO mail = new EmailDetailsDTO();
     mail.setRecipient(recipient);
     mail.setSubject(pass_subject);

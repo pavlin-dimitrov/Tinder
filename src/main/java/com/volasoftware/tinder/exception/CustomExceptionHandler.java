@@ -13,7 +13,6 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
 
   @ExceptionHandler({AccountNotFoundException.class})
-  @ResponseStatus(HttpStatus.NOT_FOUND)
   public ResponseEntity<ErrorResponseDTO> handleNotFoundException(RuntimeException ex) {
     return new ResponseEntity<>(
         new ErrorResponseDTO(HttpStatus.NOT_FOUND, ex.getMessage(), LocalDateTime.now()),
@@ -30,7 +29,6 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
     RatingRangeException.class,
     InvalidPasswordException.class
   })
-  @ResponseStatus(HttpStatus.BAD_REQUEST)
   public ResponseEntity<ErrorResponseDTO> handleBadRequestException(RuntimeException ex) {
     return new ResponseEntity<>(
         new ErrorResponseDTO(HttpStatus.BAD_REQUEST, ex.getMessage(), LocalDateTime.now()),
@@ -38,7 +36,6 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
   }
 
   @ExceptionHandler(Exception.class)
-  @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
   public ResponseEntity<ErrorResponseDTO> handleException(Exception ex) {
     return new ResponseEntity<>(
         new ErrorResponseDTO(

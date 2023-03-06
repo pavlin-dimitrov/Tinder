@@ -65,6 +65,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.util.MimeTypeUtils;
 
@@ -78,6 +79,9 @@ class AuthenticationServiceImplTest {
   @Mock private PasswordEncoder passwordEncoder;
   @Mock private JwtService jwtService;
   @Mock private EmailService emailService;
+  private final static String fixedSalt =
+      "$2a$10$9WzT8ofq96tEFe/LaIWxCeQl.XDfvew96SDECVoR7jKk9x.Oi1FJi";
+  private final static String hashedPassword = BCrypt.hashpw("testPassword", fixedSalt);
 
   @BeforeEach
   void setUp() {
@@ -175,11 +179,13 @@ class AuthenticationServiceImplTest {
     Account account = new Account();
     account.setId(1L);
     account.setEmail("john.doe@gmail.com");
-    account.setPassword("testPassword");
+    account.setPassword(hashedPassword);
     account.setVerified(true);
 
-    AccountLoginDTO accountLoginDTO =
-        AccountLoginMapper.INSTANCE.mapAccountToAccountLoginDTO(account);
+    AccountLoginDTO accountLoginDTO = new AccountLoginDTO();
+    accountLoginDTO.setPassword("testPassword");
+    accountLoginDTO.setEmail("john.doe@gmail.com");
+
     Authentication authentication =
         authenticationManager.authenticate(
             new UsernamePasswordAuthenticationToken(
@@ -207,11 +213,12 @@ class AuthenticationServiceImplTest {
     Account account = new Account();
     account.setId(1L);
     account.setEmail("john.doe@gmail.com");
-    account.setPassword("testPassword");
+    account.setPassword(hashedPassword);
     account.setVerified(false);
 
-    AccountLoginDTO accountLoginDTO =
-        AccountLoginMapper.INSTANCE.mapAccountToAccountLoginDTO(account);
+    AccountLoginDTO accountLoginDTO = new AccountLoginDTO();
+    accountLoginDTO.setPassword("testPassword");
+    accountLoginDTO.setEmail("john.doe@gmail.com");
 
     when(accountService.getAccountByEmailIfExists(accountLoginDTO.getEmail())).thenReturn(account);
 
