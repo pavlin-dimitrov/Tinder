@@ -5,7 +5,6 @@ import com.volasoftware.tinder.DTO.FriendDTO;
 import com.volasoftware.tinder.DTO.LocationDTO;
 import com.volasoftware.tinder.DTO.ResponseDTO;
 import com.volasoftware.tinder.entity.Account;
-import com.volasoftware.tinder.entity.Location;
 import com.volasoftware.tinder.entity.Rating;
 import com.volasoftware.tinder.enums.AccountType;
 import com.volasoftware.tinder.exception.MissingFriendshipException;
@@ -22,7 +21,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
@@ -77,7 +75,7 @@ public class FriendsServiceImpl implements FriendsService {
     log.info("Seed friends for requested REAL account.");
     List<Account> accounts = accountRepository.findAll();
     Account account = accountService.getAccountByIdIfExists(id);
-    if (!account.getType().equals(AccountType.REAL)){
+    if (!account.getType().equals(AccountType.REAL)) {
       return getResponseDTO(accounts);
     }
     Set<Account> friends = new HashSet<>();
@@ -116,25 +114,21 @@ public class FriendsServiceImpl implements FriendsService {
       LocationDTO locationDTO,
       Integer limit) {
 
-    if (orderedBy == null)
-      orderedBy = desc;
-
-    if (sortedBy == null)
-      sortedBy = location;
+    if (orderedBy == null) orderedBy = desc;
+    if (sortedBy == null) sortedBy = location;
 
     Account account = accountService.getAccountByEmailIfExists(principal.getName());
     log.info("Get account: " + account.getEmail());
     List<FriendDTO> friends = getFriendsList(account);
     log.info("Get list of friends. List size: " + friends.size());
 
-    if (sortedBy.equalsIgnoreCase(location)) {
-      friends = sortFriendsByLocation(locationDTO, friends);
-      log.info("List, sorted by location.");
-    } else if (sortedBy.equalsIgnoreCase(rating)) {
-      friends = sortFriendsByRating(account);
-      log.info("List, sorted by rating.");
-    }
+    friends = getSortedListOfFriends(sortedBy, locationDTO, account, friends);
+    friends = getOrderedListOfFriends(sortedBy, orderedBy, locationDTO, limit, account, friends);
+    return friends;
+  }
 
+  private List<FriendDTO> getOrderedListOfFriends(String sortedBy, String orderedBy, LocationDTO locationDTO,
+      Integer limit, Account account, List<FriendDTO> friends) {
     if (orderedBy.equalsIgnoreCase(asc)) {
       log.info("Filtered list ordered by ASC with limit: ");
       return getLimitedListOfFriends(limit, friends);
@@ -142,6 +136,18 @@ public class FriendsServiceImpl implements FriendsService {
       friends = orderFriendsDescending(account, friends, sortedBy, locationDTO);
       log.info("Filtered list ordered by DESC with limit: " + limit);
       return getLimitedListOfFriends(limit, friends);
+    }
+    return friends;
+  }
+
+  private List<FriendDTO> getSortedListOfFriends(String sortedBy, LocationDTO locationDTO, Account account,
+      List<FriendDTO> friends) {
+    if (sortedBy.equalsIgnoreCase(location)) {
+      friends = sortFriendsByLocation(locationDTO, friends);
+      log.info("List, sorted by location.");
+    } else if (sortedBy.equalsIgnoreCase(rating)) {
+      friends = sortFriendsByRating(account);
+      log.info("List, sorted by rating.");
     }
     return friends;
   }
@@ -200,24 +206,6 @@ public class FriendsServiceImpl implements FriendsService {
         .collect(Collectors.toList());
   }
 
-//  private List<FriendDTO> getFriendsList(Account account) {
-//    return account.getFriends().stream()
-//        .map(
-//            friend -> {
-//              Location friendLocation = friend.getLocation();
-//              LocationDTO friendLocationDTO =
-//                  new LocationDTO(friendLocation.getLatitude(), friendLocation.getLongitude());
-//              return new FriendDTO(
-//                  friend.getFirstName(),
-//                  friend.getLastName(),
-//                  friend.getImage(),
-//                  friend.getGender(),
-//                  friend.getAge(),
-//                  friendLocationDTO);
-//            })
-//        .collect(Collectors.toList());
-//  }
-
   private void seedFriends(List<Account> accounts, Account account, Set<Account> friends) {
     for (int i = 0; i < accounts.size(); i++) {
       Account friend = accounts.get(getRandomFriendId());
@@ -230,7 +218,7 @@ public class FriendsServiceImpl implements FriendsService {
   private int getRandomFriendId() {
     int origin = 0;
     int bound = accountRepository.findAllByType(AccountType.BOT).size();
-    if (bound <= origin){
+    if (bound <= origin) {
       throw new OriginGreaterThenBoundException();
     }
     return ThreadLocalRandom.current().nextInt(origin, bound);

@@ -91,7 +91,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     String accessToken = jwtService.generateAccessToken(user);
     log.info("Access token created after the Login.");
 
-    var refreshToken = jwtService.generateRefreshToken(user);
+    String refreshToken = jwtService.generateRefreshToken(user);
     log.info("Refresh token created after Login.");
 
     return AuthenticationResponseDTO.builder()
@@ -105,25 +105,12 @@ public class AuthenticationServiceImpl implements AuthenticationService {
       throws IOException {
     final String authHeader = request.getHeader("Authorization");
     final String refresh_jwt;
-    final String userEmail;
     if (authHeader != null && authHeader.startsWith("Bearer ")) {
       try {
         refresh_jwt = authHeader.substring(7);
-        userEmail = jwtService.extractUsername(refresh_jwt);
-        Account account = accountService.getAccountByEmailIfExists(userEmail);
-        String access_jwt = jwtService.generateAccessToken(account);
-        Map<String, String> tokens = new HashMap<>();
-        tokens.put("refreshToken", refresh_jwt);
-        tokens.put("accessToken", access_jwt);
-        response.setContentType(MimeTypeUtils.APPLICATION_JSON_VALUE);
-        new ObjectMapper().writeValue(response.getOutputStream(), tokens);
+        setJwtResponseInHttpServlet(response, refresh_jwt);
       } catch (Exception e) {
-        log.error("Error refreshing the access token: {}", e.getMessage());
-        response.setHeader("error", e.getMessage());
-        response.setStatus(FORBIDDEN.value());
-        Map<String, String> error = new HashMap<>();
-        error.put("error_message", e.getMessage());
-        new ObjectMapper().writeValue(response.getOutputStream(), error);
+        setErrorResponseInHttpServlet(response, e);
       }
     } else {
       log.warn("Refresh token is missing, can not refresh the access token.");
@@ -183,6 +170,27 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 accountLoginDTO.getEmail(), accountLoginDTO.getPassword()));
     SecurityContextHolder.getContext().setAuthentication(authentication);
     log.info("Security filter chain was SET");
+  }
+
+  private void setErrorResponseInHttpServlet(HttpServletResponse response, Exception e) throws IOException {
+    log.error("Error refreshing the access token: {}", e.getMessage());
+    response.setHeader("error", e.getMessage());
+    response.setStatus(FORBIDDEN.value());
+    Map<String, String> error = new HashMap<>();
+    error.put("error_message", e.getMessage());
+    new ObjectMapper().writeValue(response.getOutputStream(), error);
+  }
+
+  private void setJwtResponseInHttpServlet(HttpServletResponse response, String refreshToken)
+      throws IOException {
+    String userEmail = jwtService.extractUsername(refreshToken);
+    Account account = accountService.getAccountByEmailIfExists(userEmail);
+    String accessToken = jwtService.generateAccessToken(account);
+    Map<String, String> tokens = new HashMap<>();
+    tokens.put("refreshToken", refreshToken);
+    tokens.put("accessToken", accessToken);
+    response.setContentType(MimeTypeUtils.APPLICATION_JSON_VALUE);
+    new ObjectMapper().writeValue(response.getOutputStream(), tokens);
   }
 
   private void checkIfPasswordMatches(AccountLoginDTO accountLoginDTO) {
