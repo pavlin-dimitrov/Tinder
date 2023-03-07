@@ -13,6 +13,9 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -42,9 +45,9 @@ public class AccountController {
         @ApiResponse(code = 404, message = "The resource you were trying to reach is not found")
       })
   @GetMapping
-  public ResponseEntity<List<AccountDTO>> getAllAccounts() {
+  public ResponseEntity<Page<AccountDTO>> getAllAccounts(@PageableDefault(size = 5) Pageable pageable) {
     log.info("Received request to get all accounts");
-    return new ResponseEntity<>(accountService.getAccounts(), HttpStatus.OK);
+    return new ResponseEntity<>(accountService.getAccounts(pageable), HttpStatus.OK);
   }
 
   @ApiOperation(value = "Edit personal account", response = AccountDTO.class)
