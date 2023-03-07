@@ -8,6 +8,8 @@ import java.security.Principal;
 import java.util.List;
 import java.util.Optional;
 import javax.security.auth.login.AccountNotFoundException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -19,7 +21,7 @@ public interface AccountService {
 
   AccountDTO findAccountById(Long id);
 
-  List<AccountDTO> getAccounts();
+  Page<AccountDTO> getAccounts(Pageable pageable);
 
   AccountVerificationDTO findAccountVerificationById(Long id);
 

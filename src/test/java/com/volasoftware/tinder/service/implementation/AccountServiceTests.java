@@ -34,6 +34,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 
 @ExtendWith(MockitoExtension.class)
 public class AccountServiceTests {
@@ -51,14 +55,16 @@ public class AccountServiceTests {
   @DisplayName("Test get all accounts")
   void testWhenRetrieveAllAccountsThenExpectedListOfThreeAccountsToBeReturned() {
     // given
+    Pageable pageable = Pageable.ofSize(5);
     List<Account> accounts = getAccounts();
-    when(repository.findAll()).thenReturn(accounts);
+    Page<Account> page = new PageImpl<>(accounts, pageable, accounts.size());
+    when(repository.findAll(pageable)).thenReturn(page);
     // when
-    List<AccountDTO> result = underTest.getAccounts();
+    Page<AccountDTO> result = underTest.getAccounts(pageable);
     // then
     assertNotNull(result);
-    assertEquals(3, result.size());
-    verify(repository).findAll();
+    assertEquals(3, result.getTotalElements());
+    verify(repository).findAll(pageable);
   }
 
   @Test
