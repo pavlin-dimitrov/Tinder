@@ -1,0 +1,1 @@
+ALTER TABLE account ADD COLUMN role varchar(6) NOT NULL DEFAULT 'USER';
