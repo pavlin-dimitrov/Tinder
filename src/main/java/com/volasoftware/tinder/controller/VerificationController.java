@@ -50,7 +50,7 @@ public class VerificationController {
       throws AccountNotFoundException {
     log.info("Received request to verify email with token: {}", token);
     emailVerificationService.verifyEmail(token);
-    return new RedirectView("/api/v1/auth/login");
+    return new RedirectView("/login");
   }
 
   @ApiOperation(value = "Re-Verification of new account e-mail address.")

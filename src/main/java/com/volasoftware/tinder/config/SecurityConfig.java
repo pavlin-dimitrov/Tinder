@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
@@ -22,18 +23,27 @@ public class SecurityConfig {
 
   @Bean
   public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-    http.csrf()
+    http
+        .csrf()
         .disable()
         .authorizeHttpRequests()
-        .antMatchers(
-            "/api/v1/auth/login",
-            "/swagger-ui/index.html/**",
+        .antMatchers("/swagger-ui/**",
+            "/swagger-ui/index.html",
+            "/swagger-resources/**",
+            "/swagger-ui.html",
+            "/v2/api-docs",
+            "/webjars/**",
+            "/login/",
+            "/api/v1/auth/login/**",
             "/api/v1/auth/**",
             "/api/v1/verify-email/**",
             "/api/v1/seed-friends/**")
         .permitAll()
         .anyRequest()
         .authenticated()
+        .and()
+        .formLogin()
+        .permitAll()
         .and()
         .sessionManagement()
         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
@@ -42,4 +52,5 @@ public class SecurityConfig {
         .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
     return http.build();
   }
+
 }
