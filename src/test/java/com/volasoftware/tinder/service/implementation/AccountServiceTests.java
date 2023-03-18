@@ -11,8 +11,8 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.volasoftware.tinder.DTO.AccountDTO;
-import com.volasoftware.tinder.DTO.AccountVerificationDTO;
+import com.volasoftware.tinder.dto.AccountDto;
+import com.volasoftware.tinder.dto.AccountVerificationDto;
 import com.volasoftware.tinder.entity.Account;
 import com.volasoftware.tinder.enums.AccountType;
 import com.volasoftware.tinder.enums.Gender;
@@ -37,7 +37,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PageableDefault;
 
 @ExtendWith(MockitoExtension.class)
 public class AccountServiceTests {
@@ -60,7 +59,7 @@ public class AccountServiceTests {
     Page<Account> page = new PageImpl<>(accounts, pageable, accounts.size());
     when(repository.findAll(pageable)).thenReturn(page);
     // when
-    Page<AccountDTO> result = underTest.getAccounts(pageable);
+    Page<AccountDto> result = underTest.getAccounts(pageable);
     // then
     assertNotNull(result);
     assertEquals(3, result.getTotalElements());
@@ -105,17 +104,17 @@ public class AccountServiceTests {
 
   @Test
   @DisplayName("Find account by given id")
-  void testFindAccountByIdWhenTheCorrectIdIsGivenThenExpectCorrectAccountDTO() {
+  void testFindAccountByIdWhenTheCorrectIdIsGivenThenExpectCorrectAccountDto() {
     // given
     Long accountId = 1L;
     Account account = createAccount("John", "Doe", "john.doe@example.com", Gender.MALE);
     account.setId(accountId);
     when(repository.findById(accountId)).thenReturn(Optional.of(account));
     // when
-    AccountDTO accountDTO = underTest.findAccountById(accountId);
+    AccountDto accountDto = underTest.findAccountById(accountId);
     // then
-    assertNotNull(accountDTO);
-    assertEquals(account.getId(), accountDTO.getId());
+    assertNotNull(accountDto);
+    assertEquals(account.getId(), accountDto.getId());
     verify(repository).findById(accountId);
   }
 
@@ -135,14 +134,14 @@ public class AccountServiceTests {
 
   @Test
   @DisplayName("Find account verification by valid Id")
-  void testFindAccountVerificationWhenValidIdIsProvidedAccountVerificationDTO() {
+  void testFindAccountVerificationWhenValidIdIsProvidedAccountVerificationDto() {
     // given
     Account account = createAccount("John", "Doe", "john.doe@example.com", Gender.MALE);
     account.setId(1L);
     account.setVerified(true);
     Mockito.when(repository.findById(account.getId())).thenReturn(Optional.of(account));
     // when
-    AccountVerificationDTO returnedAccount = underTest.findAccountVerificationById(account.getId());
+    AccountVerificationDto returnedAccount = underTest.findAccountVerificationById(account.getId());
     // then
     verify(repository).findById(account.getId());
     assertTrue(returnedAccount.isVerified());
@@ -167,11 +166,11 @@ public class AccountServiceTests {
     Account account = createAccount("John", "Doe", "john.doe@example.com", Gender.MALE);
     account.setId(1L);
     account.setVerified(false);
-    AccountVerificationDTO verificationDTO = new AccountVerificationDTO(true);
+    AccountVerificationDto verificationDto = new AccountVerificationDto(true);
 
     Mockito.when(repository.findById(account.getId())).thenReturn(Optional.of(account));
     // when
-    underTest.updateVerificationStatus(account.getId(), verificationDTO);
+    underTest.updateVerificationStatus(account.getId(), verificationDto);
     // then
     verify(repository).findById(account.getId());
     verify(repository).save(account);
@@ -185,14 +184,14 @@ public class AccountServiceTests {
     // given
     Account account = createAccount("John", "Doe", "john.doe@example.com", Gender.MALE);
     account.setId(1L);
-    AccountDTO accountDTO = AccountMapper.INSTANCE.mapAccountToAccountDto(account);
-    accountDTO.setEmail("jane.doe@example.com");
+    AccountDto accountDto = AccountMapper.INSTANCE.mapAccountToAccountDto(account);
+    accountDto.setEmail("jane.doe@example.com");
     // when
-    Principal principal = accountDTO::getEmail;
-    Mockito.when(repository.findById(accountDTO.getId())).thenReturn(Optional.of(account));
-    AccountDTO updatedAccount = underTest.updateAccountInfo(accountDTO, principal);
+    Principal principal = accountDto::getEmail;
+    Mockito.when(repository.findById(accountDto.getId())).thenReturn(Optional.of(account));
+    AccountDto updatedAccount = underTest.updateAccountInfo(accountDto, principal);
     // then
-    verify(repository).findById(accountDTO.getId());
+    verify(repository).findById(accountDto.getId());
     verify(repository).save(account);
     assertEquals("jane.doe@example.com", updatedAccount.getEmail());
   }
@@ -202,14 +201,14 @@ public class AccountServiceTests {
       "Throw NotAuthorizedException when unauthorized user attempts to update account info")
   void testUpdateAccountInfoWhenUserIsNotAuthorizedThenThrowAnNotAuthorizedException() {
     // given
-    AccountDTO accountDTO = new AccountDTO(1L, "John", "Doe", "john.doe@example.com", Gender.MALE);
+    AccountDto accountDto = new AccountDto(1L, "John", "Doe", "john.doe@example.com", Gender.MALE);
     Account account = createAccount("Johny", "Doe", "john.doe@example.com", Gender.MALE);
     account.setId(1L);
     // when
     Principal principal = () -> "jane.doe@example.com";
     // then
     assertThrows(
-        NotAuthorizedException.class, () -> underTest.updateAccountInfo(accountDTO, principal));
+        NotAuthorizedException.class, () -> underTest.updateAccountInfo(accountDto, principal));
     verify(repository, never()).save(account);
   }
 

@@ -1,10 +1,7 @@
 package com.volasoftware.tinder.controller;
 
-import com.volasoftware.tinder.DTO.AccountLoginDTO;
-import com.volasoftware.tinder.DTO.AccountRegisterDTO;
-import com.volasoftware.tinder.DTO.ErrorResponseDTO;
-import com.volasoftware.tinder.DTO.ResponseDTO;
-import com.volasoftware.tinder.DTO.AuthenticationResponseDTO;
+import com.volasoftware.tinder.dto.*;
+import com.volasoftware.tinder.dto.AccountLoginDto;
 import com.volasoftware.tinder.service.contract.AuthenticationService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -13,7 +10,6 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import java.io.IOException;
 import java.security.Principal;
-import java.time.Instant;
 import java.util.Objects;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -52,9 +48,9 @@ public class AuthenticationController {
         @ApiResponse(code = 404, message = "The resource you were trying to reach is not found")
       })
   @PostMapping("/register")
-  public ResponseEntity<ResponseDTO> register(
+  public ResponseEntity<ResponseDto> register(
       @ApiParam(value = "Account registration details", required = true) @Valid @RequestBody
-          AccountRegisterDTO dto) {
+      AccountRegisterDto dto) {
     log.info("Received request to register new account with e-mail: " + dto.getEmail());
     return new ResponseEntity<>(authenticationService.register(dto), HttpStatus.OK);
   }
@@ -62,8 +58,8 @@ public class AuthenticationController {
   // https://www.aykutbuyukkaya.codes/how-to-validate-passwords-with-constraints-in-java-spring/
   @ExceptionHandler(MethodArgumentNotValidException.class)
   @ResponseStatus(HttpStatus.BAD_REQUEST)
-  public ErrorResponseDTO handlePasswordValidationException(MethodArgumentNotValidException e) {
-    return ErrorResponseDTO.builder()
+  public ErrorResponseDto handlePasswordValidationException(MethodArgumentNotValidException e) {
+    return ErrorResponseDto.builder()
         .status(HttpStatus.BAD_REQUEST)
         .message(
             String.join(
@@ -81,8 +77,8 @@ public class AuthenticationController {
         @ApiResponse(code = 404, message = "The resource is not found")
       })
   @PostMapping("/login")
-  public ResponseEntity<AuthenticationResponseDTO> login(
-      @ApiParam(value = "Login details", required = true) @RequestBody AccountLoginDTO request) {
+  public ResponseEntity<AuthenticationResponseDto> login(
+      @ApiParam(value = "Login details", required = true) @Valid @RequestBody AccountLoginDto request) {
     log.info("Received request to login");
     return new ResponseEntity<>(authenticationService.login(request), HttpStatus.OK);
   }
@@ -117,7 +113,7 @@ public class AuthenticationController {
         @ApiResponse(code = 404, message = "The resource is not found")
       })
   @PostMapping("/password-recovery")
-  public ResponseEntity<ResponseDTO> recoverPassword(
+  public ResponseEntity<ResponseDto> recoverPassword(
       @ApiParam(value = "The authenticated user", required = true) Principal principal) {
     return new ResponseEntity<>(authenticationService.recoverPassword(principal), HttpStatus.OK);
   }

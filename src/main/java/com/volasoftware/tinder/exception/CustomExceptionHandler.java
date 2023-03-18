@@ -1,21 +1,20 @@
 package com.volasoftware.tinder.exception;
 
-import com.volasoftware.tinder.DTO.ErrorResponseDTO;
+import com.volasoftware.tinder.dto.ErrorResponseDto;
 import java.time.LocalDateTime;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 @ControllerAdvice
 public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
 
   @ExceptionHandler({AccountNotFoundException.class})
-  public ResponseEntity<ErrorResponseDTO> handleNotFoundException(RuntimeException ex) {
+  public ResponseEntity<ErrorResponseDto> handleNotFoundException(RuntimeException ex) {
     return new ResponseEntity<>(
-        new ErrorResponseDTO(HttpStatus.NOT_FOUND, ex.getMessage(), LocalDateTime.now()),
+        new ErrorResponseDto(HttpStatus.NOT_FOUND, ex.getMessage(), LocalDateTime.now()),
         HttpStatus.NOT_FOUND);
   }
 
@@ -29,16 +28,16 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
     RatingRangeException.class,
     InvalidPasswordException.class
   })
-  public ResponseEntity<ErrorResponseDTO> handleBadRequestException(RuntimeException ex) {
+  public ResponseEntity<ErrorResponseDto> handleBadRequestException(RuntimeException ex) {
     return new ResponseEntity<>(
-        new ErrorResponseDTO(HttpStatus.BAD_REQUEST, ex.getMessage(), LocalDateTime.now()),
+        new ErrorResponseDto(HttpStatus.BAD_REQUEST, ex.getMessage(), LocalDateTime.now()),
         HttpStatus.BAD_REQUEST);
   }
 
   @ExceptionHandler(Exception.class)
-  public ResponseEntity<ErrorResponseDTO> handleException(Exception ex) {
+  public ResponseEntity<ErrorResponseDto> handleException(Exception ex) {
     return new ResponseEntity<>(
-        new ErrorResponseDTO(
+        new ErrorResponseDto(
             HttpStatus.INTERNAL_SERVER_ERROR, "Internal Server Error", LocalDateTime.now()),
         HttpStatus.INTERNAL_SERVER_ERROR);
   }

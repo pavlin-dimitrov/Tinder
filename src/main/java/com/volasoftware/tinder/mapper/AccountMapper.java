@@ -1,10 +1,9 @@
 package com.volasoftware.tinder.mapper;
 
-import com.volasoftware.tinder.DTO.AccountDTO;
+import com.volasoftware.tinder.dto.AccountDto;
 import com.volasoftware.tinder.entity.Account;
 import java.util.List;
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
 import org.mapstruct.ReportingPolicy;
 import org.mapstruct.factory.Mappers;
 
@@ -13,9 +12,9 @@ public interface AccountMapper {
 
   AccountMapper INSTANCE = Mappers.getMapper(AccountMapper.class);
 
-  Account mapAccountDtoToAccount(AccountDTO accountDTO);
+  Account mapAccountDtoToAccount(AccountDto accountDto);
 
-  AccountDTO mapAccountToAccountDto(Account account);
+  AccountDto mapAccountToAccountDto(Account account);
 
-  List<AccountDTO> mapAccountListToAccountDtoList(List<Account> list);
+  List<AccountDto> mapAccountListToAccountDtoList(List<Account> list);
 }

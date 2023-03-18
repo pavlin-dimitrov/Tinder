@@ -2,27 +2,24 @@ package com.volasoftware.tinder.service.implementation;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
-import com.volasoftware.tinder.DTO.FriendRatingDTO;
-import com.volasoftware.tinder.DTO.ResponseDTO;
+import com.volasoftware.tinder.dto.FriendRatingDto;
+import com.volasoftware.tinder.dto.ResponseDto;
 import com.volasoftware.tinder.entity.Account;
-import com.volasoftware.tinder.entity.Location;
 import com.volasoftware.tinder.entity.Rating;
 import com.volasoftware.tinder.exception.RatingRangeException;
-import com.volasoftware.tinder.mapper.FriendMapper;
 import com.volasoftware.tinder.mapper.RatingMapper;
 import com.volasoftware.tinder.repository.RatingRepository;
 import com.volasoftware.tinder.service.contract.AccountService;
-import com.volasoftware.tinder.service.contract.FriendsService;
+import com.volasoftware.tinder.service.contract.FriendService;
 import com.volasoftware.tinder.service.contract.RatingService;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -36,12 +33,12 @@ class RatingServiceImplTest {
 
   @Autowired private RatingService underTest;
   @Mock private AccountService accountService;
-  @Mock private FriendsService friendsService;
+  @Mock private FriendService friendService;
   @Mock private RatingRepository repository;
 
   @BeforeEach
   void setUp() {
-    underTest = new RatingServiceImpl(accountService, friendsService, repository);
+    underTest = new RatingServiceImpl(accountService, friendService, repository);
   }
 
   @Test
@@ -51,14 +48,14 @@ class RatingServiceImplTest {
     Account user = getAccounts().get(0);
     Account friend = getAccounts().get(1);
 
-    FriendRatingDTO ratingDTO = new FriendRatingDTO();
-    ratingDTO.setRating(6);
-    ratingDTO.setFriendId(friend.getId());
+    FriendRatingDto ratingDto = new FriendRatingDto();
+    ratingDto.setRating(6);
+    ratingDto.setFriendId(friend.getId());
 
     when(accountService.getAccountByEmailIfExists(user.getEmail())).thenReturn(user);
     when(accountService.getAccountByIdIfExists(friend.getId())).thenReturn(friend);
     //when
-    ResponseDTO response = underTest.rateFriend(user.getEmail(), ratingDTO);
+    ResponseDto response = underTest.rateFriend(user.getEmail(), ratingDto);
     //then
     assertThat(response.getResponse()).isEqualTo("Successfully rated friend!");
   }
@@ -76,15 +73,15 @@ class RatingServiceImplTest {
     rating.setFriend(friend);
     rating.setRating(6);
 
-    FriendRatingDTO ratingDTO = RatingMapper.INSTANCE.ratingToFriendRatingDTO(rating);
-    ratingDTO.setRating(7);
-    ratingDTO.setFriendId(friend.getId());
+    FriendRatingDto ratingDto = RatingMapper.INSTANCE.ratingToFriendRatingDto(rating);
+    ratingDto.setRating(7);
+    ratingDto.setFriendId(friend.getId());
 
     when(accountService.getAccountByEmailIfExists(user.getEmail())).thenReturn(user);
     when(accountService.getAccountByIdIfExists(friend.getId())).thenReturn(friend);
     when(repository.findByAccountAndFriend(user, friend)).thenReturn(Optional.of(rating));
     //when
-    ResponseDTO response = underTest.rateFriend(user.getEmail(), ratingDTO);
+    ResponseDto response = underTest.rateFriend(user.getEmail(), ratingDto);
     //then
     assertThat(response.getResponse()).isEqualTo("Successfully updated rating friend!");
   }
@@ -96,11 +93,11 @@ class RatingServiceImplTest {
     Account user = getAccounts().get(0);
     Account friend = getAccounts().get(1);
 
-    FriendRatingDTO ratingDTO = new FriendRatingDTO();
-    ratingDTO.setRating(11);
-    ratingDTO.setFriendId(friend.getId());
+    FriendRatingDto ratingDto = new FriendRatingDto();
+    ratingDto.setRating(11);
+    ratingDto.setFriendId(friend.getId());
     //when and then
-    assertThatThrownBy(() -> underTest.rateFriend(user.getEmail(), ratingDTO))
+    assertThatThrownBy(() -> underTest.rateFriend(user.getEmail(), ratingDto))
         .isInstanceOf(RatingRangeException.class)
         .hasMessage("Rating must be between 1 and 10.");
   }

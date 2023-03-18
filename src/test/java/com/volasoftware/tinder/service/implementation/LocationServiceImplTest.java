@@ -1,15 +1,13 @@
 package com.volasoftware.tinder.service.implementation;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
-import com.volasoftware.tinder.DTO.LocationDTO;
+import com.volasoftware.tinder.dto.LocationDto;
 import com.volasoftware.tinder.entity.Account;
 import com.volasoftware.tinder.entity.Location;
 import com.volasoftware.tinder.mapper.LocationMapper;
 import com.volasoftware.tinder.service.contract.LocationService;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -35,10 +33,10 @@ class LocationServiceImplTest {
   @DisplayName("Calculate distance between two users.")
   void getFriendDistance() {
     // given
-    List<LocationDTO> locationsDto =
+    List<LocationDto> locationsDto =
         getAccounts().stream()
             .map(Account::getLocation)
-            .map(LocationMapper.INSTANCE::locationToLocationDTO)
+            .map(LocationMapper.INSTANCE::locationToLocationDto)
             .collect(Collectors.toList());
     List<Double> distances = new ArrayList<>();
     //when

@@ -1,4 +1,4 @@
-package com.volasoftware.tinder.DTO;
+package com.volasoftware.tinder.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -8,6 +8,6 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter @Setter
-public class ResponseDTO {
+public class ResponseDto {
     private String response;
 }

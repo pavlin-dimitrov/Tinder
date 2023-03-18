@@ -1,11 +1,7 @@
 package com.volasoftware.tinder.controller;
 
-import com.volasoftware.tinder.DTO.AccountDTO;
-import com.volasoftware.tinder.DTO.FriendDTO;
-import com.volasoftware.tinder.DTO.FriendRatingDTO;
-import com.volasoftware.tinder.DTO.LocationDTO;
-import com.volasoftware.tinder.DTO.ResponseDTO;
-import com.volasoftware.tinder.service.contract.FriendsService;
+import com.volasoftware.tinder.dto.*;
+import com.volasoftware.tinder.service.contract.FriendService;
 import com.volasoftware.tinder.service.contract.RatingService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -32,9 +28,9 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 @RequestMapping("api/v1/friends")
 @Api(value = "Friends controller")
-public class FriendsController {
+public class FriendController {
 
-  private final FriendsService friendsService;
+  private final FriendService friendService;
   private final RatingService ratingService;
 
   @ApiOperation(
@@ -47,17 +43,15 @@ public class FriendsController {
         @ApiResponse(code = 404, message = "The resource is not found")
       })
   @GetMapping("")
-  public ResponseEntity<List<FriendDTO>> showFilteredListOfFriends(
+  public ResponseEntity<List<FriendDto>> showFilteredListOfFriends(
       @RequestParam(value = "sortedBy", required = false, defaultValue = "location") String sortedBy,
       @RequestParam(value = "orderedBy", required = false, defaultValue = "desc") String orderedBy,
       Principal principal,
-      @RequestBody(required = false) LocationDTO locationDTO,
+      @Valid @RequestBody(required = false) LocationDto locationDto,
       @RequestParam(value = "limit", required = false) Integer limit) {
 
-    return new ResponseEntity<>(
-        friendsService.showFilteredListOfFriends(
-            sortedBy, orderedBy, principal, locationDTO, limit),
-        HttpStatus.OK);
+    return new ResponseEntity<>(friendService.showFilteredListOfFriends(
+            sortedBy, orderedBy, principal, locationDto, limit), HttpStatus.OK);
   }
 
   @ApiOperation(value = "Rate friend")
@@ -69,10 +63,10 @@ public class FriendsController {
         @ApiResponse(code = 404, message = "The resource is not found")
       })
   @PostMapping("/rate")
-  public ResponseEntity<ResponseDTO> rateFriend(
-      Principal principal, @Valid @RequestBody FriendRatingDTO friendRatingDTO) {
+  public ResponseEntity<ResponseDto> rateFriend(
+      Principal principal, @Valid @RequestBody FriendRatingDto friendRatingDto) {
     return new ResponseEntity<>(
-        ratingService.rateFriend(principal.getName(), friendRatingDTO), HttpStatus.OK);
+        ratingService.rateFriend(principal.getName(), friendRatingDto), HttpStatus.OK);
   }
 
   @ApiOperation(value = "Get friend info")
@@ -84,9 +78,9 @@ public class FriendsController {
         @ApiResponse(code = 404, message = "The resource is not found")
       })
   @GetMapping("/info/{id}")
-  public ResponseEntity<AccountDTO> showFriendInfo(
+  public ResponseEntity<AccountDto> showFriendInfo(
       Principal principal, @PathVariable("id") Long friendId) {
     return new ResponseEntity<>(
-        friendsService.getFriendInfo(principal.getName(), friendId), HttpStatus.OK);
+        friendService.getFriendInfo(principal.getName(), friendId), HttpStatus.OK);
   }
 }

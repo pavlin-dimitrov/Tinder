@@ -2,10 +2,10 @@ package com.volasoftware.tinder.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.volasoftware.tinder.DTO.AccountLoginDTO;
-import com.volasoftware.tinder.DTO.AccountRegisterDTO;
-import com.volasoftware.tinder.DTO.AuthenticationResponseDTO;
-import com.volasoftware.tinder.DTO.ResponseDTO;
+import com.volasoftware.tinder.dto.AccountLoginDto;
+import com.volasoftware.tinder.dto.AccountRegisterDto;
+import com.volasoftware.tinder.dto.AuthenticationResponseDto;
+import com.volasoftware.tinder.dto.ResponseDto;
 import com.volasoftware.tinder.entity.Account;
 import com.volasoftware.tinder.enums.AccountType;
 import com.volasoftware.tinder.enums.Gender;
@@ -42,22 +42,22 @@ class AuthenticationControllerTest {
   @Test
   @DisplayName("Register new user with status 200")
   void testRegisterNewUserWhenCorrectDataIsGivenThenReturnStatusOk() {
-    AccountRegisterDTO registerDTO = new AccountRegisterDTO();
-    registerDTO.setEmail("tester@example.com");
-    registerDTO.setPassword("Aa012345678");
-    registerDTO.setFirstName("Test");
-    registerDTO.setLastName("User");
-    registerDTO.setGender(Gender.MALE);
-    registerDTO.setAge(34);
+    AccountRegisterDto registerDto = new AccountRegisterDto();
+    registerDto.setEmail("tester@example.com");
+    registerDto.setPassword("Aa012345678");
+    registerDto.setFirstName("Test");
+    registerDto.setLastName("User");
+    registerDto.setGender(Gender.MALE);
+    registerDto.setAge(34);
 
     webTestClient
         .post()
         .uri("/api/v1/auth/register")
-        .body(Mono.just(registerDTO), AccountRegisterDTO.class)
+        .body(Mono.just(registerDto), AccountRegisterDto.class)
         .exchange()
         .expectStatus()
         .isOk()
-        .expectBody(ResponseDTO.class)
+        .expectBody(ResponseDto.class)
         .value(
             response -> {
               assertThat(response.getResponse())
@@ -68,18 +68,18 @@ class AuthenticationControllerTest {
   @Test
   @DisplayName("Try register new user with provided not valid password, then return status 400")
   void testRegisterWithNotValidPassword() {
-    AccountRegisterDTO registerDTO = new AccountRegisterDTO();
-    registerDTO.setEmail("test@example.com");
-    registerDTO.setPassword("012345");
-    registerDTO.setFirstName("Test");
-    registerDTO.setLastName("User");
-    registerDTO.setGender(Gender.MALE);
-    registerDTO.setAge(34);
+    AccountRegisterDto registerDto = new AccountRegisterDto();
+    registerDto.setEmail("test@example.com");
+    registerDto.setPassword("012345");
+    registerDto.setFirstName("Test");
+    registerDto.setLastName("User");
+    registerDto.setGender(Gender.MALE);
+    registerDto.setAge(34);
 
     webTestClient
         .post()
         .uri("/api/v1/auth/register")
-        .body(Mono.just(registerDTO), AccountRegisterDTO.class)
+        .body(Mono.just(registerDto), AccountRegisterDto.class)
         .exchange()
         .expectStatus().isBadRequest();
   }
@@ -99,17 +99,17 @@ class AuthenticationControllerTest {
         .build();
     service.saveAccount(account);
 
-    AccountLoginDTO accountLoginDTO = new AccountLoginDTO();
-    accountLoginDTO.setPassword("testPassword");
-    accountLoginDTO.setEmail("john.doe@gmail.com");
+    AccountLoginDto accountLoginDto = new AccountLoginDto();
+    accountLoginDto.setPassword("testPassword");
+    accountLoginDto.setEmail("john.doe@gmail.com");
 
     this.webTestClient
         .post()
         .uri("/api/v1/auth/login")
-        .body(Mono.just(accountLoginDTO), AccountLoginDTO.class)
+        .body(Mono.just(accountLoginDto), AccountLoginDto.class)
         .exchange()
         .expectStatus().isOk()
-        .expectBody(AuthenticationResponseDTO.class)
+        .expectBody(AuthenticationResponseDto.class)
         .value(response -> {assertThat(response.getAccessToken()).isNotEmpty();
         assertThat(response.getRefreshToken()).isNotEmpty();
         });

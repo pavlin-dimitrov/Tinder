@@ -1,10 +1,10 @@
 package com.volasoftware.tinder.service.contract;
 
-import com.volasoftware.tinder.DTO.FriendRatingDTO;
-import com.volasoftware.tinder.DTO.ResponseDTO;
+import com.volasoftware.tinder.dto.FriendRatingDto;
+import com.volasoftware.tinder.dto.ResponseDto;
 
 public interface RatingService {
 
-  ResponseDTO rateFriend(String email, FriendRatingDTO friendRatingDTO);
+  ResponseDto rateFriend(String email, FriendRatingDto friendRatingDto);
 
 }

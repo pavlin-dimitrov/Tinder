@@ -6,68 +6,51 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.volasoftware.tinder.DTO.AccountLoginDTO;
-import com.volasoftware.tinder.DTO.AccountRegisterDTO;
-import com.volasoftware.tinder.DTO.AuthenticationResponseDTO;
-import com.volasoftware.tinder.DTO.ResponseDTO;
+import com.volasoftware.tinder.dto.AccountLoginDto;
+import com.volasoftware.tinder.dto.AccountRegisterDto;
+import com.volasoftware.tinder.dto.AuthenticationResponseDto;
+import com.volasoftware.tinder.dto.ResponseDto;
 import com.volasoftware.tinder.entity.Account;
 import com.volasoftware.tinder.entity.VerificationToken;
-import com.volasoftware.tinder.enums.Gender;
 import com.volasoftware.tinder.exception.AccountNotFoundException;
 import com.volasoftware.tinder.exception.AccountNotVerifiedException;
 import com.volasoftware.tinder.exception.EmailIsTakenException;
 import com.volasoftware.tinder.exception.MissingRefreshTokenException;
-import com.volasoftware.tinder.mapper.AccountLoginMapper;
-import com.volasoftware.tinder.mapper.AccountMapper;
 import com.volasoftware.tinder.mapper.AccountRegisterMapper;
 import com.volasoftware.tinder.service.contract.AccountService;
 import com.volasoftware.tinder.service.contract.AuthenticationService;
 import com.volasoftware.tinder.service.contract.EmailService;
 import com.volasoftware.tinder.service.contract.JwtService;
 import com.volasoftware.tinder.service.contract.VerificationTokenService;
-import java.io.ByteArrayOutputStream;
+
 import java.io.IOException;
 import java.security.Principal;
-import java.time.OffsetDateTime;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
 import javax.mail.MessagingException;
-import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.junit.jupiter.api.AfterEach;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.util.MimeTypeUtils;
 
 @ExtendWith(MockitoExtension.class)
 class AuthenticationServiceImplTest {
@@ -99,11 +82,11 @@ class AuthenticationServiceImplTest {
   @DisplayName("Register new user with correct data!")
   void testRegisterNewAccountWhenCorrectDataIsGivenThenReturnSuccessResponse() {
     // given
-    AccountRegisterDTO registerDTO = new AccountRegisterDTO();
-    registerDTO.setEmail("john.doe@gmail.com");
-    registerDTO.setPassword("password");
+    AccountRegisterDto registerDto = new AccountRegisterDto();
+    registerDto.setEmail("john.doe@gmail.com");
+    registerDto.setPassword("password");
 
-    ResponseDTO expected = new ResponseDTO();
+    ResponseDto expected = new ResponseDto();
     expected.setResponse("Check your e-mail to confirm the registration");
 
     VerificationTokenService verificationTokenService = mock(VerificationTokenService.class);
@@ -119,7 +102,7 @@ class AuthenticationServiceImplTest {
                 emailService));
     doReturn(new VerificationToken()).when(verificationTokenService).createVerificationToken(any());
 
-    String actual = authenticationService.register(registerDTO).getResponse();
+    String actual = authenticationService.register(registerDto).getResponse();
     assertEquals(expected.getResponse(), actual);
   }
 
@@ -127,11 +110,11 @@ class AuthenticationServiceImplTest {
   @DisplayName("Try to Register new user with wrong Email address.")
   void testRegisterNewAccountWhenWrongEmailIsGivenThenExpectException() throws MessagingException {
     // given
-    AccountRegisterDTO registerDTO = new AccountRegisterDTO();
-    registerDTO.setEmail("john.doe@gmail.com");
-    registerDTO.setPassword("password");
+    AccountRegisterDto registerDto = new AccountRegisterDto();
+    registerDto.setEmail("john.doe@gmail.com");
+    registerDto.setPassword("password");
 
-    ResponseDTO expected = new ResponseDTO();
+    ResponseDto expected = new ResponseDto();
     expected.setResponse("Failed to send verification e-mail!");
 
     VerificationTokenService verificationTokenService = mock(VerificationTokenService.class);
@@ -151,7 +134,7 @@ class AuthenticationServiceImplTest {
         .when(emailService)
         .sendVerificationEmail(anyString(), anyString());
     // when
-    String actual = authenticationService.register(registerDTO).getResponse();
+    String actual = authenticationService.register(registerDto).getResponse();
     assertEquals(expected.getResponse(), actual);
   }
 
@@ -159,15 +142,15 @@ class AuthenticationServiceImplTest {
   @DisplayName("Try to Register new user when Email is taken")
   void testRegisterNewAccountWhenGivenEmailIsTakenThenExpectException() {
     // given
-    AccountRegisterDTO registerDTO = new AccountRegisterDTO();
-    registerDTO.setEmail("john.doe@gmail.com");
-    registerDTO.setPassword("password");
-    Account account = AccountRegisterMapper.INSTANCE.mapAccountRegisterDtoToAccount(registerDTO);
-    when(accountService.findAccountByEmail(registerDTO.getEmail()))
+    AccountRegisterDto registerDto = new AccountRegisterDto();
+    registerDto.setEmail("john.doe@gmail.com");
+    registerDto.setPassword("password");
+    Account account = AccountRegisterMapper.INSTANCE.mapAccountRegisterDtoToAccount(registerDto);
+    when(accountService.findAccountByEmail(registerDto.getEmail()))
         .thenReturn(Optional.of(account));
 
     // when
-    assertThatThrownBy(() -> underTest.register(registerDTO))
+    assertThatThrownBy(() -> underTest.register(registerDto))
         .isInstanceOf(EmailIsTakenException.class)
         .hasMessage("Email is taken! Use another e-mail address!");
   }
@@ -182,25 +165,25 @@ class AuthenticationServiceImplTest {
     account.setPassword(hashedPassword);
     account.setVerified(true);
 
-    AccountLoginDTO accountLoginDTO = new AccountLoginDTO();
-    accountLoginDTO.setPassword("testPassword");
-    accountLoginDTO.setEmail("john.doe@gmail.com");
+    AccountLoginDto accountLoginDto = new AccountLoginDto();
+    accountLoginDto.setPassword("testPassword");
+    accountLoginDto.setEmail("john.doe@gmail.com");
 
     Authentication authentication =
         authenticationManager.authenticate(
             new UsernamePasswordAuthenticationToken(
-                accountLoginDTO.getEmail(), accountLoginDTO.getPassword()));
+                accountLoginDto.getEmail(), accountLoginDto.getPassword()));
 
-    when(accountService.getAccountByEmailIfExists(accountLoginDTO.getEmail())).thenReturn(account);
+    when(accountService.getAccountByEmailIfExists(accountLoginDto.getEmail())).thenReturn(account);
     when(authenticationManager.authenticate(
             new UsernamePasswordAuthenticationToken(
-                accountLoginDTO.getEmail(), accountLoginDTO.getPassword())))
+                accountLoginDto.getEmail(), accountLoginDto.getPassword())))
         .thenReturn(authentication);
     when(jwtService.generateAccessToken(account)).thenReturn("Access Token");
     when(jwtService.generateRefreshToken(account)).thenReturn("Refresh Token");
 
     // when
-    AuthenticationResponseDTO response = underTest.login(accountLoginDTO);
+    AuthenticationResponseDto response = underTest.login(accountLoginDto);
     // then
     assertEquals(response.getAccessToken(), "Access Token");
     assertEquals(response.getRefreshToken(), "Refresh Token");
@@ -216,14 +199,14 @@ class AuthenticationServiceImplTest {
     account.setPassword(hashedPassword);
     account.setVerified(false);
 
-    AccountLoginDTO accountLoginDTO = new AccountLoginDTO();
-    accountLoginDTO.setPassword("testPassword");
-    accountLoginDTO.setEmail("john.doe@gmail.com");
+    AccountLoginDto accountLoginDto = new AccountLoginDto();
+    accountLoginDto.setPassword("testPassword");
+    accountLoginDto.setEmail("john.doe@gmail.com");
 
-    when(accountService.getAccountByEmailIfExists(accountLoginDTO.getEmail())).thenReturn(account);
+    when(accountService.getAccountByEmailIfExists(accountLoginDto.getEmail())).thenReturn(account);
 
     // when and then
-    assertThatThrownBy(() -> underTest.login(accountLoginDTO))
+    assertThatThrownBy(() -> underTest.login(accountLoginDto))
         .isInstanceOf(AccountNotVerifiedException.class)
         .hasMessage("Account e-mail is not verified yet!");
   }
@@ -233,15 +216,15 @@ class AuthenticationServiceImplTest {
   void testToLoginWhitNotExistingEmailThenExpectException() {
     // given
     String nonExistingEmail = "nonexistingemail@example.com";
-    AccountLoginDTO accountLoginDTO = new AccountLoginDTO();
-    accountLoginDTO.setEmail(nonExistingEmail);
-    accountLoginDTO.setPassword("password");
+    AccountLoginDto accountLoginDto = new AccountLoginDto();
+    accountLoginDto.setEmail(nonExistingEmail);
+    accountLoginDto.setPassword("password");
 
-    when(accountService.getAccountByEmailIfExists(accountLoginDTO.getEmail()))
+    when(accountService.getAccountByEmailIfExists(accountLoginDto.getEmail()))
         .thenThrow(new AccountNotFoundException());
 
     // when and then
-    assertThatThrownBy(() -> underTest.login(accountLoginDTO))
+    assertThatThrownBy(() -> underTest.login(accountLoginDto))
         .isInstanceOf(AccountNotFoundException.class)
         .hasMessage("User not found");
   }
@@ -306,7 +289,7 @@ class AuthenticationServiceImplTest {
         .when(emailService)
         .sendPasswordRecoveryEmail(eq(email), newPasswordCaptor.capture());
     //when
-    ResponseDTO response = underTest.recoverPassword(principal);
+    ResponseDto response = underTest.recoverPassword(principal);
     //then
     assertThat(response.getResponse()).isEqualTo("Failed to send new password!");
   }

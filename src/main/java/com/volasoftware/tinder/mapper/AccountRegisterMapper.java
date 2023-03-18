@@ -1,6 +1,6 @@
 package com.volasoftware.tinder.mapper;
 
-import com.volasoftware.tinder.DTO.AccountRegisterDTO;
+import com.volasoftware.tinder.dto.AccountRegisterDto;
 import com.volasoftware.tinder.entity.Account;
 import org.mapstruct.Mapper;
 import org.mapstruct.ReportingPolicy;
@@ -11,7 +11,7 @@ public interface AccountRegisterMapper {
 
   AccountRegisterMapper INSTANCE = Mappers.getMapper(AccountRegisterMapper.class);
 
-  Account mapAccountRegisterDtoToAccount(AccountRegisterDTO accountRegisterDTO);
+  Account mapAccountRegisterDtoToAccount(AccountRegisterDto accountRegisterDto);
 
-  AccountRegisterDTO mapAccountToAccountDto(Account account);
+  AccountRegisterDto mapAccountToAccountDto(Account account);
 }

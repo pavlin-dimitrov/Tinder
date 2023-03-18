@@ -3,6 +3,7 @@ package com.volasoftware.tinder.config;
 import com.volasoftware.tinder.exception.AccountNotFoundException;
 import com.volasoftware.tinder.repository.AccountRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -17,6 +18,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @RequiredArgsConstructor
 public class AuthConfig {
 
+  @Autowired
   private final AccountRepository repository;
 
   @Bean

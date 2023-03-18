@@ -1,4 +1,4 @@
-package com.volasoftware.tinder.DTO;
+package com.volasoftware.tinder.dto;
 
 import com.volasoftware.tinder.enums.Gender;
 import io.swagger.annotations.ApiModel;
@@ -13,7 +13,7 @@ import lombok.Setter;
 @Setter
 @Getter
 @ApiModel(description = "Public account information")
-public class AccountDTO {
+public class AccountDto {
   @ApiModelProperty(value = "Account ID", example = "23", required = true)
   private Long id;
 

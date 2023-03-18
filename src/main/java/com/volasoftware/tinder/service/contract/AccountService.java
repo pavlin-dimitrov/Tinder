@@ -1,11 +1,10 @@
 package com.volasoftware.tinder.service.contract;
 
-import com.volasoftware.tinder.DTO.AccountDTO;
-import com.volasoftware.tinder.DTO.AccountVerificationDTO;
+import com.volasoftware.tinder.dto.AccountDto;
+import com.volasoftware.tinder.dto.AccountVerificationDto;
 import com.volasoftware.tinder.entity.Account;
 import com.volasoftware.tinder.exception.NotAuthorizedException;
 import java.security.Principal;
-import java.util.List;
 import java.util.Optional;
 import javax.security.auth.login.AccountNotFoundException;
 import org.springframework.data.domain.Page;
@@ -19,16 +18,16 @@ public interface AccountService {
 
   Optional<Account> findAccountByEmail(String email);
 
-  AccountDTO findAccountById(Long id);
+  AccountDto findAccountById(Long id);
 
-  Page<AccountDTO> getAccounts(Pageable pageable);
+  Page<AccountDto> getAccounts(Pageable pageable);
 
-  AccountVerificationDTO findAccountVerificationById(Long id);
+  AccountVerificationDto findAccountVerificationById(Long id);
 
-  void updateVerificationStatus(Long accountId, AccountVerificationDTO verificationDTO)
+  void updateVerificationStatus(Long accountId, AccountVerificationDto verificationDto)
       throws AccountNotFoundException;
 
-  AccountDTO updateAccountInfo(AccountDTO accountDTO, Principal principal)
+  AccountDto updateAccountInfo(AccountDto accountDto, Principal principal)
       throws NotAuthorizedException;
 
   void saveNewPasswordInToDatabase(String newPassword, Account account);
