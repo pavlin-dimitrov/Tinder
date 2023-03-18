@@ -1,14 +1,14 @@
 package com.volasoftware.tinder.service.implementation;
 
-import com.volasoftware.tinder.DTO.AccountVerificationDTO;
-import com.volasoftware.tinder.DTO.ResponseDTO;
+import com.volasoftware.tinder.dto.AccountVerificationDto;
+import com.volasoftware.tinder.dto.ResponseDto;
 import com.volasoftware.tinder.entity.Account;
 import com.volasoftware.tinder.entity.VerificationToken;
 import com.volasoftware.tinder.exception.EmailIsVerifiedException;
 import com.volasoftware.tinder.service.contract.AccountService;
 import com.volasoftware.tinder.service.contract.EmailService;
 import com.volasoftware.tinder.service.contract.EmailVerificationService;
-import com.volasoftware.tinder.service.contract.FriendsService;
+import com.volasoftware.tinder.service.contract.FriendService;
 import com.volasoftware.tinder.service.contract.VerificationTokenService;
 import java.time.OffsetDateTime;
 import javax.mail.MessagingException;
@@ -27,7 +27,7 @@ public class EmailVerificationServiceImpl implements EmailVerificationService {
   private final VerificationTokenService verificationTokenService;
   private final EmailService emailService;
   private final AccountService accountService;
-  private final FriendsService friendsService;
+  private final FriendService friendService;
 
   @Override
   public ResponseEntity<?> verifyEmail(String token) throws AccountNotFoundException {
@@ -37,30 +37,30 @@ public class EmailVerificationServiceImpl implements EmailVerificationService {
       log.warn("Token expired or invalid: {}", token);
       return ResponseEntity.badRequest().body("Token expired or invalid");
     } else {
-      AccountVerificationDTO accountVerificationDTO =
+      AccountVerificationDto accountVerificationDto =
           accountService.findAccountVerificationById(verificationToken.getAccount().getId());
-      if (accountVerificationDTO == null) {
+      if (accountVerificationDto == null) {
         log.warn("User not found for token: {}", token);
         return ResponseEntity.badRequest().body("User not found");
       }
       Long accountId = verificationToken.getAccount().getId();
-      accountVerificationDTO.setVerified(true);
-      accountService.updateVerificationStatus(accountId, accountVerificationDTO);
-      friendsService.linkFriendsAsync(accountId);
+      accountVerificationDto.setVerified(true);
+      accountService.updateVerificationStatus(accountId, accountVerificationDto);
+      friendService.linkFriendsAsync(accountId);
       log.info("Successfully verified email for user with id: {}", accountId);
       return ResponseEntity.ok().build();
     }
   }
 
   @Override
-  public ResponseDTO resendVerificationEmail(String email) {
+  public ResponseDto resendVerificationEmail(String email) {
     Account account = isAccountPresent(email);
     isEmailVerified(email);
     VerificationToken verificationToken = verificationTokenService.createVerificationToken(account);
     log.info("Re-Verification token generated for email: {}", account.getEmail());
     verificationTokenService.updateToken(verificationToken);
     log.info("Re-Verification token saved in to the DB");
-    ResponseDTO response = new ResponseDTO();
+    ResponseDto response = new ResponseDto();
     try {
       emailService.sendVerificationEmail(account.getEmail(), verificationToken.getToken());
       response.setResponse("Check your e-mail to confirm the registration");

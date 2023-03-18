@@ -1,4 +1,4 @@
-package com.volasoftware.tinder.DTO;
+package com.volasoftware.tinder.dto;
 
 import com.volasoftware.tinder.enums.Gender;
 import io.swagger.annotations.ApiModel;
@@ -13,7 +13,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @ApiModel(value = "Friend model", description = "Model representing friend model.")
-public class FriendDTO {
+public class FriendDto {
   @ApiModelProperty(value = "Friend first name", required = true)
   private String firstName;
 
@@ -30,5 +30,5 @@ public class FriendDTO {
   private int age;
 
   @ApiModelProperty(value = "Friend location", required = true)
-  private LocationDTO locationDTO;
+  private LocationDto locationDto;
 }

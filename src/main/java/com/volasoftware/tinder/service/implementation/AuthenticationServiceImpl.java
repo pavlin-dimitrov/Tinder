@@ -3,10 +3,10 @@ package com.volasoftware.tinder.service.implementation;
 import static org.springframework.http.HttpStatus.FORBIDDEN;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.volasoftware.tinder.DTO.AccountLoginDTO;
-import com.volasoftware.tinder.DTO.AccountRegisterDTO;
-import com.volasoftware.tinder.DTO.AuthenticationResponseDTO;
-import com.volasoftware.tinder.DTO.ResponseDTO;
+import com.volasoftware.tinder.dto.AccountLoginDto;
+import com.volasoftware.tinder.dto.AccountRegisterDto;
+import com.volasoftware.tinder.dto.AuthenticationResponseDto;
+import com.volasoftware.tinder.dto.ResponseDto;
 import com.volasoftware.tinder.entity.Account;
 import com.volasoftware.tinder.entity.VerificationToken;
 import com.volasoftware.tinder.exception.AccountNotVerifiedException;
@@ -52,17 +52,17 @@ public class AuthenticationServiceImpl implements AuthenticationService {
   private final EmailService emailService;
 
   @Override
-  public ResponseDTO register(AccountRegisterDTO accountRegisterDTO) {
-    log.info("Register new account with email {}", accountRegisterDTO.getEmail());
-    checkForExistingEmail(accountRegisterDTO);
-    ResponseDTO response = new ResponseDTO();
-    Account account = getAccount(accountRegisterDTO);
+  public ResponseDto register(AccountRegisterDto accountRegisterDto) {
+    log.info("Register new account with email {}", accountRegisterDto.getEmail());
+    checkForExistingEmail(accountRegisterDto);
+    ResponseDto response = new ResponseDto();
+    Account account = getAccount(accountRegisterDto);
 
     VerificationToken token = verificationTokenService.createVerificationToken(account);
-    log.info("Verification token generated for email: {}", accountRegisterDTO.getEmail());
+    log.info("Verification token generated for email: {}", accountRegisterDto.getEmail());
     try {
-      emailService.sendVerificationEmail(accountRegisterDTO.getEmail(), token.getToken());
-      log.info("Email with verification token sent to email: {}", accountRegisterDTO.getEmail());
+      emailService.sendVerificationEmail(accountRegisterDto.getEmail(), token.getToken());
+      log.info("Email with verification token sent to email: {}", accountRegisterDto.getEmail());
       response.setResponse("Check your e-mail to confirm the registration");
     } catch (MessagingException messagingException) {
       log.error(
@@ -75,17 +75,17 @@ public class AuthenticationServiceImpl implements AuthenticationService {
   }
 
   @Override
-  public AuthenticationResponseDTO login(AccountLoginDTO accountLoginDTO) {
+  public AuthenticationResponseDto login(AccountLoginDto accountLoginDto) {
     Account user = accountService.
-        getAccountByEmailIfExists(accountLoginDTO.getEmail());
+        getAccountByEmailIfExists(accountLoginDto.getEmail());
 
-    checkIfPasswordMatches(accountLoginDTO);
+    checkIfPasswordMatches(accountLoginDto);
     log.info("Correct password is passed.");
 
-    verifyLogin(accountLoginDTO);
+    verifyLogin(accountLoginDto);
     log.info("Login verified.");
 
-    getSecurityContext(accountLoginDTO);
+    getSecurityContext(accountLoginDto);
     log.info("Authentication successfully added to Security Context Holder");
 
     String accessToken = jwtService.generateAccessToken(user);
@@ -94,7 +94,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     String refreshToken = jwtService.generateRefreshToken(user);
     log.info("Refresh token created after Login.");
 
-    return AuthenticationResponseDTO.builder()
+    return AuthenticationResponseDto.builder()
         .accessToken(accessToken)
         .refreshToken(refreshToken)
         .build();
@@ -119,10 +119,10 @@ public class AuthenticationServiceImpl implements AuthenticationService {
   }
 
   @Override
-  public ResponseDTO recoverPassword(Principal principal) {
+  public ResponseDto recoverPassword(Principal principal) {
     Account account = accountService.getAccountByEmailIfExists(principal.getName());
     String newPassword = UUID.randomUUID().toString();
-    ResponseDTO response = new ResponseDTO();
+    ResponseDto response = new ResponseDto();
 
     try {
       emailService.sendPasswordRecoveryEmail(account.getEmail(), newPassword);
@@ -139,35 +139,35 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     return response;
   }
 
-  private Account getAccount(AccountRegisterDTO accountRegisterDTO) {
+  private Account getAccount(AccountRegisterDto accountRegisterDto) {
     Account account =
-        AccountRegisterMapper.INSTANCE.mapAccountRegisterDtoToAccount(accountRegisterDTO);
-    account.setPassword(passwordEncoder.encode(accountRegisterDTO.getPassword()));
+        AccountRegisterMapper.INSTANCE.mapAccountRegisterDtoToAccount(accountRegisterDto);
+    account.setPassword(passwordEncoder.encode(accountRegisterDto.getPassword()));
     account = accountService.saveAccount(account);
     return account;
   }
 
-  private void checkForExistingEmail(AccountRegisterDTO accountRegisterDTO) {
+  private void checkForExistingEmail(AccountRegisterDto accountRegisterDto) {
     Optional<Account> accountByEmail =
-        accountService.findAccountByEmail(accountRegisterDTO.getEmail());
+        accountService.findAccountByEmail(accountRegisterDto.getEmail());
     if (accountByEmail.isPresent()) {
       throw new EmailIsTakenException();
     }
   }
 
-  private void verifyLogin(AccountLoginDTO accountLoginDTO) {
-    Account account = accountService.getAccountByEmailIfExists(accountLoginDTO.getEmail());
+  private void verifyLogin(AccountLoginDto accountLoginDto) {
+    Account account = accountService.getAccountByEmailIfExists(accountLoginDto.getEmail());
     if (!account.isVerified()) {
       log.warn("Account email is not verified yet");
       throw new AccountNotVerifiedException();
     }
   }
 
-  private void getSecurityContext(AccountLoginDTO accountLoginDTO) {
+  private void getSecurityContext(AccountLoginDto accountLoginDto) {
     Authentication authentication =
         authenticationManager.authenticate(
             new UsernamePasswordAuthenticationToken(
-                accountLoginDTO.getEmail(), accountLoginDTO.getPassword()));
+                accountLoginDto.getEmail(), accountLoginDto.getPassword()));
     SecurityContextHolder.getContext().setAuthentication(authentication);
     log.info("Security filter chain was SET");
   }
@@ -193,9 +193,9 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     new ObjectMapper().writeValue(response.getOutputStream(), tokens);
   }
 
-  private void checkIfPasswordMatches(AccountLoginDTO accountLoginDTO) {
-    Account account = accountService.getAccountByEmailIfExists(accountLoginDTO.getEmail());
-    String enteredPassword = accountLoginDTO.getPassword();
+  private void checkIfPasswordMatches(AccountLoginDto accountLoginDto) {
+    Account account = accountService.getAccountByEmailIfExists(accountLoginDto.getEmail());
+    String enteredPassword = accountLoginDto.getPassword();
     String storedHash = account.getPassword();
     if (!BCrypt.checkpw(enteredPassword, storedHash)){
       throw new InvalidPasswordException();

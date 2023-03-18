@@ -1,7 +1,7 @@
 package com.volasoftware.tinder.service.implementation;
 
-import com.volasoftware.tinder.DTO.AccountDTO;
-import com.volasoftware.tinder.DTO.AccountVerificationDTO;
+import com.volasoftware.tinder.dto.AccountDto;
+import com.volasoftware.tinder.dto.AccountVerificationDto;
 import com.volasoftware.tinder.entity.Account;
 import com.volasoftware.tinder.enums.AccountType;
 import com.volasoftware.tinder.enums.Role;
@@ -12,7 +12,6 @@ import com.volasoftware.tinder.mapper.AccountVerificationMapper;
 import com.volasoftware.tinder.repository.AccountRepository;
 import com.volasoftware.tinder.service.contract.AccountService;
 import java.security.Principal;
-import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -51,20 +50,20 @@ public class AccountServiceImpl implements AccountService {
   }
 
   @Override
-  public AccountDTO findAccountById(Long id) {
+  public AccountDto findAccountById(Long id) {
     Account account = getAccountByIdIfExists(id);
     return AccountMapper.INSTANCE.mapAccountToAccountDto(account);
   }
 
   @Override
-  public Page<AccountDTO> getAccounts(Pageable pageable) {
+  public Page<AccountDto> getAccounts(Pageable pageable) {
     log.info("Get all accounts");
     Page<Account> accountsPage = accountRepository.findAll(pageable);
     return accountsPage.map(AccountMapper.INSTANCE::mapAccountToAccountDto);
   }
 
   @Override
-  public AccountVerificationDTO findAccountVerificationById(Long id) {
+  public AccountVerificationDto findAccountVerificationById(Long id) {
     log.info("Get isVerified field for Account with ID: " + id);
     Account account = getAccountByIdIfExists(id);
     return AccountVerificationMapper.INSTANCE.accountToAccountVerificationDto(account);
@@ -72,25 +71,25 @@ public class AccountServiceImpl implements AccountService {
 
   @Override
   @Transactional
-  public void updateVerificationStatus(Long accountId, AccountVerificationDTO verificationDTO) {
+  public void updateVerificationStatus(Long accountId, AccountVerificationDto verificationDto) {
     Account account = getAccountByIdIfExists(accountId);
     log.info(String.format("Update verification status for e-mail: %s", account.getEmail()));
-    AccountVerificationMapper.INSTANCE.updateAccountFromVerificationDTO(verificationDTO, account);
+    AccountVerificationMapper.INSTANCE.updateAccountFromVerificationDto(verificationDto, account);
     accountRepository.save(account);
   }
 
   @Override
   @Transactional
-  public AccountDTO updateAccountInfo(AccountDTO accountDTO, Principal principal)
+  public AccountDto updateAccountInfo(AccountDto accountDto, Principal principal)
       throws NotAuthorizedException {
-    validateAccountOwnership(accountDTO, principal);
+    validateAccountOwnership(accountDto, principal);
 
-    Account account = getAccountByIdIfExists(accountDTO.getId());
+    Account account = getAccountByIdIfExists(accountDto.getId());
 
-    account.setFirstName(accountDTO.getFirstName());
-    account.setLastName(accountDTO.getLastName());
-    account.setEmail(accountDTO.getEmail());
-    account.setGender(accountDTO.getGender());
+    account.setFirstName(accountDto.getFirstName());
+    account.setLastName(accountDto.getLastName());
+    account.setEmail(accountDto.getEmail());
+    account.setGender(accountDto.getGender());
 
     accountRepository.save(account);
     log.info("Account changes are saved!");
@@ -114,14 +113,14 @@ public class AccountServiceImpl implements AccountService {
     return accountRepository.findAccountByEmail(email).orElseThrow(AccountNotFoundException::new);
   }
 
-  private void validateAccountOwnership(AccountDTO accountDTO, Principal principal)
+  private void validateAccountOwnership(AccountDto accountDto, Principal principal)
       throws NotAuthorizedException {
-    if (!principal.getName().equals(accountDTO.getEmail())) {
+    if (!principal.getName().equals(accountDto.getEmail())) {
       log.warn(
           "Account: "
               + principal.getName()
               + " is not authorized to edit account of: "
-              + accountDTO.getEmail());
+              + accountDto.getEmail());
       throw new NotAuthorizedException();
     }
   }

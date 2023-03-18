@@ -1,9 +1,9 @@
 package com.volasoftware.tinder.service.contract;
 
-import com.volasoftware.tinder.DTO.LocationDTO;
+import com.volasoftware.tinder.dto.LocationDto;
 
 public interface LocationService {
 
-  double getFriendDistance(LocationDTO myLocation, LocationDTO friendLocation);
+  double getFriendDistance(LocationDto myLocation, LocationDto friendLocation);
 
 }

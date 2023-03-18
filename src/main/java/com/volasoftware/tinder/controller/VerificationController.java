@@ -1,6 +1,6 @@
 package com.volasoftware.tinder.controller;
 
-import com.volasoftware.tinder.DTO.ResponseDTO;
+import com.volasoftware.tinder.dto.ResponseDto;
 import com.volasoftware.tinder.repository.VerificationTokenRepository;
 import com.volasoftware.tinder.service.contract.EmailVerificationService;
 import io.swagger.annotations.ApiOperation;
@@ -63,7 +63,7 @@ public class VerificationController {
         @ApiResponse(code = 404, message = "The resource you were trying to reach is not found")
       })
   @PostMapping("/resend-verification-email")
-  public ResponseEntity<ResponseDTO> resendVerificationEmail(
+  public ResponseEntity<ResponseDto> resendVerificationEmail(
       @ApiParam(
               name = "email",
               value = "Email address for which the verification email should be sent",

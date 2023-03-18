@@ -1,13 +1,13 @@
 package com.volasoftware.tinder.service.implementation;
 
-import com.volasoftware.tinder.DTO.FriendRatingDTO;
-import com.volasoftware.tinder.DTO.ResponseDTO;
+import com.volasoftware.tinder.dto.FriendRatingDto;
+import com.volasoftware.tinder.dto.ResponseDto;
 import com.volasoftware.tinder.entity.Account;
 import com.volasoftware.tinder.entity.Rating;
 import com.volasoftware.tinder.exception.RatingRangeException;
 import com.volasoftware.tinder.repository.RatingRepository;
 import com.volasoftware.tinder.service.contract.AccountService;
-import com.volasoftware.tinder.service.contract.FriendsService;
+import com.volasoftware.tinder.service.contract.FriendService;
 import com.volasoftware.tinder.service.contract.RatingService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,32 +20,32 @@ import org.springframework.stereotype.Service;
 public class RatingServiceImpl implements RatingService {
 
   private final AccountService accountService;
-  private final FriendsService friendsService;
+  private final FriendService friendService;
   private final RatingRepository ratingRepository;
 
   @Override
-  public ResponseDTO rateFriend(String email, FriendRatingDTO friendRatingDTO) {
+  public ResponseDto rateFriend(String email, FriendRatingDto friendRatingDto) {
     Account account = accountService.getAccountByEmailIfExists(email);
-    Account friend = accountService.getAccountByIdIfExists(friendRatingDTO.getFriendId());
-    friendsService.checkIfUsersAreFriends(account, friend);
+    Account friend = accountService.getAccountByIdIfExists(friendRatingDto.getFriendId());
+    friendService.checkIfUsersAreFriends(account, friend);
 
-    validateRatingRange(friendRatingDTO.getRating());
+    validateRatingRange(friendRatingDto.getRating());
     String ratingStatus = getRatingStatus(account, friend);
-    setRatingForFriend(friendRatingDTO, account, friend);
+    setRatingForFriend(friendRatingDto, account, friend);
 
-    ResponseDTO response = new ResponseDTO();
+    ResponseDto response = new ResponseDto();
     response.setResponse("Successfully " + ratingStatus + " friend!");
     log.info(response.getResponse());
 
     return response;
   }
 
-  private void setRatingForFriend(FriendRatingDTO friendRatingDTO, Account account, Account friend) {
+  private void setRatingForFriend(FriendRatingDto friendRatingDto, Account account, Account friend) {
     Rating rating =
         ratingRepository
             .findByAccountAndFriend(account, friend)
-            .orElseGet(() -> createRating(account, friend, friendRatingDTO.getRating()));
-    rating.setRating(friendRatingDTO.getRating());
+            .orElseGet(() -> createRating(account, friend, friendRatingDto.getRating()));
+    rating.setRating(friendRatingDto.getRating());
     ratingRepository.save(rating);
   }
 

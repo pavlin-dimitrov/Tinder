@@ -2,7 +2,7 @@ package com.volasoftware.tinder.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.volasoftware.tinder.DTO.AccountDTO;
+import com.volasoftware.tinder.dto.AccountDto;
 import com.volasoftware.tinder.entity.Account;
 import com.volasoftware.tinder.enums.Gender;
 import com.volasoftware.tinder.enums.Role;
@@ -16,13 +16,11 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
-import javax.transaction.Transactional;
-import org.junit.jupiter.api.AfterEach;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpHeaders;
@@ -62,7 +60,7 @@ class AccountControllerTest {
         .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
         .exchange()
         .expectStatus().isOk()
-        .expectBodyList(AccountDTO.class)
+        .expectBodyList(AccountDto.class)
         .hasSize(22);
   }
 
@@ -73,24 +71,24 @@ class AccountControllerTest {
     Account account = repository.findById(1L).get();
     String token = getJwt(account.getEmail());
 
-    AccountDTO updatedAccountDTO = AccountMapper.INSTANCE.mapAccountToAccountDto(account);
-    updatedAccountDTO.setFirstName("John");
-    updatedAccountDTO.setLastName("Doe");
-    updatedAccountDTO.setGender(Gender.MALE);
+    AccountDto updatedAccountDto = AccountMapper.INSTANCE.mapAccountToAccountDto(account);
+    updatedAccountDto.setFirstName("John");
+    updatedAccountDto.setLastName("Doe");
+    updatedAccountDto.setGender(Gender.MALE);
 
     webTestClient.put()
         .uri("/api/v1/accounts/profile")
         .contentType(MediaType.APPLICATION_JSON)
         .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
-        .body(Mono.just(updatedAccountDTO), AccountDTO.class)
+        .body(Mono.just(updatedAccountDto), AccountDto.class)
         .exchange()
         .expectStatus().isOk()
-        .expectBody(AccountDTO.class)
+        .expectBody(AccountDto.class)
         .value(response -> {
           assertThat(response.getId()).isEqualTo(account.getId());
-          assertThat(response.getFirstName()).isEqualTo(updatedAccountDTO.getFirstName());
-          assertThat(response.getLastName()).isEqualTo(updatedAccountDTO.getLastName());
-          assertThat(response.getEmail()).isEqualTo(updatedAccountDTO.getEmail());
+          assertThat(response.getFirstName()).isEqualTo(updatedAccountDto.getFirstName());
+          assertThat(response.getLastName()).isEqualTo(updatedAccountDto.getLastName());
+          assertThat(response.getEmail()).isEqualTo(updatedAccountDto.getEmail());
         });
   }
 
@@ -103,17 +101,17 @@ class AccountControllerTest {
 
     Account newAccount = repository.findById(2L).get();
 
-    AccountDTO accountDTO = AccountMapper.INSTANCE.mapAccountToAccountDto(newAccount);
+    AccountDto accountDto = AccountMapper.INSTANCE.mapAccountToAccountDto(newAccount);
 
     webTestClient.get()
-        .uri("/api/v1/accounts/profile/?id=" + accountDTO.getId())
+        .uri("/api/v1/accounts/profile/?id=" + accountDto.getId())
         .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
         .exchange()
         .expectStatus().isOk()
-        .expectBody(AccountDTO.class)
+        .expectBody(AccountDto.class)
         .value(response -> {
-          assertThat(response.getId()).isEqualTo(accountDTO.getId());
-          assertThat(response.getEmail()).isEqualTo(accountDTO.getEmail());
+          assertThat(response.getId()).isEqualTo(accountDto.getId());
+          assertThat(response.getEmail()).isEqualTo(accountDto.getEmail());
         });
   }
 

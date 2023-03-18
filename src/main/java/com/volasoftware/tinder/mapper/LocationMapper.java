@@ -1,6 +1,6 @@
 package com.volasoftware.tinder.mapper;
 
-import com.volasoftware.tinder.DTO.LocationDTO;
+import com.volasoftware.tinder.dto.LocationDto;
 import com.volasoftware.tinder.entity.Location;
 import org.mapstruct.Mapper;
 import org.mapstruct.ReportingPolicy;
@@ -11,7 +11,7 @@ public interface LocationMapper {
 
   LocationMapper INSTANCE = Mappers.getMapper(LocationMapper.class);
 
-  LocationDTO locationToLocationDTO(Location location);
+  LocationDto locationToLocationDto(Location location);
 
-  Location locationDTOToLocation(LocationDTO locationDTO);
+  Location locationDtoToLocation(LocationDto locationDto);
 }

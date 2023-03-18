@@ -1,4 +1,4 @@
-package com.volasoftware.tinder.DTO;
+package com.volasoftware.tinder.dto;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -14,7 +14,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @ApiModel(value = "Rating dto model ", description = "Model representing friend rating.")
-public class FriendRatingDTO {
+public class FriendRatingDto {
 
   @ApiModelProperty(value = "Friend id", required = true)
   private Long friendId;

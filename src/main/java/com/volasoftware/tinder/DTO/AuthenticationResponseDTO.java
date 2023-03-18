@@ -1,4 +1,4 @@
-package com.volasoftware.tinder.DTO;
+package com.volasoftware.tinder.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 @Data
-public class AuthenticationResponseDTO {
+public class AuthenticationResponseDto {
 
   private String accessToken;
   private String refreshToken;
