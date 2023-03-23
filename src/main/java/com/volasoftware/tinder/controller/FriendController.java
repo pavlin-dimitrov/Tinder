@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -90,10 +91,10 @@ public class FriendController {
   }
 
   @GetMapping("/filter-by-rating")
-  public ResponseEntity<List<Account>> filteredListOfFriendsByRating( Principal principal,
-      @PageableDefault(size = 10, sort = "rating", direction = Sort.Direction.DESC) Pageable pageable) {
+  public ResponseEntity<List<FriendDto>> filteredListOfFriendsByRating(Principal principal,
+      @RequestParam(value = "direction", defaultValue = "DESC") String direction) {
     return new ResponseEntity<>(
-        friendService.findFriendsByRating(principal, pageable), HttpStatus.OK
+        friendService.findFriendsByRating(principal, direction), HttpStatus.OK
     );
   }
 }

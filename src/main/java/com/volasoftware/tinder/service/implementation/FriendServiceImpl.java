@@ -18,10 +18,12 @@ import com.volasoftware.tinder.service.contract.AccountService;
 import com.volasoftware.tinder.service.contract.FriendService;
 import com.volasoftware.tinder.service.contract.LocationService;
 import java.security.Principal;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
@@ -30,10 +32,8 @@ import javax.transaction.Transactional;
 import com.volasoftware.tinder.exception.NoRealAccountsFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -52,11 +52,24 @@ public class FriendServiceImpl implements FriendService {
   private static final String DESC = "desc";
 
   @Override
-  public List<Account> findFriendsByRating(Principal principal, Pageable pageable) {
-    Account account = accountService.getAccountByEmailIfExists(principal.getName());
-    Long accountId = account.getId();
-    Page<Long> friendIds = accountRepository.findFriendIdsByRating(accountId, pageable);
-    return accountRepository.findAllById(friendIds.getContent());
+  public List<FriendDto> findFriendsByRating(Principal principal, String direction) {
+    Sort sort = Sort.by(Sort.Direction.fromString(direction), "rating");
+
+    Long currentAccountId = accountService.getAccountByEmailIfExists(principal.getName()).getId();
+
+    List<Long> friendIdListOrderedByRating =
+        ratingRepository.findRatedFriendsByAccountId(currentAccountId, sort);
+
+    return getAccountListById(friendIdListOrderedByRating).stream()
+        .map(FriendMapper.INSTANCE::accountToFriendDto)
+        .collect(Collectors.toList());
+  }
+
+  @NotNull
+  private List<Account> getAccountListById(List<Long> friendIds) {
+    return friendIds.stream()
+        .map(accountService::getAccountByIdIfExists)
+        .collect(Collectors.toList());
   }
 
   @Override
