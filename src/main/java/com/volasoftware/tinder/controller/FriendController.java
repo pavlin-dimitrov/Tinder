@@ -1,6 +1,7 @@
 package com.volasoftware.tinder.controller;
 
 import com.volasoftware.tinder.dto.*;
+import com.volasoftware.tinder.entity.Account;
 import com.volasoftware.tinder.service.contract.FriendService;
 import com.volasoftware.tinder.service.contract.RatingService;
 import io.swagger.annotations.Api;
@@ -13,6 +14,10 @@ import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -82,5 +87,13 @@ public class FriendController {
       Principal principal, @PathVariable("id") Long friendId) {
     return new ResponseEntity<>(
         friendService.getFriendInfo(principal.getName(), friendId), HttpStatus.OK);
+  }
+
+  @GetMapping("/filter-by-rating")
+  public ResponseEntity<List<Account>> filteredListOfFriendsByRating( Principal principal,
+      @PageableDefault(size = 10, sort = "rating", direction = Sort.Direction.DESC) Pageable pageable) {
+    return new ResponseEntity<>(
+        friendService.findFriendsByRating(principal, pageable), HttpStatus.OK
+    );
   }
 }

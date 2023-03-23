@@ -7,6 +7,8 @@ import com.volasoftware.tinder.dto.ResponseDto;
 import com.volasoftware.tinder.entity.Account;
 import java.security.Principal;
 import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface FriendService {
 
@@ -22,4 +24,6 @@ public interface FriendService {
 
   List<FriendDto> showFilteredListOfFriends(String sortedBy, String orderedBy,
                                             Principal principal, LocationDto locationDto, Integer limit);
+
+  List<Account> findFriendsByRating(Principal principal, Pageable pageable);
 }

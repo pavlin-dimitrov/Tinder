@@ -27,7 +27,7 @@ public class SecurityConfig {
         .csrf()
         .disable()
         .authorizeHttpRequests()
-        .antMatchers("/swagger-ui/**",
+        .antMatchers( "/swagger-ui/**",
             "/swagger-ui/index.html",
             "/swagger-resources/**",
             "/swagger-ui.html",

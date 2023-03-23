@@ -31,6 +31,10 @@ import com.volasoftware.tinder.exception.NoRealAccountsFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -48,6 +52,14 @@ public class FriendServiceImpl implements FriendService {
   private static final String DESC = "desc";
 
   @Override
+  public List<Account> findFriendsByRating(Principal principal, Pageable pageable) {
+    Account account = accountService.getAccountByEmailIfExists(principal.getName());
+    Long accountId = account.getId();
+    Page<Long> friendIds = accountRepository.findFriendIdsByRating(accountId, pageable);
+    return accountRepository.findAllById(friendIds.getContent());
+  }
+
+  @Override
   public AccountDto getFriendInfo(String email, Long userId) {
     Account user = accountService.getAccountByEmailIfExists(email);
     Account friend = accountService.getAccountByIdIfExists(userId);
@@ -62,7 +74,7 @@ public class FriendServiceImpl implements FriendService {
     log.info("Seed friends for all REAL accounts.");
     List<Account> realAccounts = accountRepository.findAllByType(AccountType.REAL);
 
-    if (realAccounts.isEmpty()){
+    if (realAccounts.isEmpty()) {
       throw new NoRealAccountsFoundException();
     }
 
@@ -95,7 +107,7 @@ public class FriendServiceImpl implements FriendService {
     Account currentAccount = accountService.getAccountByIdIfExists(id);
 
     if (!isRealCurrentAccount(currentAccount)) {
-     throw new AccountIsNotRealException();
+      throw new AccountIsNotRealException();
     }
 
     if (currentAccount.getFriends() != null && !currentAccount.getFriends().isEmpty()) {
@@ -133,8 +145,12 @@ public class FriendServiceImpl implements FriendService {
   }
 
   @Override
-  public List<FriendDto> showFilteredListOfFriends(String sortedBy, String orderedBy, Principal principal,
-                                                   LocationDto locationDto, Integer limit) {
+  public List<FriendDto> showFilteredListOfFriends(
+      String sortedBy,
+      String orderedBy,
+      Principal principal,
+      LocationDto locationDto,
+      Integer limit) {
 
     Account account = accountService.getAccountByEmailIfExists(principal.getName());
 
@@ -144,8 +160,12 @@ public class FriendServiceImpl implements FriendService {
     return applyLimit(limit, friends);
   }
 
-  private List<FriendDto> getFilteredFriends(String sortedBy, String orderedBy, LocationDto locationDto,
-                                             Account account, List<FriendDto> friends) {
+  private List<FriendDto> getFilteredFriends(
+      String sortedBy,
+      String orderedBy,
+      LocationDto locationDto,
+      Account account,
+      List<FriendDto> friends) {
     if (sortedBy.equalsIgnoreCase(LOCATION)) {
       friends = sortFriendsByLocationAsc(locationDto, friends);
     } else if (sortedBy.equalsIgnoreCase(RATING)) {
@@ -174,7 +194,8 @@ public class FriendServiceImpl implements FriendService {
         .collect(Collectors.toList());
   }
 
-  private List<FriendDto> sortFriendsByLocationAsc(LocationDto locationDto, List<FriendDto> friends) {
+  private List<FriendDto> sortFriendsByLocationAsc(
+      LocationDto locationDto, List<FriendDto> friends) {
     return friends.stream()
         .sorted(
             Comparator.comparingDouble(
@@ -214,15 +235,15 @@ public class FriendServiceImpl implements FriendService {
     return response;
   }
 
-  private boolean isRealCurrentAccount(Account account){
+  private boolean isRealCurrentAccount(Account account) {
     return account.getType().equals(AccountType.REAL);
   }
 
-  private boolean isNotSameAccount(Account friend, Account account){
+  private boolean isNotSameAccount(Account friend, Account account) {
     return !friend.getId().equals(account.getId());
   }
 
-  private boolean isBotAccount(Account friend){
+  private boolean isBotAccount(Account friend) {
     return friend.getType() == AccountType.BOT;
   }
 }
