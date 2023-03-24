@@ -9,6 +9,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -23,6 +24,6 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
   @NotNull
   Page<Account> findAll(@NotNull Pageable pageable);
 
-//  @Query("SELECT r.friend FROM Rating r WHERE r.account = :accountId ORDER BY r.rating DESC")
-//  List<Account> findFriendsByRating(Long accountId);
+  @Query("SELECT f FROM Account a JOIN a.friends f LEFT JOIN FETCH f.location l WHERE a.id = :currentAccountId AND l IS NOT NULL")
+  List<Account> findFriendsWithLocationsByAccountId(@Param("currentAccountId") Long currentAccountId);
 }

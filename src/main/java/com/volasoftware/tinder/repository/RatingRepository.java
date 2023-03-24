@@ -5,6 +5,7 @@ import com.volasoftware.tinder.entity.Rating;
 import java.util.List;
 import java.util.Optional;
 import javax.transaction.Transactional;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -19,5 +20,5 @@ public interface RatingRepository extends JpaRepository<Rating, Long> {
   List<Rating> findAllByAccount(Account account);
 
   @Query("SELECT r.friend.id FROM Rating r WHERE r.account.id = :accountId")
-  List<Long> findRatedFriendsByAccountId(Long accountId, Sort sort);
+  List<Long> findRatedFriendsByAccountId(Long accountId, Pageable pageable);
 }
