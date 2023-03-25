@@ -48,7 +48,7 @@ public class FriendController {
       @RequestParam(value = "orderedBy", required = false, defaultValue = "desc") String orderedBy,
       Principal principal,
       @Valid @RequestBody(required = false) LocationDto locationDto,
-      @RequestParam(value = "limit", required = false) Integer limit) {
+      @RequestParam(value = "limit", required = false, defaultValue = "-1") Integer limit) {
 
     return new ResponseEntity<>(friendService.showFilteredListOfFriends(
             sortedBy, orderedBy, principal, locationDto, limit), HttpStatus.OK);

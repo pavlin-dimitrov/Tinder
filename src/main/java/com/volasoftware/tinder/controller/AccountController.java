@@ -1,6 +1,7 @@
 package com.volasoftware.tinder.controller;
 
 import com.volasoftware.tinder.dto.AccountDto;
+import com.volasoftware.tinder.dto.FriendDto;
 import com.volasoftware.tinder.exception.NotAuthorizedException;
 import com.volasoftware.tinder.service.contract.AccountService;
 import io.swagger.annotations.Api;
@@ -18,6 +19,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.objenesis.instantiator.perc.PercInstantiator;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;

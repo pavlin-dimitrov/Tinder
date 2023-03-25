@@ -5,10 +5,10 @@ import com.volasoftware.tinder.dto.FriendDto;
 import com.volasoftware.tinder.dto.LocationDto;
 import com.volasoftware.tinder.dto.ResponseDto;
 import com.volasoftware.tinder.entity.Account;
-import com.volasoftware.tinder.entity.Rating;
 import com.volasoftware.tinder.enums.AccountType;
 import com.volasoftware.tinder.exception.AccountIsNotRealException;
 import com.volasoftware.tinder.exception.MissingFriendshipException;
+import com.volasoftware.tinder.exception.NoRealAccountsFoundException;
 import com.volasoftware.tinder.exception.OriginGreaterThenBoundException;
 import com.volasoftware.tinder.mapper.AccountMapper;
 import com.volasoftware.tinder.mapper.FriendMapper;
@@ -18,7 +18,6 @@ import com.volasoftware.tinder.service.contract.AccountService;
 import com.volasoftware.tinder.service.contract.FriendService;
 import com.volasoftware.tinder.service.contract.LocationService;
 import java.security.Principal;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
@@ -26,11 +25,13 @@ import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 import javax.transaction.Transactional;
-
-import com.volasoftware.tinder.exception.NoRealAccountsFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -43,9 +44,59 @@ public class FriendServiceImpl implements FriendService {
   private final RatingRepository ratingRepository;
   private final LocationService locationService;
   private final AccountService accountService;
-  private static final String LOCATION = "location";
   private static final String RATING = "rating";
-  private static final String DESC = "desc";
+
+  @Override
+  public List<FriendDto> showFilteredListOfFriends(String sortedBy, String orderedBy, Principal principal,
+      LocationDto locationDto, Integer limit) {
+
+    List<FriendDto> filteredListOfFriends =
+        filterFriendsByLocation(locationDto, principal, orderedBy, limit);
+
+    if (sortedBy.equalsIgnoreCase(RATING)) {
+      filteredListOfFriends = filterFriendsByRating(principal, orderedBy, limit);
+    }
+    return filteredListOfFriends;
+  }
+
+  private List<FriendDto> filterFriendsByRating(Principal principal, String direction, int limit) {
+    limit = setNoLimit(limit);
+
+    Pageable pageable = PageRequest.of(0, limit, Sort.Direction.fromString(direction), RATING);
+
+    Long currentAccountId = accountService.getAccountByEmailIfExists(principal.getName()).getId();
+
+    List<Account> friendIdListOrderedByRating =
+        ratingRepository.findRatedFriendsByAccountId(currentAccountId, pageable);
+
+    return friendIdListOrderedByRating.stream()
+        .map(FriendMapper.INSTANCE::accountToFriendDto)
+        .collect(Collectors.toList());
+  }
+
+  private List<FriendDto> filterFriendsByLocation(
+      LocationDto locationDto, Principal principal, String direction, int limit) {
+    limit = setNoLimit(limit);
+
+    Long currentAccountId = accountService.getAccountByEmailIfExists(principal.getName()).getId();
+
+    List<Account> listOfFriendsWithLocations =
+        accountRepository.findFriendsWithLocationsByAccountId(currentAccountId);
+
+    Comparator<FriendDto> comparedFriendsDistances =
+        Comparator.comparingDouble(
+            friend -> locationService.getFriendDistance(locationDto, friend.getLocationDto()));
+
+    if (Sort.Direction.fromString(direction) == Direction.DESC) {
+      comparedFriendsDistances = comparedFriendsDistances.reversed();
+    }
+
+    return listOfFriendsWithLocations.stream()
+        .map(FriendMapper.INSTANCE::accountToFriendDto)
+        .sorted(comparedFriendsDistances)
+        .limit(limit)
+        .collect(Collectors.toList());
+  }
 
   @Override
   public AccountDto getFriendInfo(String email, Long userId) {
@@ -62,7 +113,7 @@ public class FriendServiceImpl implements FriendService {
     log.info("Seed friends for all REAL accounts.");
     List<Account> realAccounts = accountRepository.findAllByType(AccountType.REAL);
 
-    if (realAccounts.isEmpty()){
+    if (realAccounts.isEmpty()) {
       throw new NoRealAccountsFoundException();
     }
 
@@ -95,7 +146,7 @@ public class FriendServiceImpl implements FriendService {
     Account currentAccount = accountService.getAccountByIdIfExists(id);
 
     if (!isRealCurrentAccount(currentAccount)) {
-     throw new AccountIsNotRealException();
+      throw new AccountIsNotRealException();
     }
 
     if (currentAccount.getFriends() != null && !currentAccount.getFriends().isEmpty()) {
@@ -132,60 +183,11 @@ public class FriendServiceImpl implements FriendService {
     }
   }
 
-  @Override
-  public List<FriendDto> showFilteredListOfFriends(String sortedBy, String orderedBy, Principal principal,
-                                                   LocationDto locationDto, Integer limit) {
-
-    Account account = accountService.getAccountByEmailIfExists(principal.getName());
-
-    List<FriendDto> friends = getFriendsList(account);
-    friends = getFilteredFriends(sortedBy, orderedBy, locationDto, account, friends);
-
-    return applyLimit(limit, friends);
-  }
-
-  private List<FriendDto> getFilteredFriends(String sortedBy, String orderedBy, LocationDto locationDto,
-                                             Account account, List<FriendDto> friends) {
-    if (sortedBy.equalsIgnoreCase(LOCATION)) {
-      friends = sortFriendsByLocationAsc(locationDto, friends);
-    } else if (sortedBy.equalsIgnoreCase(RATING)) {
-      friends = sortFriendsByRatingAsc(account);
+  private int setNoLimit(int limit) {
+    if (limit == -1) {
+      limit = Integer.MAX_VALUE;
     }
-
-    if (orderedBy.equalsIgnoreCase(DESC)) {
-      Collections.reverse(friends);
-    }
-
-    return friends;
-  }
-
-  private List<FriendDto> applyLimit(Integer limit, List<FriendDto> friends) {
-    if (limit == null || limit >= friends.size()) {
-      return friends;
-    }
-    return friends.subList(0, limit);
-  }
-
-  private List<FriendDto> sortFriendsByRatingAsc(Account account) {
-    List<Rating> ratings = ratingRepository.findAllByAccount(account);
-    return ratings.stream()
-        .sorted(Comparator.comparingInt(Rating::getRating))
-        .map(rating -> FriendMapper.INSTANCE.accountToFriendDto(rating.getFriend()))
-        .collect(Collectors.toList());
-  }
-
-  private List<FriendDto> sortFriendsByLocationAsc(LocationDto locationDto, List<FriendDto> friends) {
-    return friends.stream()
-        .sorted(
-            Comparator.comparingDouble(
-                friend -> locationService.getFriendDistance(locationDto, friend.getLocationDto())))
-        .collect(Collectors.toList());
-  }
-
-  private List<FriendDto> getFriendsList(Account account) {
-    return account.getFriends().stream()
-        .map(FriendMapper.INSTANCE::accountToFriendDto)
-        .collect(Collectors.toList());
+    return limit;
   }
 
   private Set<Account> seedFriends(List<Account> botAccounts, Account account) {
@@ -214,15 +216,15 @@ public class FriendServiceImpl implements FriendService {
     return response;
   }
 
-  private boolean isRealCurrentAccount(Account account){
+  private boolean isRealCurrentAccount(Account account) {
     return account.getType().equals(AccountType.REAL);
   }
 
-  private boolean isNotSameAccount(Account friend, Account account){
+  private boolean isNotSameAccount(Account friend, Account account) {
     return !friend.getId().equals(account.getId());
   }
 
-  private boolean isBotAccount(Account friend){
+  private boolean isBotAccount(Account friend) {
     return friend.getType() == AccountType.BOT;
   }
 }
