@@ -2,8 +2,7 @@ package com.volasoftware.tinder.service.implementation;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
@@ -19,17 +18,13 @@ import com.volasoftware.tinder.enums.AccountType;
 import com.volasoftware.tinder.enums.Gender;
 import com.volasoftware.tinder.enums.Role;
 import com.volasoftware.tinder.exception.AccountIsNotRealException;
-import com.volasoftware.tinder.exception.AccountNotFoundException;
 import com.volasoftware.tinder.exception.MissingFriendshipException;
-import com.volasoftware.tinder.exception.OriginGreaterThenBoundException;
-import com.volasoftware.tinder.mapper.FriendMapper;
 import com.volasoftware.tinder.mapper.LocationMapper;
 import com.volasoftware.tinder.repository.AccountRepository;
 import com.volasoftware.tinder.repository.RatingRepository;
 import com.volasoftware.tinder.service.contract.LocationService;
 import java.security.Principal;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
@@ -37,10 +32,14 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
 @ExtendWith(MockitoExtension.class)
 class FriendServiceImplTest {
@@ -50,7 +49,7 @@ class FriendServiceImplTest {
   @Mock private AccountRepository repository;
   @Mock private AccountServiceImpl service;
   @Mock private RatingRepository ratingRepository;
-  @Mock private LocationService locationService;
+  @InjectMocks private LocationService locationService = new LocationServiceImpl();
   private final static String LOCATION = "location";
   private final static String RATING = "rating";
   private final static String ASC = "asc";
@@ -216,12 +215,17 @@ class FriendServiceImplTest {
     //given
     Account account = getAccounts().get(0);
     Principal principal = Mockito.mock(Principal.class);
+
     when(principal.getName()).thenReturn(account.getEmail());
     when(service.getAccountByEmailIfExists(principal.getName())).thenReturn(account);
 
     LocationDto principalLocation = LocationMapper.INSTANCE.locationToLocationDto(account.getLocation());
+
+    when(repository.findFriendsWithLocationsByAccountId(account.getId())).thenReturn(getFriendsWithLocations());
+
     //when
     List<FriendDto> filteredList = underTest.showFilteredListOfFriends(LOCATION, ASC, principal, principalLocation, LIMIT);
+
     //then
     assertThat(filteredList.size()).isEqualTo(2);
     assertThat(filteredList.get(0).getFirstName()).isEqualTo("Mezdra");
@@ -233,30 +237,18 @@ class FriendServiceImplTest {
   void showFilteredListOfFriendsSortedByLocationOrderedByDESC() {
     //given
     Account account = getAccounts().get(0);
-    Principal principal = mock(Principal.class);
+    Principal principal = Mockito.mock(Principal.class);
+
     when(principal.getName()).thenReturn(account.getEmail());
     when(service.getAccountByEmailIfExists(principal.getName())).thenReturn(account);
+
     LocationDto principalLocation = LocationMapper.INSTANCE.locationToLocationDto(account.getLocation());
 
-    //when
-    List<FriendDto> filteredList = underTest.showFilteredListOfFriends(LOCATION, DESC, principal, principalLocation, null);
-    //then
-    assertThat(filteredList.size()).isEqualTo(2);
-    assertThat(filteredList.get(0).getFirstName()).isEqualTo("Sofia");
-    assertThat(filteredList.get(1).getFirstName()).isEqualTo("Mezdra");
-  }
+    when(repository.findFriendsWithLocationsByAccountId(account.getId())).thenReturn(getFriendsWithLocations());
 
-  @Test
-  @DisplayName("Show filtered list of friends sorted by Location, ordered by Default")
-  void showFilteredListOfFriendsSortedByLocationOrderedByDefault() {
-    //given
-    Account account = getAccounts().get(0);
-    Principal principal = mock(Principal.class);
-    when(principal.getName()).thenReturn(account.getEmail());
-    when(service.getAccountByEmailIfExists(principal.getName())).thenReturn(account);
-    LocationDto principalLocation = LocationMapper.INSTANCE.locationToLocationDto(account.getLocation());
     //when
-    List<FriendDto> filteredList = underTest.showFilteredListOfFriends(LOCATION, DESC, principal, principalLocation, null);
+    List<FriendDto> filteredList = underTest.showFilteredListOfFriends(LOCATION, DESC, principal, principalLocation, LIMIT);
+
     //then
     assertThat(filteredList.size()).isEqualTo(2);
     assertThat(filteredList.get(0).getFirstName()).isEqualTo("Sofia");
@@ -268,14 +260,19 @@ class FriendServiceImplTest {
   void showFilteredListOfFriendsSortedByRatingOrderedByASC() {
     //given
     Account account = getAccounts().get(0);
-    Principal principal = mock(Principal.class);
+    Principal principal = Mockito.mock(Principal.class);
+
     when(principal.getName()).thenReturn(account.getEmail());
     when(service.getAccountByEmailIfExists(principal.getName())).thenReturn(account);
-    when(ratingRepository.findAllByAccount(account)).thenReturn(getRatings());
-    LocationDto principalLocation = LocationMapper.INSTANCE.locationToLocationDto(account.getLocation());
+
+    Pageable pageable = PageRequest.of(0, LIMIT, Sort.Direction.ASC, RATING);
+    when(ratingRepository.findRatedFriendsByAccountId(account.getId(), pageable)).thenReturn(getFriendIdsOrderedByRatingAsc());
+
     //when
-    List<FriendDto> filteredList = underTest.showFilteredListOfFriends(RATING, ASC, principal, principalLocation, null);
+    List<FriendDto> filteredList = underTest.showFilteredListOfFriends(RATING, ASC, principal, null, LIMIT);
+
     //then
+    assertThat(filteredList.size()).isEqualTo(2);
     assertThat(filteredList.get(0).getFirstName()).isEqualTo("Mezdra");
     assertThat(filteredList.get(1).getFirstName()).isEqualTo("Sofia");
   }
@@ -285,65 +282,18 @@ class FriendServiceImplTest {
   void showFilteredListOfFriendsSortedByRatingOrderedByDESC() {
     //given
     Account account = getAccounts().get(0);
-    Principal principal = mock(Principal.class);
-    when(principal.getName()).thenReturn(account.getEmail());
-    when(service.getAccountByEmailIfExists(principal.getName())).thenReturn(account);
-    when(ratingRepository.findAllByAccount(account)).thenReturn(getRatings());
-    LocationDto principalLocation = LocationMapper.INSTANCE.locationToLocationDto(account.getLocation());
-    //when
-    List<FriendDto> filteredList = underTest.showFilteredListOfFriends(RATING, DESC, principal, principalLocation, null);
-    //then
-    assertThat(filteredList.get(0).getFirstName()).isEqualTo("Sofia");
-    assertThat(filteredList.get(1).getFirstName()).isEqualTo("Mezdra");
-  }
+    Principal principal = Mockito.mock(Principal.class);
 
-  @Test
-  @DisplayName("Show filtered list of friends sorted by Rating, ordered by Default")
-  void showFilteredListOfFriendsSortedByRatingOrderedByDefault() {
-    //given
-    Account account = getAccounts().get(0);
-    Principal principal = mock(Principal.class);
     when(principal.getName()).thenReturn(account.getEmail());
     when(service.getAccountByEmailIfExists(principal.getName())).thenReturn(account);
-    when(ratingRepository.findAllByAccount(account)).thenReturn(getRatings());
-    LocationDto principalLocation = LocationMapper.INSTANCE.locationToLocationDto(account.getLocation());
-    //when
-    List<FriendDto> filteredList = underTest.showFilteredListOfFriends(RATING, DESC, principal, principalLocation, null);
-    //then
-    assertThat(filteredList.get(0).getFirstName()).isEqualTo("Sofia");
-    assertThat(filteredList.get(1).getFirstName()).isEqualTo("Mezdra");
-  }
 
-  @Test
-  @DisplayName("Show filtered list of friends sorted by Default, ordered by Asc")
-  void showFilteredListOfFriendsSortedByDefaultOrderedByASC() {
-    //given
-    Account account = getAccounts().get(0);
-    Principal principal = mock(Principal.class);
-    when(principal.getName()).thenReturn(account.getEmail());
-    when(service.getAccountByEmailIfExists(principal.getName())).thenReturn(account);
-    LocationDto principalLocation = LocationMapper.INSTANCE.locationToLocationDto(account.getLocation());
-    //when
-    List<FriendDto> filteredList = underTest.showFilteredListOfFriends(LOCATION, ASC, principal, principalLocation, LIMIT);
-    //then
-    assertThat(filteredList.size()).isEqualTo(2);
-    assertThat(filteredList.get(0).getFirstName()).isEqualTo("Mezdra");
-    assertThat(filteredList.get(1).getFirstName()).isEqualTo("Sofia");
-  }
+    Pageable pageable = PageRequest.of(0, LIMIT, Sort.Direction.DESC, RATING);
+    when(ratingRepository.findRatedFriendsByAccountId(account.getId(), pageable)).thenReturn(getFriendIdsOrderedByRatingDesc());
 
-  @Test
-  @DisplayName("Show filtered list of friends sorted by Default, ordered by DESC")
-  void showFilteredListOfFriendsSortedByDefaultOrderedByDESC() {
-    //given
-    Account account = getAccounts().get(0);
-    Principal principal = mock(Principal.class);
-    when(principal.getName()).thenReturn(account.getEmail());
-    when(service.getAccountByEmailIfExists(principal.getName())).thenReturn(account);
-    LocationDto principalLocation = LocationMapper.INSTANCE.locationToLocationDto(account.getLocation());
     //when
-    List<FriendDto> filteredList = underTest.showFilteredListOfFriends(LOCATION, DESC, principal, principalLocation, null);
+    List<FriendDto> filteredList = underTest.showFilteredListOfFriends(RATING, DESC, principal, null, LIMIT);
+
     //then
-    assertThat(filteredList.size()).isEqualTo(2);
     assertThat(filteredList.get(0).getFirstName()).isEqualTo("Sofia");
     assertThat(filteredList.get(1).getFirstName()).isEqualTo("Mezdra");
   }
@@ -448,5 +398,29 @@ class FriendServiceImplTest {
     ratings.add(rating1);
     ratings.add(rating2);
     return ratings;
+  }
+
+  private List<Account> getFriendsWithLocations() {
+    List<Account> accounts = getAccounts();
+    List<Account> friendsWithLocations = new ArrayList<>();
+    friendsWithLocations.add(accounts.get(1)); // Mezdra
+    friendsWithLocations.add(accounts.get(2)); // Sofia
+    return friendsWithLocations;
+  }
+
+  private List<Account> getFriendIdsOrderedByRatingAsc() {
+    List<Rating> ratings = getRatings();
+    List<Account> friendIdsOrderedByRating = new ArrayList<>();
+    friendIdsOrderedByRating.add(ratings.get(0).getFriend()); // Mezdra
+    friendIdsOrderedByRating.add(ratings.get(1).getFriend()); // Sofia
+    return friendIdsOrderedByRating;
+  }
+
+  private List<Account> getFriendIdsOrderedByRatingDesc() {
+    List<Rating> ratings = getRatings();
+    List<Account> friendIdsOrderedByRating = new ArrayList<>();
+    friendIdsOrderedByRating.add(ratings.get(1).getFriend()); // Sofia
+    friendIdsOrderedByRating.add(ratings.get(0).getFriend()); // Mezdra
+    return friendIdsOrderedByRating;
   }
 }

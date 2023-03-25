@@ -22,9 +22,4 @@ public interface FriendService {
 
   List<FriendDto> showFilteredListOfFriends(String sortedBy, String orderedBy,
                                             Principal principal, LocationDto locationDto, Integer limit);
-
-  List<FriendDto> filterFriendsByLocation(
-      LocationDto locationDto, Principal principal, String direction, int limit);
-
-//  List<FriendDto> filterFriendsByRating(Principal principal, String sort, int limit);
 }

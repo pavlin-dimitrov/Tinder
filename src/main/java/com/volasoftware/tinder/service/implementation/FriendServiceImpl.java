@@ -18,7 +18,6 @@ import com.volasoftware.tinder.service.contract.AccountService;
 import com.volasoftware.tinder.service.contract.FriendService;
 import com.volasoftware.tinder.service.contract.LocationService;
 import java.security.Principal;
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
@@ -28,7 +27,6 @@ import java.util.stream.Collectors;
 import javax.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -62,24 +60,23 @@ public class FriendServiceImpl implements FriendService {
   }
 
   private List<FriendDto> filterFriendsByRating(Principal principal, String direction, int limit) {
-    limit = getNoLimit(limit);
+    limit = setNoLimit(limit);
 
     Pageable pageable = PageRequest.of(0, limit, Sort.Direction.fromString(direction), RATING);
 
     Long currentAccountId = accountService.getAccountByEmailIfExists(principal.getName()).getId();
 
-    List<Long> friendIdListOrderedByRating =
+    List<Account> friendIdListOrderedByRating =
         ratingRepository.findRatedFriendsByAccountId(currentAccountId, pageable);
 
-    return getAccountListByIds(friendIdListOrderedByRating).stream()
+    return friendIdListOrderedByRating.stream()
         .map(FriendMapper.INSTANCE::accountToFriendDto)
         .collect(Collectors.toList());
   }
 
-  @Override
-  public List<FriendDto> filterFriendsByLocation(
+  private List<FriendDto> filterFriendsByLocation(
       LocationDto locationDto, Principal principal, String direction, int limit) {
-    limit = getNoLimit(limit);
+    limit = setNoLimit(limit);
 
     Long currentAccountId = accountService.getAccountByEmailIfExists(principal.getName()).getId();
 
@@ -186,18 +183,11 @@ public class FriendServiceImpl implements FriendService {
     }
   }
 
-  private int getNoLimit(int limit) {
+  private int setNoLimit(int limit) {
     if (limit == -1) {
       limit = Integer.MAX_VALUE;
     }
     return limit;
-  }
-
-  @NotNull
-  private List<Account> getAccountListByIds(List<Long> friendIds) {
-    return friendIds.stream()
-        .map(accountService::getAccountByIdIfExists)
-        .collect(Collectors.toList());
   }
 
   private Set<Account> seedFriends(List<Account> botAccounts, Account account) {

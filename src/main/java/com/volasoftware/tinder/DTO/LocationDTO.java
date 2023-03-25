@@ -24,4 +24,13 @@ public class LocationDto {
   @DecimalMin("-180.0")
   @DecimalMax("180.0")
   private Double longitude;
+
+  @Override
+  public String toString() {
+    return "LocationDto{" +
+            "latitude=" + latitude +
+            ", longitude=" + longitude +
+            '}';
+  }
+
 }
