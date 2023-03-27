@@ -59,45 +59,6 @@ public class FriendServiceImpl implements FriendService {
     return filteredListOfFriends;
   }
 
-  private List<FriendDto> filterFriendsByRating(Principal principal, String direction, int limit) {
-    limit = setNoLimit(limit);
-
-    Pageable pageable = PageRequest.of(0, limit, Sort.Direction.fromString(direction), RATING);
-
-    Long currentAccountId = accountService.getAccountByEmailIfExists(principal.getName()).getId();
-
-    List<Account> friendIdListOrderedByRating =
-        ratingRepository.findRatedFriendsByAccountId(currentAccountId, pageable);
-
-    return friendIdListOrderedByRating.stream()
-        .map(FriendMapper.INSTANCE::accountToFriendDto)
-        .collect(Collectors.toList());
-  }
-
-  private List<FriendDto> filterFriendsByLocation(
-      LocationDto locationDto, Principal principal, String direction, int limit) {
-    limit = setNoLimit(limit);
-
-    Long currentAccountId = accountService.getAccountByEmailIfExists(principal.getName()).getId();
-
-    List<Account> listOfFriendsWithLocations =
-        accountRepository.findFriendsWithLocationsByAccountId(currentAccountId);
-
-    Comparator<FriendDto> comparedFriendsDistances =
-        Comparator.comparingDouble(
-            friend -> locationService.getFriendDistance(locationDto, friend.getLocationDto()));
-
-    if (Sort.Direction.fromString(direction) == Direction.DESC) {
-      comparedFriendsDistances = comparedFriendsDistances.reversed();
-    }
-
-    return listOfFriendsWithLocations.stream()
-        .map(FriendMapper.INSTANCE::accountToFriendDto)
-        .sorted(comparedFriendsDistances)
-        .limit(limit)
-        .collect(Collectors.toList());
-  }
-
   @Override
   public AccountDto getFriendInfo(String email, Long userId) {
     Account user = accountService.getAccountByEmailIfExists(email);
@@ -181,6 +142,45 @@ public class FriendServiceImpl implements FriendService {
       log.warn("You are not friend with this user, cannot rate it!");
       throw new MissingFriendshipException();
     }
+  }
+
+  private List<FriendDto> filterFriendsByRating(Principal principal, String direction, int limit) {
+    limit = setNoLimit(limit);
+
+    Pageable pageable = PageRequest.of(0, limit, Sort.Direction.fromString(direction), RATING);
+
+    Long currentAccountId = accountService.getAccountByEmailIfExists(principal.getName()).getId();
+
+    List<Account> friendIdListOrderedByRating =
+        ratingRepository.findRatedFriendsByAccountId(currentAccountId, pageable);
+
+    return friendIdListOrderedByRating.stream()
+        .map(FriendMapper.INSTANCE::accountToFriendDto)
+        .collect(Collectors.toList());
+  }
+
+  private List<FriendDto> filterFriendsByLocation(
+      LocationDto locationDto, Principal principal, String direction, int limit) {
+    limit = setNoLimit(limit);
+
+    Long currentAccountId = accountService.getAccountByEmailIfExists(principal.getName()).getId();
+
+    List<Account> listOfFriendsWithLocations =
+        accountRepository.findFriendsWithLocationsByAccountId(currentAccountId);
+
+    Comparator<FriendDto> comparedFriendsDistances =
+        Comparator.comparingDouble(
+            friend -> locationService.getFriendDistance(locationDto, friend.getLocationDto()));
+
+    if (Sort.Direction.fromString(direction) == Direction.DESC) {
+      comparedFriendsDistances = comparedFriendsDistances.reversed();
+    }
+
+    return listOfFriendsWithLocations.stream()
+        .map(FriendMapper.INSTANCE::accountToFriendDto)
+        .sorted(comparedFriendsDistances)
+        .limit(limit)
+        .collect(Collectors.toList());
   }
 
   private int setNoLimit(int limit) {
