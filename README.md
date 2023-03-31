@@ -6,8 +6,8 @@
 <p align="center">A RESTful API for the Tinder web app clone built with Spring Boot</p>
 
 <p align="center">
-  <a href="https://github.com/pavlin-dimitrov/Tinder/blob/master/LICENSE.md">
-    <img alt="License" src="https://img.shields.io/github/license/pavlin-dimitrov/Tinder">
+  <a href="https://github.com/pavlin-dimitrov/Tinder/blob/develop/LICENSE.md">
+    <img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-yellow.svg">
   </a>
   <img alt="GitHub last commit" src="https://img.shields.io/github/last-commit/pavlin-dimitrov/Tinder/develop">
   <img alt="GitHub repo size" src="https://img.shields.io/github/repo-size/pavlin-dimitrov/Tinder">
