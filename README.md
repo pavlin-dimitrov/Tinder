@@ -105,10 +105,7 @@ Now, the Tinder application should be up and running on http://localhost:8080.
   https://www.postman.com/restless-desert-638182/workspace/tinder/overview
 
 📚 Documentation
-For more information, check out our [Wiki](https://github.com/pavlin-dimitrov/FileOrganizer/wiki).
-
-🤝 Contributing
-Contributions are welcome! Please read our [contributing guidelines](https://github.com/pavlin-dimitrov/FileOrganizer/blob/master/blob/main/CONTRIBUTING.md) for more details on how to contribute to this project.
+For more information, check out our [Wiki](https://github.com/pavlin-dimitrov/Tinder/wiki).
 
 📄 License
 This project is licensed under the MIT License - see the [MIT License](https://github.com/pavlin-dimitrov/Tinder/blob/develop/LICENSE.md) file for details.
