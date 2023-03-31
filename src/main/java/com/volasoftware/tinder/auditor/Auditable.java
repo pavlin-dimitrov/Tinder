@@ -3,7 +3,6 @@ package com.volasoftware.tinder.auditor;
 import static javax.persistence.TemporalType.TIMESTAMP;
 
 import java.util.Date;
-import javax.persistence.Column;
 import javax.persistence.EntityListeners;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.Temporal;
@@ -17,22 +16,19 @@ import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-//@Data
 @ToString
 @NoArgsConstructor
 @Getter
 @Setter
-@MappedSuperclass // This means that this class has not table created for it
+@MappedSuperclass
 @EntityListeners(AuditingEntityListener.class)
 public abstract class Auditable<T> {
 
   @CreatedBy
- // @Column(updatable = false)
   protected T createdBy;
 
   @CreatedDate
   @Temporal(TIMESTAMP)
- // @Column(updatable = false)
   protected Date createdAt;
 
   @LastModifiedBy
