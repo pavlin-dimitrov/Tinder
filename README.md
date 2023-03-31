@@ -66,8 +66,6 @@ Make sure you have the following software installed on your local machine:
    ```sh
    git clone https://github.com/pavlin-dimitrov/Tinder.git
    
-   Use the `develop` branch.
-
 2. Navigate to the project directory:
 
    ```sh
